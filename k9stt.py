@@ -5,8 +5,6 @@ from secrets import *
 from datetime import datetime
 from eyes import Eyes
 
-k9eyes = Eyes()
-
 # Start K9 dialogue states
 
 class Waitforhotword(State):
@@ -30,7 +28,7 @@ class Waitforhotword(State):
         result = porcupine.process(pcm)
         if result >= 0:
             print('Detected hotword')
-            dalek.on_event('hotword_detected')
+            k9assistant.on_event('hotword_detected')
 
     def on_event(self, event):
         if event == 'hotword_detected':
@@ -57,3 +55,22 @@ class Listening(State):
     def on_event(self, event):
         pass
         return self
+
+class K9Assistant(object):
+    def __init__(self):
+        self.state = Waitforhotword()
+
+    def run(self):
+        self.state.run()
+
+    def on_event(self, event):
+        self.state = self.state.on_event(event) 
+
+k9eyes = Eyes()
+k9assistant = K9Assistant()
+
+try:
+    while True:
+        k9assistant.run()
+except KeyboardInterrupt:
+    print("Assistant stopped")
