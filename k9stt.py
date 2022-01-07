@@ -1,4 +1,5 @@
 import pvporcupine
+import State from state
 from pvrecorder import PvRecorder
 from secrets import * 
 from datetime import datetime
