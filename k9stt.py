@@ -1,29 +1,59 @@
 import pvporcupine
-import State from state
+from state import State
 from pvrecorder import PvRecorder
 from secrets import * 
 from datetime import datetime
+from eyes import Eyes
 
-try:
-    porcupine = pvporcupine.create(
-    access_key = ACCESS_KEY,
-    keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
-    )
+k9eyes = Eyes()
 
-    recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
-    recorder.start()
+# Start K9 dialogue states
 
-    print(f'Using device: {recorder.selected_device}')
+class Waitforhotword(State):
 
-    while True:
+    '''
+    The child state where the k9 is waiting for the hotword
+    '''
+    def __init__(self):
+        super(Waitforhotword, self).__init__()
+        porcupine = pvporcupine.create(
+            access_key = ACCESS_KEY,
+            keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
+        )   
+        recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
+        recorder.start()
+        print(f'Using device: {recorder.selected_device}')
+        k9eyes.set_level(0.01)
+
+    def run(self):
         pcm = recorder.read()
         result = porcupine.process(pcm)
         if result >= 0:
-            print('[%s] Detected %s' % (str(datetime.now()), str(result)))
-except KeyboardInterrupt:
-    print('Stopping....')
-finally:
-    if porcupine is not None:
-        porcupine.delete()
-    if recorder is not None:
-        recorder.delete()
+            print('Detected hotword')
+            dalek.on_event('hotword_detected')
+
+    def on_event(self, event):
+        if event == 'hotword_detected':
+            if porcupine is not None:
+                porcupine.delete()
+            if recorder is not None:
+                recorder.delete()
+            return Listening()
+        return self
+
+# Start Dalek states
+class Listening(State):
+
+    '''
+    The child state where K9 is now listening for an utterance
+    '''
+    def __init__(self):
+        super(Listening, self).__init__()
+        k9eyes.set_level(0.1)
+
+    def run(self):
+        pass
+
+    def on_event(self, event):
+        pass
+        return self
