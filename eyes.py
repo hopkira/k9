@@ -7,12 +7,12 @@ pca.frequency = 60
 
 class Eyes():
     def __init__(self):
-        self.level = 0.0
+        self.level = 0
         self.set_level(self.level)
 
-    def set_level(self, value):
-        self.level = value
-        value *= 65535.0
+    def set_level(self, level):
+        self.level = level
+        value = int(level * 65535)
         pca.channels[0].duty_cycle = value
 
     def get_level(self):
