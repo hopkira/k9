@@ -13,29 +13,29 @@ class Waitforhotword(State):
     The child state where the k9 is waiting for the hotword
     '''
     def __init__(self):
-        porcupine = pvporcupine.create(
+        self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
         )   
-        recorder = PvRecorder(device_index=-1, frame_length=porcupine.frame_length)
-        recorder.start()
-        print(f'Using device: {recorder.selected_device}')
+        self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
+        self.recorder.start()
+        print(f'Using device: {self.recorder.selected_device}')
         k9eyes.set_level(0.01)
         super(Waitforhotword, self).__init__()
 
     def run(self):
-        pcm = recorder.read()
-        result = porcupine.process(pcm)
+        pcm = self.recorder.read()
+        result = self.porcupine.process(pcm)
         if result >= 0:
             print('Detected hotword')
             k9assistant.on_event('hotword_detected')
 
     def on_event(self, event):
         if event == 'hotword_detected':
-            if porcupine is not None:
-                porcupine.delete()
-            if recorder is not None:
-                recorder.delete()
+            if self.porcupine is not None:
+                self.porcupine.delete()
+            if self.recorder is not None:
+                self.recorder.delete()
             return Listening()
         return self
 
