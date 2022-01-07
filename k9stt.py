@@ -13,7 +13,6 @@ class Waitforhotword(State):
     The child state where the k9 is waiting for the hotword
     '''
     def __init__(self):
-        super(Waitforhotword, self).__init__()
         porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
@@ -22,6 +21,7 @@ class Waitforhotword(State):
         recorder.start()
         print(f'Using device: {recorder.selected_device}')
         k9eyes.set_level(0.01)
+        super(Waitforhotword, self).__init__()
 
     def run(self):
         pcm = recorder.read()
