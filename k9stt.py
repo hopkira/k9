@@ -69,6 +69,7 @@ class K9Assistant(object):
 k9eyes = Eyes()
 k9assistant = K9Assistant()
 
+
 try:
     while True:
         k9assistant.run()

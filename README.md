@@ -9,8 +9,11 @@ source $HOME/tmp/deepspeech-venv/bin/activate
 
 # Install DeepSpeech
 pip3 install deepspeech
-pip3 install pvporcupine
+sudo pip3 install pvporcupinedemo
 pip3 install pyaudio
+
+pip3 install webrtcvad
+pip3 install halo
 
 curl -LO https://github.com/mozilla/STT/releases/download/v0.7.1/deepspeech-0.7.1-models.tflite
 curl -LO https://github.com/mozilla/STT/releases/download/v0.7.1/deepspeech-0.7.1-models.scorer
