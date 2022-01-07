@@ -2,6 +2,6 @@ import pvporcupine
 from secrets import * 
 
 porcupine = pvporcupine.create(
-  access_key=ACCESS_KEY,
-  keywords=['/home/pi/k9localstt/canine_en_reaspberry-pi_v2_0_0.ppn']
+  access_key = ACCESS_KEY,
+  keyword_paths=['/home/pi/k9localstt/canine_en_reaspberry-pi_v2_0_0.ppn']
 )
