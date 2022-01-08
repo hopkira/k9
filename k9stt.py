@@ -72,9 +72,9 @@ class Listening(State):
                 if 'stop listening' in text:
                     k9assistant.on_event('stop_listening')
                 if text != "":
-                    print("Listen.run() - I heard",text)
+                    print("Listen.run() - I heard:",text)
                     k9assistant.command = text
-                    k9assistant.on_event("command_received")
+                    k9assistant.on_event('command_received')
 
     def on_event(self, event):
         if event == 'stop_listening':
