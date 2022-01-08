@@ -75,12 +75,16 @@ class Listening(State):
                     print("Listen.run() - I heard:",text)
                     k9assistant.command = text
                     k9assistant.on_event('command_received')
+                else:
+                    k9assistant.on_event('try_again')
 
     def on_event(self, event):
         if event == 'stop_listening':
             return Waitforhotword()
         if event == 'command_received':
             return Responding()
+        if event == 'try_again':
+            return Listening()
         return self
 
 class Responding():
