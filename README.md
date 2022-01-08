@@ -1,7 +1,7 @@
 # k9localstt
 Prototype of offline wakeword, STT and TTS for K9 robot
 
-
+https://www.hackster.io/dmitrywat/offline-speech-recognition-on-raspberry-pi-4-with-respeaker-c537e7
 
 # Create and activate a virtualenv
 virtualenv -p python3 $HOME/tmp/deepspeech-venv/

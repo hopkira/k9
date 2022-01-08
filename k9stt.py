@@ -105,8 +105,8 @@ class Responding():
 # Define FSM
 class K9Assistant(object):
     def __init__(self):
-        self.model = deepspeech.Model("/home/pi/k9localstt/?????")
-        self.model.enableExternalScorer("/home/pi/k9localstt/??????")
+        self.model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.7.1-models.tflite")
+        self.model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.7.1-models.scorer")
         speak("K9 initialized")
         self.state = Waitforhotword()
 
