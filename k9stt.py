@@ -72,7 +72,7 @@ class Listening(State):
                 if 'stop listening' in text:
                     k9assistant.on_event('stop_listening')
                 if text != "":
-                    print("I heard",text)
+                    print("Listen.run() - I heard",text)
                     k9assistant.command = text
                     k9assistant.on_event("command_received")
 
@@ -95,7 +95,7 @@ class Responding():
     def run(self):
         # say something
         # lower eye lights
-        response = "I heard " + k9assistant.text
+        response = "Responding.run() - I heard " + k9assistant.command
         speak(response)
         k9assistant.on_event('responded')
 
@@ -118,7 +118,7 @@ class K9Assistant(object):
 
     def on_event(self, event):
         self.state = self.state.on_event(event)
-        print(event)
+        print("Event:", event)
 
 k9eyes = Eyes()
 k9assistant = K9Assistant()
