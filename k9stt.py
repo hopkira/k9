@@ -126,5 +126,6 @@ k9lights = BackLights()
 try:
     k9assistant = K9Assistant()
 except KeyboardInterrupt:
-    speak("K9 shutting down")
+    speak("K9 listen module stopped")
     k9lights.off()
+    k9eyes.set_level(0)
