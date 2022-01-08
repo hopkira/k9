@@ -93,7 +93,7 @@ class Responding(State):
         print("Responding.init() - started")
         super(Responding, self).__init__()
         k9eyes.set_level(0.5)
-        print("Responding.init() - complete")
+        print("Responding.init() - complete -",k9assistant.command)
 
     def run(self):
         print("Responding.run() - I am here")
