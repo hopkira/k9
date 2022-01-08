@@ -4,6 +4,7 @@ webrtcvad~=2.0.10
 halo~=0.0.18
 numpy>=1.15.1
 scipy>=1.1.0
+PyAudio==0.2.11
 Adafruit-Blinka==6.17.0
 adafruit-circuitpython-busdevice==5.1.1
 adafruit-circuitpython-motor==3.3.4
