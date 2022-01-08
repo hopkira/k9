@@ -7,6 +7,7 @@ from pvrecorder import PvRecorder
 from secrets import * 
 from datetime import datetime
 from eyes import Eyes
+from back_lights import BackLights
 import numpy as np
 from k9tts import speak
 
@@ -111,6 +112,7 @@ command = ""
 # Define FSM
 class K9Assistant(object):
     def __init__(self):
+        k9lights.on()
         speak("Entering listen mode")
         self.state = Waitforhotword()
 
@@ -119,7 +121,10 @@ class K9Assistant(object):
         print("Event:", event)
 
 k9eyes = Eyes()
+k9lights = BackLights()
+
 try:
     k9assistant = K9Assistant()
 except KeyboardInterrupt:
     speak("K9 shutting down")
+    k9lights.off()
