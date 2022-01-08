@@ -32,7 +32,7 @@ class Waitforhotword(State):
             result = self.porcupine.process(pcm)
             if result >= 0:
                 print('Detected hotword')
-                k9assistant.on_event('hotword_detected')
+                self.on_event('hotword_detected')
 
     def on_event(self, event):
         if event == 'hotword_detected':
@@ -55,7 +55,7 @@ class Listening(State):
         input_rate=16000,
         file=None)
         k9eyes.set_level(0.1)
-        self.stream_context = k9assistant.model.createStream()
+        self.stream_context = model.createStream()
         print("Listening: init complete")
         while True:
             self.frames = self.vad_audio.vad_collector()
@@ -67,15 +67,15 @@ class Listening(State):
                     text = self.stream_context.finishStream()
                     del self.stream_context
                     print("Listen.run() - I heard:",text)
-                    k9assistant.command = text
+                    command = text
                     if text != "":
                         self.vad_audio.destroy()
                         if 'stop listening' in text:
-                            k9assistant.on_event('stop_listening')
+                            self.on_event('stop_listening')
                         else:
-                            k9assistant.on_event('command_received')
+                            self.on_event('command_received')
                     else:
-                        self.stream_context = k9assistant.model.createStream()
+                        self.stream_context = model.createStream()
 
     def on_event(self, event):
         if event == 'stop_listening':
@@ -103,12 +103,13 @@ class Responding(State):
             return Listening()
         return self
 
+model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.7.1-models.tflite")
+model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.7.1-models.scorer")
+command = ""
 
 # Define FSM
 class K9Assistant(object):
     def __init__(self):
-        self.model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.7.1-models.tflite")
-        self.model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.7.1-models.scorer")
         speak("K9 initialized")
         self.state = Waitforhotword()
 
@@ -117,10 +118,7 @@ class K9Assistant(object):
         print("Event:", event)
 
 k9eyes = Eyes()
-k9assistant = K9Assistant()
-
 try:
-    while True:
-        k9assistant.run()
+    k9assistant = K9Assistant()
 except KeyboardInterrupt:
     speak("K9 shutting down")
