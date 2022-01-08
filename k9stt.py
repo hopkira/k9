@@ -76,6 +76,8 @@ class Listening(State):
                         k9assistant.on_event('stop_listening')
                     else:
                         k9assistant.on_event('command_received')
+                else:
+                    self.stream_context = k9assistant.model.createStream()
 
     def on_event(self, event):
         if event == 'stop_listening':
