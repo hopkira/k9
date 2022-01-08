@@ -67,12 +67,12 @@ class Listening(State):
             else:
                 text = self.stream_context.finishStream()
                 self.vad_audio.destroy()
-                print("I heard",text)
                 if 'stop listening' in text:
                     k9assistant.on_event('stop_listening')
                 if text != "":
-                    k9assistant.on_event("command_received")
+                    print("I heard",text)
                     k9assistant.command = text
+                    k9assistant.on_event("command_received")
 
     def on_event(self, event):
         if event == 'stop_listening':
