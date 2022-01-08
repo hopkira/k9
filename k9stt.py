@@ -1,11 +1,15 @@
 import pvporcupine
+import deepspeech
+import pyaudio
+from audio_tools import VADAudio
 from state import State
 from pvrecorder import PvRecorder
 from secrets import * 
 from datetime import datetime
 from eyes import Eyes
+import numpy as np
 
-# Start K9 dialogue states
+# Start K9 dialogue states   
 
 class Waitforhotword(State):
 
@@ -46,18 +50,35 @@ class Listening(State):
     The child state where K9 is now listening for an utterance
     '''
     def __init__(self):
-        super(Listening, self).__init__()
         k9eyes.set_level(0.1)
+        self.vad_audio = VADAudio(aggressiveness=1,
+                        device=None,
+                        input_rate=16000,
+                        file=None)
+        self.frames = self.vad_audio.vad_collector()
+        self.stream_context = k9assistant.model.createStream()
+        super(Listening, self).__init__()
 
     def run(self):
-        pass
+        for frame in self.frames:
+            if frame is not None:
+                 self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+            else:
+                text = self.stream_context.finishStream()
+                print(text)
+            if 'stop listening' in text:
+                self.vad_audio.destroy()
+                k9assistant.on_event('stop_listening')
 
     def on_event(self, event):
-        pass
+        if event == 'stop_listening':
+            return Waitforhotword()
         return self
 
 class K9Assistant(object):
     def __init__(self):
+        self.model = deepspeech.Model("/home/pi/k9localstt/?????")
+        self.model.enableExternalScorer("/home/pi/k9localstt/??????")
         self.state = Waitforhotword()
 
     def run(self):
@@ -68,7 +89,6 @@ class K9Assistant(object):
 
 k9eyes = Eyes()
 k9assistant = K9Assistant()
-
 
 try:
     while True:
