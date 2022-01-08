@@ -27,13 +27,12 @@ class Waitforhotword(State):
         self.recorder.start()
         print(f'Using device: {self.recorder.selected_device}')
         k9eyes.set_level(0.01)
-
-    def run(self):
-        pcm = self.recorder.read()
-        result = self.porcupine.process(pcm)
-        if result >= 0:
-            print('Detected hotword')
-            k9assistant.on_event('hotword_detected')
+        while True:
+            pcm = self.recorder.read()
+            result = self.porcupine.process(pcm)
+            if result >= 0:
+                print('Detected hotword')
+                k9assistant.on_event('hotword_detected')
 
     def on_event(self, event):
         if event == 'hotword_detected':
@@ -58,26 +57,25 @@ class Listening(State):
         k9eyes.set_level(0.1)
         self.stream_context = k9assistant.model.createStream()
         print("Listening: init complete")
-
-    def run(self):
-        self.frames = self.vad_audio.vad_collector()
-        for frame in self.frames:
-            if frame is not None:
-                self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-            else:
-                print("Stream finished")
-                text = self.stream_context.finishStream()
-                del self.stream_context
-                print("Listen.run() - I heard:",text)
-                k9assistant.command = text
-                if text != "":
-                    self.vad_audio.destroy()
-                    if 'stop listening' in text:
-                        k9assistant.on_event('stop_listening')
-                    else:
-                        k9assistant.on_event('command_received')
+        while True:
+            self.frames = self.vad_audio.vad_collector()
+            for frame in self.frames:
+                if frame is not None:
+                    self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 else:
-                    self.stream_context = k9assistant.model.createStream()
+                    print("Stream finished")
+                    text = self.stream_context.finishStream()
+                    del self.stream_context
+                    print("Listen.run() - I heard:",text)
+                    k9assistant.command = text
+                    if text != "":
+                        self.vad_audio.destroy()
+                        if 'stop listening' in text:
+                            k9assistant.on_event('stop_listening')
+                        else:
+                            k9assistant.on_event('command_received')
+                    else:
+                        self.stream_context = k9assistant.model.createStream()
 
     def on_event(self, event):
         if event == 'stop_listening':
@@ -95,10 +93,6 @@ class Responding(State):
         print("Responding.init() - started")
         super(Responding, self).__init__()
         k9eyes.set_level(0.5)
-        print("Responding.init() - complete -",k9assistant.command)
-
-    def run(self):
-        print("Responding.run() - I am here")
         response = "Responding.run() - I heard " + k9assistant.command
         print(response)
         speak(response)
@@ -117,9 +111,6 @@ class K9Assistant(object):
         self.model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.7.1-models.scorer")
         speak("K9 initialized")
         self.state = Waitforhotword()
-
-    def run(self):
-        self.state.run()
 
     def on_event(self, event):
         self.state = self.state.on_event(event)
