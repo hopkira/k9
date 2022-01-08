@@ -5,7 +5,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 pca = adafruit_pca9685.PCA9685(i2c)
 pca.frequency = 60
 
-class Eyes():
+class BackLights():
     def __init__(self):
         self.level = 0
         self.set_level(self.level)
