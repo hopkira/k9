@@ -93,7 +93,7 @@ class Responding(State):
         print("Responding.init() - started")
         super(Responding, self).__init__()
         k9eyes.set_level(0.5)
-        response = "Responding.run() - I heard " + k9assistant.command
+        response = "Responding.run() - I heard " + command
         print(response)
         speak(response)
         k9assistant.on_event('responded')
