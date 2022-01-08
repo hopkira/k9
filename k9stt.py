@@ -90,6 +90,7 @@ class Responding(State):
     The child state where K9 processes a response to the text
     '''
     def __init__(self):
+        print("Responding.init() - started")
         super(Responding, self).__init__()
         k9eyes.set_level(0.5)
         print("Responding.init() - complete")
