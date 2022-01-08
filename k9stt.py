@@ -66,7 +66,6 @@ class Listening(State):
             else:
                 text = self.stream_context.finishStream()
                 self.vad_audio.destroy()
-                self.stream_context.destroy()
                 print("I heard",text)
                 if 'stop listening' in text:
                     k9assistant.on_event('stop_listening')
