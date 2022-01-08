@@ -89,7 +89,7 @@ class Responding():
     The child state where K9 processes a response to the text
     '''
     def __init__(self):
-        super(Waitforhotword, self).__init__()
+        super(Responding, self).__init__()
         k9eyes.set_level(0.5)
 
     def run(self):
