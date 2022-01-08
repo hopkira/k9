@@ -52,15 +52,15 @@ class Listening(State):
     def __init__(self):
         super(Listening, self).__init__()
         k9eyes.set_level(0.1)
-        self.vad_audio = VADAudio(aggressiveness=1,
-                        device=None,
-                        input_rate=16000,
-                        file=None)
-        self.frames = self.vad_audio.vad_collector()
-        self.stream_context = k9assistant.model.createStream()
         print("Listening: init complete")
 
     def run(self):
+        self.vad_audio = VADAudio(aggressiveness=1,
+                device=None,
+                input_rate=16000,
+                file=None)
+        self.stream_context = k9assistant.model.createStream()
+        self.frames = self.vad_audio.vad_collector()
         for frame in self.frames:
             if frame is not None:
                 self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
@@ -75,9 +75,6 @@ class Listening(State):
                     print("Listen.run() - I heard:",text)
                     k9assistant.command = text
                     k9assistant.on_event('command_received')
-                else:
-                    print("Nothing heard")
-                    k9assistant.on_event('try_again')
 
     def on_event(self, event):
         if event == 'stop_listening':
