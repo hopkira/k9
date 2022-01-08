@@ -21,3 +21,6 @@ curl -LO https://github.com/mozilla/STT/releases/download/v0.7.1/deepspeech-0.7.
 Research:
 
 https://github.com/mozilla/DeepSpeech-examples/blob/r0.9/mic_vad_streaming/mic_vad_streaming.py
+
+python3 vad_streaming.py -m deepspeech-0.7.1-models.tflite -s deepspeech-0.7.1-models.scorer
+
