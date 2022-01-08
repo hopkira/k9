@@ -82,11 +82,9 @@ class Listening(State):
             return Waitforhotword()
         if event == 'command_received':
             return Responding()
-        if event == 'try_again':
-            return Listening()
         return self
 
-class Responding():
+class Responding(State):
 
     '''
     The child state where K9 processes a response to the text
