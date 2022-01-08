@@ -92,11 +92,12 @@ class Responding(State):
     def __init__(self):
         super(Responding, self).__init__()
         k9eyes.set_level(0.5)
+        print("Responding.init() - complete")
 
     def run(self):
-        # say something
-        # lower eye lights
+        print("Responding.run() - I am here")
         response = "Responding.run() - I heard " + k9assistant.command
+        print(response)
         speak(response)
         k9assistant.on_event('responded')
 
