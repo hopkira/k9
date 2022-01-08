@@ -8,7 +8,6 @@ pca.frequency = 60
 class BackLights():
     def __init__(self):
         self.level = 0
-        self.set_level(self.level)
 
     def on(self):
         self.level = 1
