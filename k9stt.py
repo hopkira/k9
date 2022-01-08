@@ -62,6 +62,7 @@ class Listening(State):
         self.stream_context = k9assistant.model.createStream()
         self.frames = self.vad_audio.vad_collector()
         for frame in self.frames:
+            print("+")
             if frame is not None:
                 self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 print(".")
@@ -132,5 +133,4 @@ try:
     while True:
         k9assistant.run()
 except KeyboardInterrupt:
-    print(k9assistant.state.__str__())
     speak("K9 shutting down")
