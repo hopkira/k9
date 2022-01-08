@@ -18,6 +18,7 @@ class Waitforhotword(State):
     The child state where the k9 is waiting for the hotword
     '''
     def __init__(self):
+        super(Waitforhotword, self).__init__()
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
@@ -26,7 +27,6 @@ class Waitforhotword(State):
         self.recorder.start()
         print(f'Using device: {self.recorder.selected_device}')
         k9eyes.set_level(0.01)
-        # super(Waitforhotword, self).__init__()
 
     def run(self):
         pcm = self.recorder.read()
@@ -50,6 +50,7 @@ class Listening(State):
     The child state where K9 is now listening for an utterance
     '''
     def __init__(self):
+        super(Listening, self).__init__()
         k9eyes.set_level(0.1)
         self.vad_audio = VADAudio(aggressiveness=1,
                         device=None,
@@ -86,8 +87,8 @@ class Responding():
     The child state where K9 processes a response to the text
     '''
     def __init__(self):
+        super(Waitforhotword, self).__init__()
         k9eyes.set_level(0.5)
-        # super(Responding, self).__init__()
 
     def run(self):
         # say something
