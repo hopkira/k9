@@ -132,4 +132,5 @@ try:
     while True:
         k9assistant.run()
 except KeyboardInterrupt:
+    print(k9assistant.state)
     speak("K9 shutting down")
