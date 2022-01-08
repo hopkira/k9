@@ -58,13 +58,15 @@ class Listening(State):
                         file=None)
         self.frames = self.vad_audio.vad_collector()
         self.stream_context = k9assistant.model.createStream()
-        # super(Listening, self).__init__()
+        print("Listening: init complete")
 
     def run(self):
         for frame in self.frames:
             if frame is not None:
                 self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                print(".")
             else:
+                print("Stream finished")
                 text = self.stream_context.finishStream()
                 self.vad_audio.destroy()
                 if 'stop listening' in text:
@@ -115,7 +117,8 @@ class K9Assistant(object):
         self.state.run()
 
     def on_event(self, event):
-        self.state = self.state.on_event(event) 
+        self.state = self.state.on_event(event)
+        print(event)
 
 k9eyes = Eyes()
 k9assistant = K9Assistant()
