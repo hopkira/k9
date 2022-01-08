@@ -76,6 +76,7 @@ class Listening(State):
                     k9assistant.command = text
                     k9assistant.on_event('command_received')
                 else:
+                    print("Nothing heard")
                     k9assistant.on_event('try_again')
 
     def on_event(self, event):
