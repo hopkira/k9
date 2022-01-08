@@ -26,7 +26,7 @@ class Waitforhotword(State):
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
         print(f'Using device: {self.recorder.selected_device}')
-        k9eyes.set_level(0.01)
+        k9eyes.set_level(0.001)
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
@@ -54,9 +54,9 @@ class Listening(State):
         device=None,
         input_rate=16000,
         file=None)
-        k9eyes.set_level(0.1)
         self.stream_context = model.createStream()
         print("Listening: init complete")
+        k9eyes.set_level(0.01)
         while True:
             self.frames = self.vad_audio.vad_collector()
             for frame in self.frames:
@@ -72,6 +72,7 @@ class Listening(State):
                         self.vad_audio.destroy()
                         if 'stop listening' in command:
                             self.on_event('stop_listening')
+                            espeak("Stopping listening")
                         else:
                             self.on_event('command_received')
                     else:
@@ -110,7 +111,7 @@ command = ""
 # Define FSM
 class K9Assistant(object):
     def __init__(self):
-        speak("K9 initialized")
+        speak("Entering listen mode")
         self.state = Waitforhotword()
 
     def on_event(self, event):
