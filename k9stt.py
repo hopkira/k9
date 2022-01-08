@@ -8,8 +8,9 @@ from secrets import *
 from datetime import datetime
 from eyes import Eyes
 import numpy as np
+from k9tts import speak
 
-# Start K9 dialogue states   
+# Define K9 States   
 
 class Waitforhotword(State):
 
@@ -25,7 +26,7 @@ class Waitforhotword(State):
         self.recorder.start()
         print(f'Using device: {self.recorder.selected_device}')
         k9eyes.set_level(0.01)
-        super(Waitforhotword, self).__init__()
+        # super(Waitforhotword, self).__init__()
 
     def run(self):
         pcm = self.recorder.read()
@@ -43,7 +44,6 @@ class Waitforhotword(State):
             return Listening()
         return self
 
-# Start Dalek states
 class Listening(State):
 
     '''
@@ -57,7 +57,7 @@ class Listening(State):
                         file=None)
         self.frames = self.vad_audio.vad_collector()
         self.stream_context = k9assistant.model.createStream()
-        super(Listening, self).__init__()
+        # super(Listening, self).__init__()
 
     def run(self):
         for frame in self.frames:
@@ -65,20 +65,49 @@ class Listening(State):
                  self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
             else:
                 text = self.stream_context.finishStream()
-                print(text)
+                print("I heard",text)
             if 'stop listening' in text:
                 self.vad_audio.destroy()
                 k9assistant.on_event('stop_listening')
+            if text != "":
+                k9assistant.on_event("command_received")
+                k9assistant.command = text
 
     def on_event(self, event):
         if event == 'stop_listening':
             return Waitforhotword()
+        if event == 'command_received':
+            return Responding()
         return self
 
+class Responding():
+
+    '''
+    The child state where K9 processes a response to the text
+    '''
+    def __init__(self):
+        k9eyes.set_level(0.5)
+        # super(Responding, self).__init__()
+
+    def run(self):
+        # say something
+        # lower eye lights
+        response = "I heard " + k9assistant.text
+        speak(response)
+        k9assistant.on_event('responded')
+
+    def on_event(self, event):
+        if event == 'responded':
+            return Listening()
+        return self
+
+
+# Define FSM
 class K9Assistant(object):
     def __init__(self):
         self.model = deepspeech.Model("/home/pi/k9localstt/?????")
         self.model.enableExternalScorer("/home/pi/k9localstt/??????")
+        speak("K9 initialized")
         self.state = Waitforhotword()
 
     def run(self):
@@ -94,4 +123,4 @@ try:
     while True:
         k9assistant.run()
 except KeyboardInterrupt:
-    print("Assistant stopped")
+    speak("K9 shutting down")
