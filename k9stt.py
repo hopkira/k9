@@ -62,12 +62,13 @@ class Listening(State):
     def run(self):
         for frame in self.frames:
             if frame is not None:
-                 self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
             else:
                 text = self.stream_context.finishStream()
+                self.vad_audio.destroy()
+                self.stream_context.destroy()
                 print("I heard",text)
                 if 'stop listening' in text:
-                    self.vad_audio.destroy()
                     k9assistant.on_event('stop_listening')
                 if text != "":
                     k9assistant.on_event("command_received")

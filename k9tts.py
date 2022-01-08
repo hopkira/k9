@@ -52,3 +52,4 @@ def speak(speech):
                 #cmd = "espeak -v en-rp '%s' -p %s -s %s -a %s -z" % (clause, pitch, speed, amplitude)
                 cmd = ['espeak','-v','en-rp',str(clause),'-p',str(pitch),'-s',str(speed),'-a',str(amplitude)]
                 speaking = Popen(cmd)
+                Popen.terminate(cmd)
