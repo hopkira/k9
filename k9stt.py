@@ -64,13 +64,13 @@ class Listening(State):
                     self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 else:
                     print("Stream finished")
-                    text = self.stream_context.finishStream()
+                    global command
+                    command = self.stream_context.finishStream()
                     del self.stream_context
-                    print("Listen.run() - I heard:",text)
-                    command = text
-                    if text != "":
+                    print("Listen.run() - I heard:",command)
+                    if command != "":
                         self.vad_audio.destroy()
-                        if 'stop listening' in text:
+                        if 'stop listening' in command:
                             self.on_event('stop_listening')
                         else:
                             self.on_event('command_received')
