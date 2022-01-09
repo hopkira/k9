@@ -20,6 +20,7 @@ class Waitforhotword(State):
     '''
     def __init__(self):
         super(Waitforhotword, self).__init__()
+        k9lights.off()
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
@@ -27,7 +28,7 @@ class Waitforhotword(State):
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
         print(f'Using device: {self.recorder.selected_device}')
-        k9eyes.set_level(0.001)
+        k9eyes.set_level(0.0001)
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
@@ -58,6 +59,7 @@ class Listening(State):
         self.stream_context = model.createStream()
         print("Listening: init complete")
         k9eyes.set_level(0.01)
+        k9lights.on()
         while True:
             self.frames = self.vad_audio.vad_collector()
             for frame in self.frames:
@@ -112,7 +114,6 @@ command = ""
 # Define FSM
 class K9Assistant(object):
     def __init__(self):
-        k9lights.on()
         speak("Entering listen mode")
         self.state = Waitforhotword()
 
