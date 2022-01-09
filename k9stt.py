@@ -94,15 +94,15 @@ class Responding(State):
         k9eyes.set_level(0.5)
         if 'listen' in command:
             speak("No longer listening")
-            self.one_event('stop_listening')
+            self.on_event('stop_listening')
         if 'here' or 'over' in command:
-            speak("Coming|>master")
-            self.one_event('responded')
+            speak("Coming|<master")
+            self.on_event('responded')
         if 'follow' in command:
-            speak("Folllowing|>master")
-            self.one_event('responded')
+            speak("Folllowing|<master")
+            self.on_event('responded')
         speak("Not understood")
-        self.one_event('responded')
+        self.on_event('responded')
 
     def on_event(self, event):
         if event == 'responded':
