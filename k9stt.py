@@ -111,8 +111,8 @@ class Responding(State):
             return Waitforhotword()
         return self
 
-model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.7.1-models.tflite")
-model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.7.1-models.scorer")
+model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
+model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
 command = ""
 
 # Define FSM
