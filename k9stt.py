@@ -96,10 +96,10 @@ class Responding(State):
             speak("No longer listening")
             self.on_event('stop_listening')
         if 'here' or 'over' in command:
-            speak("Coming|<master")
+            speak("Coming master")
             self.on_event('responded')
         if 'follow' in command:
-            speak("Folllowing|<master")
+            speak("Folllowing master")
             self.on_event('responded')
         speak("Not understood")
         self.on_event('responded')
