@@ -95,7 +95,7 @@ class Responding(State):
         if 'listen' in command:
             speak("No longer listening")
             self.on_event('stop_listening')
-        if 'here' or 'over' in command:
+        if ('here' in command) or ('over' in command):
             speak("Coming master")
             self.on_event('responded')
         if 'follow' in command:
