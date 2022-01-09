@@ -73,17 +73,11 @@ class Listening(State):
                     print("Listen.run() - I heard:",command)
                     if command != "":
                         self.vad_audio.destroy()
-                        if 'stop listening' in command:
-                            self.on_event('stop_listening')
-                            espeak("Stopping listening")
-                        else:
-                            self.on_event('command_received')
+                        self.on_event('command_received')
                     else:
                         self.stream_context = model.createStream()
 
     def on_event(self, event):
-        if event == 'stop_listening':
-            return Waitforhotword()
         if event == 'command_received':
             return Responding()
         return self
@@ -96,15 +90,25 @@ class Responding(State):
     def __init__(self):
         print("Responding.init() - started")
         super(Responding, self).__init__()
+        print(command)
         k9eyes.set_level(0.5)
-        response = "I heard you say" + command
-        print(response)
-        speak(response)
-        self.on_event('responded')
+        if 'listen' in command:
+            speak("No longer listening")
+            self.one_event('stop_listening')
+        if 'here' or 'over' in command:
+            speak("Coming|>master")
+            self.one_event('responded')
+        if 'follow' in command:
+            speak("Folllowing|>master")
+            self.one_event('responded')
+        speak("Not understood")
+        self.one_event('responded')
 
     def on_event(self, event):
         if event == 'responded':
             return Listening()
+        if event == 'stop_listening':
+            return Waitforhotword()
         return self
 
 model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.7.1-models.tflite")
