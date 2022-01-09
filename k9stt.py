@@ -28,7 +28,7 @@ class Waitforhotword(State):
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
         print(f'Using device: {self.recorder.selected_device}')
-        k9eyes.set_level(0.0001)
+        k9eyes.set_level(0.001)
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
