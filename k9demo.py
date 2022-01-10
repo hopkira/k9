@@ -3,23 +3,26 @@ import sys
 import json
 import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
-import deepspeech  # Mozilla STT
+# import deepspeech  # Mozilla STT
 import logo # k9 movement library
 import depthai
 import numpy as np
 import pandas as pd
 import skimage.measure as skim
 import paho.mqtt.client as mqtt
-from audio_tools import VADAudio # Voice activity detection
+# from audio_tools import VADAudio # Voice activity detection
 from state import State # Base FSM State class
 from pvrecorder import PvRecorder # Porcupine hotword
 from secrets import ACCESS_KEY # API key
 from datetime import datetime
 from eyes import Eyes # k9 led eyes
 from back_lights import BackLights # k9 back lights
-
-
 from k9tts import speak
+
+# mqtt connection details
+broker = "localhost"
+port = 1883
+topic = "/ble/advertise/watch/m"
 
 detections = []
 angle = 0.0
@@ -122,38 +125,22 @@ class Waitforhotword(State):
 
 class Listening(State):
     '''
-    The child state where K9 is now listening for an utterance
+    The child state where K9 is now listening for an utterance; this will
+    be received via an MQTT message
     '''
     def __init__(self):
         super(Listening, self).__init__()
-        self.vad_audio = VADAudio(aggressiveness=1,
-        device=None,
-        input_rate=16000,
-        file=None)
-        self.stream_context = model.createStream()
-        print("Listening: init complete")
         k9eyes.set_level(0.01)
         k9lights.on()
+        # TODO NEED TO SEND MESSAGE TO START LISTENING
         while True:
             self.clint.loop(0.1)
-            self.frames = self.vad_audio.vad_collector()
-            for frame in self.frames:
-                if frame is not None:
-                    self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-                else:
-                    print("Stream finished")
-                    global command
-                    command = self.stream_context.finishStream()
-                    del self.stream_context
-                    print("Listen.run() - I heard:",command)
-                    if command != "":
-                        self.vad_audio.destroy()
-                        self.on_event('command_received')
-                    else:
-                        self.stream_context = model.createStream()
 
     def on_event(self, event):
-        if event == 'command_received':
+        global command
+        if 'voice_command:' in event:
+            command = event[14:]
+            # TODO NEED TO SEND MSG TO STOP LISTENING
             return Responding()
         return self
 
@@ -167,9 +154,9 @@ class Responding(State):
         print("Responding.init() - started")
         print(command)
         k9eyes.set_level(0.5)
-        if 'listen' in command:
-            speak("No longer listening")
-            self.on_event('stop_listening')
+        #if 'listen' in command:
+        #    speak("No longer listening")
+        #    self.on_event('stop_listening')
         if ('here' in command) or ('over' in command):
             speak("Coming master")
             self.on_event('responded')
@@ -297,8 +284,8 @@ MIN_DIST = 0.3
 CONF = 0.7
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
-model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
+#model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
+#model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
 command = ""
 
 k9eyes = Eyes()
@@ -316,9 +303,10 @@ class K9(object):
         ''' Initialise K9 in his waiting state. '''
 
         self.last_message = ""
-        self.client = mqtt.Client("k9-python")
+        self.client = mqtt.Client("k9-fsm")
         self.client.connect("localhost")
         self.client.on_message = self.mqtt_callback # attach function to callback
+        self.client.on_publish = self.mqtt_publish_callback      # assign function to callback
         self.client.subscribe("/ble/advertise/watch/m")
         self.state = Waitforhotword()
 
@@ -457,6 +445,11 @@ class K9(object):
         if len(indices[0]) > 0 :
             direction = (np.average(indices) - mid_point) / width
         return (direction, final_distance)
+
+    # callback function from publish
+    def mqtt_publish_callback(self,client,userdata,result):
+        print("listen.py - data published \n")
+        pass
 
     def mqtt_callback(self, client, userdata, message):
         """

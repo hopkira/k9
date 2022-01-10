@@ -12,13 +12,6 @@ class State(object):
         to define and enable the valid state transitions.
         '''
 
-    def run(self):
-        '''
-        Enable the state to do something - this is usually delegated
-        to the child States)
-        '''
-        print('Run event for ' + str(self) + ' state not implemented')
-
     def __repr__(self):
         '''
         Leverages the __str__ method to describe the State.
