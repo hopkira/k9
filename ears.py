@@ -14,7 +14,7 @@ class K9Ears():
         )
 
     def write(self,text):
-        self.ser.write(text+"()")
+        self.ser.write(str.encode(text+"()"))
 
     def stop(self):
         self.write("stop")
