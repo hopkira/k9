@@ -205,13 +205,13 @@ class Scanning(State):
         global started_scan
         while True:
             self.target = None
-            self.target = self.person_scan()
+            self.target = person_scan()
             if self.target is not None :
                 self.on_event('person_found')
 
     def on_event(self, event):
         if event == 'person_found':
-            return Turning()
+            return Turning(self.target)
         return self
 
 
@@ -219,8 +219,9 @@ class Turning(State):
     '''
     The child state where K9 is turning towards the target person
     '''
-    def __init__(self):
+    def __init__(self,target):
         super(Turning, self).__init__()
+        self.target = target
         z = float(self.target.depth_z)
         x = float(self.target.depth_x)
         angle = ( math.pi / 2 ) - math.atan2(z, x)
@@ -235,7 +236,7 @@ class Turning(State):
 
     def on_event(self, event):
         if event == 'turn_finished':
-            return Moving_Forward()
+            return Moving_Forward(self.target)
         return self
 
 
@@ -243,9 +244,10 @@ class Moving_Forward(State):
     '''
     The child state where K9 is moving forwards to the target
     '''
-    def __init__(self):
+    def __init__(self, target):
         super(Moving_Forward, self).__init__()
-        self.avg_dist = 4.0
+        self.target = target
+        # self.avg_dist = 4.0
         z = float(self.target.depth_z)
         distance = float(z - SWEET_SPOT)
         if distance > 0:
@@ -260,8 +262,6 @@ class Moving_Forward(State):
     def on_event(self, event):
         if event == 'target_reached':
             return Following()
-        if event == 'scan_again':
-            return Scanning()
         return self
 
 
@@ -335,7 +335,7 @@ class K9(object):
         k9ears.stop()
         self.state = Waitforhotword()
 
-    def on_event(self, event):
+    def on_event(self,event):
         '''
         Process the incoming event using the on_event function of the
         current K9 state.  This may result in a change of state.
@@ -345,133 +345,7 @@ class K9(object):
         print("Event:",event, "raised in state", str(self.state).lower())
         self.state = self.state.on_event(event)
 
-    def person_scan(self):
-        '''
-        Returns detectd person nearest centre of field
-        '''
-
-        nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets()
-        for nnet_packet in nnet_packets:
-            detections = list(nnet_packet.getDetectedObjects())
-            if detections is not None :
-                people = [detection for detection in detections
-                            if detection.label == 15
-                            if detection.confidence > CONF]
-                if len(people) >= 1 :
-                    min_angle = math.pi
-                    for person in people:
-                        z = float(person.depth_z)
-                        x = float(person.depth_x)
-                        angle = abs(( math.pi / 2 ) - math.atan2(z, x))
-                        if angle < min_angle:
-                            min_angle = angle
-                            target = person
-                    return target
-
-    def scan(self, min_range = 500.0, max_range = 1200.0, decimate_level = 20, mean = True):
-        '''
-        Generate a simplified image of the depth image stream from the camera.  This image
-        can be reduced in size by using the decimate_level parameter.  
-        It also will remove invalid data from the image (too close or too near pixels)
-        The mechanism to determine the returned value of each new pixel can be the mean or 
-        minimum values across the area can also be specified.
-        
-        The image is returned as a 2D numpy array.
-        '''
-
-        func = np.mean if mean else np.min
-        nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets()
-        for packet in data_packets:
-            if packet.stream_name == 'depth':
-                frame = packet.getData()
-                valid_frame = (frame >= min_range) & (frame <= max_range)
-                valid_image = np.where(valid_frame, frame, max_range)
-                decimated_valid_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
-                return decimated_valid_image
-
-    def point_cloud(self, frame, min_range = 200.0, max_range = 4000.0):
-        '''
-        Generates a point cloud based on the provided numpy 2D depth array.
-        
-        Returns a 16 x 40 numpy matrix describing the forward distance to
-        the points within the field of view of the camera.
-        
-        Initial measures closer than the min_range are discarded.  Those outside of the
-        max_range are set to the max_range.
-        '''
-
-        height, width = frame.shape
-        # Convert depth map to point cloud with valid depths
-        column, row = np.meshgrid(np.arange(width), np.arange(height), sparse=True)
-        valid = (frame >= min_range) & (frame <= max_range)
-        global test_image
-        test_image = np.where(valid, frame, max_range)
-        z = np.where(valid, frame, 0.0)
-        x = np.where(valid, (z * (column - cx) /cx / fx) + 120.0 , max_range)
-        y = np.where(valid, 325.0 - (z * (row - cy) / cy / fy) , max_range)
-        # Flatten point cloud axes
-        z2 = z.flatten()
-        x2 = x.flatten()
-        y2 = y.flatten()
-        # Stack the x, y and z co-ordinates into a single 2D array
-        cloud = np.column_stack((x2,y2,z2))
-        # Filter the array by x and y co-ordinates
-        in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 2000) & (cloud[:,0] > -2000)
-        in_scope = np.repeat(in_scope, 3)
-        in_scope = in_scope.reshape(-1, 3)
-        scope = np.where(in_scope, cloud, np.nan)
-        # Remove invalid rows from array
-        scope = scope[~np.isnan(scope).any(axis=1)]
-        # Index each point into 10cm x and y bins (40 x 16)
-        x_index = pd.cut(scope[:,0], x_bins)
-        y_index = pd.cut(scope[:,1], y_bins)
-        # Place the depth values into the corresponding bin
-        binned_depths = pd.Series(scope[:,2])
-        # Average the depth measures in each bin
-        totals = binned_depths.groupby([y_index, x_index]).mean()
-        # Reshape the bins into a 16 x 40 matrix
-        totals = totals.values.reshape(16,40)
-        return totals
-
-    def follow_vector(self, image, max_range = 1200.0, certainty = 0.75):
-        """
-        Determine direction and distance to person to approach
-        """
-        final_distance = None
-        direction = None
-        # determine size of supplied image
-        height, width = image.shape
-        # just use the top half for analysis
-        # as this will ignore low obstacles
-        half_height = int(height/2)
-        image = image[0:half_height,:]
-        # find all the columns within the image where there are a
-        # consistently significant number of valid depth measurements
-        # this suggests a target in range that is reasonably tall
-        # and vertical (hopefully a person's legs
-        columns = np.sum(image < max_range, axis = 0) >= (certainty*half_height)
-        # average the depth values of each column
-        distance = np.average(image, axis = 0)
-        # create an array with just the useful distances (by zeroing
-        # out any columns with inconsistent data)
-        useful_distances = distance * columns
-        # average out all the useful distances
-        # ignoring the zeros and the max_ranges
-        subset = useful_distances[np.where((useful_distances < max_range) & (useful_distances > 0.0))]
-        if len(subset) > 0:
-            final_distance = np.average(subset)
-        # determine the indices of the valid columns and average them
-        # us the size of the image to determine a relative strength of
-        # direction that can be converted into an angle once fov of
-        # camera is known (range is theoretically -1 to +1 that
-        # corresponds to the h_fov of the camera)
-        mid_point = (width - 1.0) / 2.0
-        indices = columns.nonzero()
-        if len(indices[0]) > 0 :
-            direction = (np.average(indices) - mid_point) / width
-        return (direction, final_distance)
-
-    def mqtt_callback(self, client, userdata, message):
+    def mqtt_callback(self,client, userdata, message):
         """
         Enables K9 to receive a message from an Epruino Watch via
         MQTT over Bluetooth (BLE) to place it into active or inactive States
@@ -483,6 +357,132 @@ class K9(object):
             event = payload[3:-1].lower()
             # print("Event: ",str(event))
             self.on_event(event)
+
+def person_scan():
+    '''
+    Returns detectd person nearest centre of field
+    '''
+
+    nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets()
+    for nnet_packet in nnet_packets:
+        detections = list(nnet_packet.getDetectedObjects())
+        if detections is not None :
+            people = [detection for detection in detections
+                        if detection.label == 15
+                        if detection.confidence > CONF]
+            if len(people) >= 1 :
+                min_angle = math.pi
+                for person in people:
+                    z = float(person.depth_z)
+                    x = float(person.depth_x)
+                    angle = abs(( math.pi / 2 ) - math.atan2(z, x))
+                    if angle < min_angle:
+                        min_angle = angle
+                        target = person
+                return target
+
+def scan(min_range = 500.0, max_range = 1200.0, decimate_level = 20, mean = True):
+    '''
+    Generate a simplified image of the depth image stream from the camera.  This image
+    can be reduced in size by using the decimate_level parameter.  
+    It also will remove invalid data from the image (too close or too near pixels)
+    The mechanism to determine the returned value of each new pixel can be the mean or 
+    minimum values across the area can also be specified.
+    
+    The image is returned as a 2D numpy array.
+    '''
+
+    func = np.mean if mean else np.min
+    nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets()
+    for packet in data_packets:
+        if packet.stream_name == 'depth':
+            frame = packet.getData()
+            valid_frame = (frame >= min_range) & (frame <= max_range)
+            valid_image = np.where(valid_frame, frame, max_range)
+            decimated_valid_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
+            return decimated_valid_image
+
+def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
+    '''
+    Generates a point cloud based on the provided numpy 2D depth array.
+    
+    Returns a 16 x 40 numpy matrix describing the forward distance to
+    the points within the field of view of the camera.
+    
+    Initial measures closer than the min_range are discarded.  Those outside of the
+    max_range are set to the max_range.
+    '''
+
+    height, width = frame.shape
+    # Convert depth map to point cloud with valid depths
+    column, row = np.meshgrid(np.arange(width), np.arange(height), sparse=True)
+    valid = (frame >= min_range) & (frame <= max_range)
+    global test_image
+    test_image = np.where(valid, frame, max_range)
+    z = np.where(valid, frame, 0.0)
+    x = np.where(valid, (z * (column - cx) /cx / fx) + 120.0 , max_range)
+    y = np.where(valid, 325.0 - (z * (row - cy) / cy / fy) , max_range)
+    # Flatten point cloud axes
+    z2 = z.flatten()
+    x2 = x.flatten()
+    y2 = y.flatten()
+    # Stack the x, y and z co-ordinates into a single 2D array
+    cloud = np.column_stack((x2,y2,z2))
+    # Filter the array by x and y co-ordinates
+    in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 2000) & (cloud[:,0] > -2000)
+    in_scope = np.repeat(in_scope, 3)
+    in_scope = in_scope.reshape(-1, 3)
+    scope = np.where(in_scope, cloud, np.nan)
+    # Remove invalid rows from array
+    scope = scope[~np.isnan(scope).any(axis=1)]
+    # Index each point into 10cm x and y bins (40 x 16)
+    x_index = pd.cut(scope[:,0], x_bins)
+    y_index = pd.cut(scope[:,1], y_bins)
+    # Place the depth values into the corresponding bin
+    binned_depths = pd.Series(scope[:,2])
+    # Average the depth measures in each bin
+    totals = binned_depths.groupby([y_index, x_index]).mean()
+    # Reshape the bins into a 16 x 40 matrix
+    totals = totals.values.reshape(16,40)
+    return totals
+
+def follow_vector(image, max_range = 1200.0, certainty = 0.75):
+    """
+    Determine direction and distance to person to approach
+    """
+    final_distance = None
+    direction = None
+    # determine size of supplied image
+    height, width = image.shape
+    # just use the top half for analysis
+    # as this will ignore low obstacles
+    half_height = int(height/2)
+    image = image[0:half_height,:]
+    # find all the columns within the image where there are a
+    # consistently significant number of valid depth measurements
+    # this suggests a target in range that is reasonably tall
+    # and vertical (hopefully a person's legs
+    columns = np.sum(image < max_range, axis = 0) >= (certainty*half_height)
+    # average the depth values of each column
+    distance = np.average(image, axis = 0)
+    # create an array with just the useful distances (by zeroing
+    # out any columns with inconsistent data)
+    useful_distances = distance * columns
+    # average out all the useful distances
+    # ignoring the zeros and the max_ranges
+    subset = useful_distances[np.where((useful_distances < max_range) & (useful_distances > 0.0))]
+    if len(subset) > 0:
+        final_distance = np.average(subset)
+    # determine the indices of the valid columns and average them
+    # us the size of the image to determine a relative strength of
+    # direction that can be converted into an angle once fov of
+    # camera is known (range is theoretically -1 to +1 that
+    # corresponds to the h_fov of the camera)
+    mid_point = (width - 1.0) / 2.0
+    indices = columns.nonzero()
+    if len(indices[0]) > 0 :
+        direction = (np.average(indices) - mid_point) / width
+    return (direction, final_distance)
 
 try:
     k9 = K9()
