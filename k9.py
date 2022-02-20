@@ -141,11 +141,10 @@ class Listening(State):
                     self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 else:
                     print("Stream finished")
-                    global command
-                    command = self.stream_context.finishStream()
+                    self.command = self.stream_context.finishStream()
                     del self.stream_context
-                    print("Listen.run() - I heard:",command)
-                    if command != "":
+                    print("Listen.run() - I heard:",self.command)
+                    if self.command != "":
                         self.vad_audio.destroy()
                         self.on_event('command_received')
                     else:
@@ -153,7 +152,7 @@ class Listening(State):
 
     def on_event(self, event):
         if event == 'command_received':
-            return Responding()
+            return Responding(self.command)
         return self
 
 
@@ -163,22 +162,23 @@ class Responding(State):
     if command is not understood, Wolfram Mathematica will be
     used to retrieve a result
     '''
-    def __init__(self):
+    def __init__(self, command):
         super(Responding, self).__init__()
+        self.command = command
         print("Responding.init() - started")
-        print(command)
+        print(self.command)
         k9eyes.set_level(0.5)
-        if 'listen' in command:
+        if 'listen' in self.command:
             speak("No longer listening")
             self.on_event('stop_listening')
-        if ('here' in command) or ('over' in command):
+        if ('here' in self.command) or ('over' in self.command):
             speak("Coming master")
             self.on_event('scanning')
-        if 'follow' in command:
+        if 'follow' in self.command:
             speak("Folllowing master")
             self.on_event('follow')
         k9ears.think()
-        answer = k9qa.ask_question(command)
+        answer = k9qa.ask_question(self.command)
         k9ears.stop()
         speak(answer)
         self.on_event('responded')
@@ -302,8 +302,7 @@ CONF = 0.7
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
 model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
-command = ""
+model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer"
 
 k9eyes = Eyes()
 k9lights = BackLights()
