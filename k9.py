@@ -302,7 +302,7 @@ CONF = 0.7
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
 model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer"
+model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
 
 k9eyes = Eyes()
 k9lights = BackLights()
