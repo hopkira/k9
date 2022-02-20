@@ -17,7 +17,9 @@ from secrets import ACCESS_KEY # API key
 from datetime import datetime
 from eyes import Eyes # k9 led eyes
 from back_lights import BackLights # k9 back lights
-from k9tts import speak
+from ears import K9Ears # k9 radar ears
+from wolframqa import K9QA # wolfram qa skill
+from k9tts import speak # speak in K9 voice
 
 detections = []
 angle = 0.0
@@ -159,6 +161,8 @@ class Listening(State):
 class Responding(State):
     '''
     The child state where K9 processes a response to the text
+    if command is not understood, Wolfram Mathematica will be
+    used to retrieve a result
     '''
     def __init__(self):
         super(Responding, self).__init__()
@@ -174,7 +178,10 @@ class Responding(State):
         if 'follow' in command:
             speak("Folllowing master")
             self.on_event('responded')
-        speak("Not understood")
+        k9ears.think()
+        answer = k9qa.ask_question(command)
+        k9ears.stop()
+        speak(answer)
         self.on_event('responded')
 
     def on_event(self, event):
@@ -301,6 +308,8 @@ command = ""
 
 k9eyes = Eyes()
 k9lights = BackLights()
+k9ears = K9Ears()
+k9qa = K9QA()
 
 class K9(object):
     '''
