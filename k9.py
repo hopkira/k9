@@ -173,10 +173,10 @@ class Responding(State):
             self.on_event('stop_listening')
         if ('here' in command) or ('over' in command):
             speak("Coming master")
-            self.on_event('responded')
+            self.on_event('scanning')
         if 'follow' in command:
             speak("Folllowing master")
-            self.on_event('responded')
+            self.on_event('follow')
         k9ears.think()
         answer = k9qa.ask_question(command)
         k9ears.stop()
@@ -188,6 +188,10 @@ class Responding(State):
             return Listening()
         if event == 'stop_listening':
             return Waitforhotword()
+        if event == 'scanning':
+            return Scanning()
+        if event == 'follow':
+            return Following()
         return self
 
 
