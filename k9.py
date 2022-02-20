@@ -135,7 +135,6 @@ class Listening(State):
         k9eyes.set_level(0.01)
         k9lights.on()
         while True:
-            self.client.loop(0.1)
             self.frames = self.vad_audio.vad_collector()
             for frame in self.frames:
                 if frame is not None:
@@ -202,7 +201,6 @@ class Scanning(State):
         global started_scan
         while True:
             self.target = None
-            self.client.loop(0.1)
             self.target = self.person_scan()
             if self.target is not None :
                 self.on_event('person_found')
@@ -228,7 +226,6 @@ class Turning(State):
         else:
             self.on_event('turn_finished')
         while True:
-            self.client.loop(0.1)
             if logo.finished_move():
                 self.on_event('turn_finished')
 
@@ -251,7 +248,6 @@ class Moving_Forward(State):
             print("Moving Forward: target is",z,"m away. Moving",distance,"m")
             logo.forwards(distance)
         while True:
-            self.client.loop(0.1)
             if not logo.finished_move():
                 pass
             else:
@@ -274,7 +270,6 @@ class Following(State):
         logo.stop()
         speak("Mastah!")
         while True:
-            self.client.loop(0.1)
             depth_image = self.scan(min_range = 200.0, max_range = 1500.0,)
             if depth_image is not None:
                 direction, distance = self.follow_vector(depth_image, certainty = CONF)
