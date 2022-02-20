@@ -322,6 +322,13 @@ class K9(object):
         self.client.connect("localhost")
         self.client.on_message = self.mqtt_callback # attach function to callback
         self.client.subscribe("/ble/advertise/watch/m")
+        k9lights.on()
+        k9eyes.set_level(1)
+        k9ears.scan()
+        speak("K9 is active")
+        k9lights.off()
+        k9eyes.set_level(0)
+        k9ears.stop()
         self.state = Waitforhotword()
 
     def on_event(self, event):
