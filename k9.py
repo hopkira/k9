@@ -135,7 +135,7 @@ class Listening(State):
         k9eyes.set_level(0.01)
         k9lights.on()
         while True:
-            self.clint.loop(0.1)
+            self.client.loop(0.1)
             self.frames = self.vad_audio.vad_collector()
             for frame in self.frames:
                 if frame is not None:
