@@ -1,6 +1,7 @@
 # first, import all necessary modules
 from pathlib import Path
 
+import cv2
 import blobconverter
 import depthai
 import numpy as np
