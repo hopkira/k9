@@ -76,7 +76,7 @@ with depthai.Device(pipeline) as device:
         if frame is not None:
             for detection in detections:
                 # for each bounding box, we first normalize it to match the frame size
-                print(detection.label, detection.conf, detection.depth_z, detection.depth_x)
+                print(detection.label)
                 bbox = frameNorm(frame, (detection.xmin, detection.ymin, detection.xmax, detection.ymax))
                 # and then draw a rectangle on the frame to show the actual result
                 cv2.rectangle(frame, (bbox[0], bbox[1]), (bbox[2], bbox[3]), (255, 0, 0), 2)
