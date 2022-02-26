@@ -4,7 +4,6 @@ import json
 import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
-import logo # k9 movement library
 import depthai as dai
 import numpy as np
 import pandas as pd
@@ -20,6 +19,7 @@ from back_lights import BackLights # k9 back lights
 from ears import K9Ears # k9 radar ears
 from wolframqa import K9QA # wolfram qa skill
 from k9tts import speak # speak in K9 voice
+import logo # k9 movement library
 
 print("All modules loaded")
 
