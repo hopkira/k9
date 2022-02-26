@@ -5,8 +5,6 @@ import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import logo # k9 movement library
-print("1")
-import depthai as dai
 print("2")
 import numpy as np
 print("3")
@@ -35,7 +33,8 @@ print("26")
 from audio_tools import VADAudio # Voice activity detection
 print("27")
 import skimage.measure as skim
-
+print("1")
+import depthai as dai
 print("All imports done")
 
 
