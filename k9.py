@@ -12,10 +12,6 @@ import numpy as np
 print("3")
 import pandas as pd
 print("4")
-import skimage.measure as skim
-print("5")
-import paho.mqtt.client as mqtt
-print("6")
 from audio_tools import VADAudio # Voice activity detection
 print("7")
 from state import State # Base FSM State class
@@ -35,6 +31,10 @@ print("14")
 from wolframqa import K9QA # wolfram qa skill
 print("15")
 from k9tts import speak # speak in K9 voice
+import skimage.measure as skim
+print("5")
+import paho.mqtt.client as mqtt
+print("6")
 print("All imports done")
 
 
