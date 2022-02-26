@@ -32,9 +32,9 @@ from k9tts import speak # speak in K9 voice
 print("16")
 import paho.mqtt.client as mqtt
 print("26")
-import skimage.measure as skim
-print("27")
 from audio_tools import VADAudio # Voice activity detection
+print("27")
+import skimage.measure as skim
 
 print("All imports done")
 
