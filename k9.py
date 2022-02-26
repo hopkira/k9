@@ -4,24 +4,27 @@ import json
 import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
+import logo # k9 movement library
+print("1")
 import depthai as dai
 import numpy as np
 import pandas as pd
 import skimage.measure as skim
 import paho.mqtt.client as mqtt
+print("2")
 from audio_tools import VADAudio # Voice activity detection
 from state import State # Base FSM State class
 from pvrecorder import PvRecorder # Porcupine hotword
 from secrets import ACCESS_KEY # API key
 from datetime import datetime
+print("3")
 from eyes import Eyes # k9 led eyes
 from back_lights import BackLights # k9 back lights
 from ears import K9Ears # k9 radar ears
+print("4")
 from wolframqa import K9QA # wolfram qa skill
 from k9tts import speak # speak in K9 voice
-import logo # k9 movement library
-
-print("All modules loaded")
+print("5")
 
 detections = []
 angle = 0.0
