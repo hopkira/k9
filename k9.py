@@ -232,7 +232,7 @@ class Turning(State):
     '''
     The child state where K9 is turning towards the target person
     '''
-    def __init__(self,target):
+    def __init__(self, target):
         super(Turning, self).__init__()
         self.target = target
         z = float(self.target.depth_z)
@@ -409,14 +409,14 @@ def scan(min_range = 500.0, max_range = 1200.0, decimate_level = 20, mean = True
     '''
 
     func = np.mean if mean else np.min
-    nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets() # REPLACE
-    for packet in data_packets:             # REPLACE
-        if packet.stream_name == 'depth':   # REPLACE
-            frame = packet.getData()        # REPLACE
-            valid_frame = (frame >= min_range) & (frame <= max_range)
-            valid_image = np.where(valid_frame, frame, max_range)
-            decimated_valid_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
-            return decimated_valid_image
+    with dai.Device(pipeline) as device:
+        depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+        depth = depthQueue.get()
+        frame = depth.getFrame()
+        valid_frame = (frame >= min_range) & (frame <= max_range)
+        valid_image = np.where(valid_frame, frame, max_range)
+        decimated_valid_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
+        return decimated_valid_image
 
 def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
     '''
