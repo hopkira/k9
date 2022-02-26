@@ -21,6 +21,8 @@ from ears import K9Ears # k9 radar ears
 from wolframqa import K9QA # wolfram qa skill
 from k9tts import speak # speak in K9 voice
 
+print("All modules loaded")
+
 detections = []
 angle = 0.0
 
@@ -98,6 +100,8 @@ y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
 
 # calculate the horizontal angle per bucket
 h_bucket_fov = math.radians( 71.0 / 40.0)
+
+print("Init of pipeline complete")
 
 # Define K9 States   
 
@@ -314,8 +318,11 @@ MIN_DIST = 0.3
 CONF = 0.7
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
+
 model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
 model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
+
+print("Deepspeech loaded")
 
 k9eyes = Eyes()
 k9lights = BackLights()
@@ -501,6 +508,7 @@ def follow_vector(image, max_range = 1200.0, certainty = 0.75):
     return (direction, final_distance)
 
 try:
+    print("Creating K9 instance")
     k9 = K9()
 except KeyboardInterrupt:
     logo.stop()
