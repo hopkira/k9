@@ -29,6 +29,7 @@ print("14")
 from wolframqa import K9QA # wolfram qa skill
 print("15")
 from k9tts import speak # speak in K9 voice
+print("16")
 import skimage.measure as skim
 print("25")
 import paho.mqtt.client as mqtt
