@@ -62,8 +62,12 @@ spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+    depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
+
     while True:
         inDet = detectionNNQueue.get()
+        depth = depthQueue.get()
+        depthFrame = depth.getFrame()
         detections = inDet.detections
         for detection in detections:
             print("=======start==========")
