@@ -40,7 +40,7 @@ monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 # Setting node configs
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
 
-spatialDetectionNetwork.setBlobPath("./mobilenet-ssd_openvino_2021.4_6shave.blob")
+spatialDetectionNetwork.setBlobPath("./mobilenet-ssd_openvino_2021.2_6shave.blob")
 spatialDetectionNetwork.setConfidenceThreshold(0.5)
 spatialDetectionNetwork.input.setBlocking(False)
 spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
