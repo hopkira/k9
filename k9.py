@@ -7,24 +7,36 @@ import deepspeech  # Mozilla STT
 import logo # k9 movement library
 print("1")
 import depthai as dai
-import numpy as np
-import pandas as pd
-import skimage.measure as skim
-import paho.mqtt.client as mqtt
 print("2")
-from audio_tools import VADAudio # Voice activity detection
-from state import State # Base FSM State class
-from pvrecorder import PvRecorder # Porcupine hotword
-from secrets import ACCESS_KEY # API key
-from datetime import datetime
+import numpy as np
 print("3")
-from eyes import Eyes # k9 led eyes
-from back_lights import BackLights # k9 back lights
-from ears import K9Ears # k9 radar ears
+import pandas as pd
 print("4")
-from wolframqa import K9QA # wolfram qa skill
-from k9tts import speak # speak in K9 voice
+import skimage.measure as skim
 print("5")
+import paho.mqtt.client as mqtt
+print("6")
+from audio_tools import VADAudio # Voice activity detection
+print("7")
+from state import State # Base FSM State class
+print("8")
+from pvrecorder import PvRecorder # Porcupine hotword
+print("9")
+from secrets import ACCESS_KEY # API key
+print("10")
+from datetime import datetime
+print("11")
+from eyes import Eyes # k9 led eyes
+print("12")
+from back_lights import BackLights # k9 back lights
+print("13")
+from ears import K9Ears # k9 radar ears
+print("14")
+from wolframqa import K9QA # wolfram qa skill
+print("15")
+from k9tts import speak # speak in K9 voice
+print("All imports done")
+
 
 detections = []
 angle = 0.0
