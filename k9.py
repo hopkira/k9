@@ -5,7 +5,7 @@ import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import logo # k9 movement library
-import depthai
+import depthai as dai
 import numpy as np
 import pandas as pd
 import skimage.measure as skim
@@ -28,44 +28,58 @@ disparity_confidence_threshold = 130
 
 sys.path.append('/home/pi/k9-chess-angular/python') 
 
-device = depthai.Device('', False)
+# Create pipeline
+pipeline = dai.Pipeline()
 
-config={
-    "streams": ["depth","metaout"],
-    "ai": {
-        "blob_file": "/home/pi/3dvision/mobilenet-ssd/mobilenet-ssd.blob",
-        "blob_file_config": "/home/pi/3dvision/mobilenet-ssd/mobilenet-ssd.json",
-        "calc_dist_to_bb": True,
-        "camera_input": "right"
-    },
-    "camera": {
-        "mono": {
-            # 1280x720, 1280x800, 640x400 (binning enabled)
-            # reducing resolution decreases min depth as
-            # relative disparity is decreased
-            'resolution_h': 400,
-            'fps': 10   
-        }
-    }
-}
+# Define sources and outputs
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
+monoLeft = pipeline.create(dai.node.MonoCamera)
+monoRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
 
-body_cam = device.create_pipeline(config=config)
+xoutRgb = pipeline.create(dai.node.XLinkOut)
+xoutNN = pipeline.create(dai.node.XLinkOut)
+xoutBoundingBoxDepthMapping = pipeline.create(dai.node.XLinkOut)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
 
-# Retrieve model class labels from model config file.
-model_config_file = config["ai"]["blob_file_config"]
-mcf = open(model_config_file)
-model_config_dict = json.load(mcf)
-labels = model_config_dict["mappings"]["labels"]
+xoutRgb.setStreamName("rgb")
+xoutNN.setStreamName("detections")
+xoutBoundingBoxDepthMapping.setStreamName("boundingBoxDepthMapping")
+xoutDepth.setStreamName("depth")
 
-if body_cam is None:
-    raise RuntimeError("Error initializing body camera")
+# Properties
+camRgb.setPreviewSize(300, 300)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
 
-nn2depth = device.get_nn_to_depth_bbox_mapping()
+monoLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+monoRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+monoRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 
-def nn_to_depth_coord(x, y, nn2depth):
-    x_depth = int(nn2depth['off_x'] + x * nn2depth['max_w'])
-    y_depth = int(nn2depth['off_y'] + y * nn2depth['max_h'])
-    return x_depth, y_depth
+# Setting node configs
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+
+spatialDetectionNetwork.setBlobPath("./mobilenet-ssd_openvino_2021.2_6shave.blob")
+spatialDetectionNetwork.setConfidenceThreshold(0.5)
+spatialDetectionNetwork.input.setBlocking(False)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
+spatialDetectionNetwork.setDepthLowerThreshold(100)
+spatialDetectionNetwork.setDepthUpperThreshold(5000)
+
+# Linking
+monoLeft.out.link(stereo.left)
+monoRight.out.link(stereo.right)
+
+camRgb.preview.link(spatialDetectionNetwork.input)
+
+spatialDetectionNetwork.passthrough.link(xoutRgb.input)
+spatialDetectionNetwork.out.link(xoutNN.input)
+spatialDetectionNetwork.boundingBoxMapping.link(xoutBoundingBoxDepthMapping.input)
+stereo.depth.link(spatialDetectionNetwork.inputDepth)
+spatialDetectionNetwork.passthroughDepth.link(xoutDepth.input)
 
 decimate = 20
 MAX_RANGE = 4000.0
@@ -202,7 +216,6 @@ class Scanning(State):
     def __init__(self):
         super(Scanning, self).__init__()
         speak("Scanning")
-        global started_scan
         while True:
             self.target = None
             self.target = person_scan()
@@ -360,11 +373,15 @@ class K9(object):
 def person_scan():
     '''
     Returns detectd person nearest centre of field
+
+    detection.label == 15
+
     '''
 
-    nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets()
-    for nnet_packet in nnet_packets:
-        detections = list(nnet_packet.getDetectedObjects())
+    with dai.Device(pipeline) as device:
+        detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+        inDet = detectionNNQueue.get()
+        detections = inDet.detections
         if detections is not None :
             people = [detection for detection in detections
                         if detection.label == 15
@@ -392,10 +409,10 @@ def scan(min_range = 500.0, max_range = 1200.0, decimate_level = 20, mean = True
     '''
 
     func = np.mean if mean else np.min
-    nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets()
-    for packet in data_packets:
-        if packet.stream_name == 'depth':
-            frame = packet.getData()
+    nnet_packets, data_packets = body_cam.get_available_nnet_and_data_packets() # REPLACE
+    for packet in data_packets:             # REPLACE
+        if packet.stream_name == 'depth':   # REPLACE
+            frame = packet.getData()        # REPLACE
             valid_frame = (frame >= min_range) & (frame <= max_range)
             valid_image = np.where(valid_frame, frame, max_range)
             decimated_valid_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
@@ -487,8 +504,6 @@ try:
     k9 = K9()
 except KeyboardInterrupt:
     logo.stop()
-    del body_cam
-    del device
     k9.client.loop_stop()
     speak("Inactive")
     print('Exiting from', str(k9.state).lower(),'state.')
