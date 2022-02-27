@@ -5,37 +5,37 @@ import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import logo # k9 movement library
-print("2")
+print("Base classes and movement library loaded...")
 import numpy as np
-print("3")
+print("Numpy active...")
 import pandas as pd
-print("4")
+print("Pandas purring...")
 from state import State # Base FSM State class
-print("5")
+print("State machine with state...")
 from pvrecorder import PvRecorder # Porcupine hotword
-print("6")
+print("Recorder, recording...")
 from secrets import ACCESS_KEY # API key
-print("10")
+print("Access key found....")
 from datetime import datetime
-print("11")
+print("Datatime known...")
 from eyes import Eyes # k9 led eyes
-print("12")
+print("Eyes open...")
 from back_lights import BackLights # k9 back lights
-print("13")
+print("Backlights on...")
 from ears import K9Ears # k9 radar ears
-print("14")
+print("Ears wiggling...")
 from wolframqa import K9QA # wolfram qa skill
-print("15")
+print("Know it all mode active...")
 from k9tts import speak # speak in K9 voice
-print("16")
+print("Speech initiated...")
 import paho.mqtt.client as mqtt
-print("26")
+print("MQTT found...")
 from audio_tools import VADAudio # Voice activity detection
-print("27")
+print("Audio tools...")
 import skimage.measure as skim
-print("1")
+print("Skikit ready to decimate...")
 import depthai as dai
-print("All imports done")
+print("All imports done!")
 
 
 detections = []
@@ -130,7 +130,7 @@ class Waitforhotword(State):
         k9lights.off()
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
-            keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_0_0.ppn']
+            keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_1_0.ppn']
         )   
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
