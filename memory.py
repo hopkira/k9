@@ -62,7 +62,7 @@ class Memory():
 
         return self.r.get(str(key) + ":now")
 
-    def getMsgKey(self):
+    def __getMsgKey(self):
         '''Uses redis to create a unique message key by incrementing message_num
         '''
 
@@ -81,7 +81,7 @@ class Memory():
         json_data = '{"type":"sensor","sensor":"'+str(name)+'","distance":"'+str(reading)+'","angle":"'+str(angle)+'"}'
         self.storeSensorMessage(str(json_data))
 
-    def storeSensorMessage(self, json_data):
+    def __storeSensorMessage(self, json_data):
         '''Stores a JSON string formatted sensor reading message
 
         Arg:
@@ -113,12 +113,12 @@ class Memory():
         # Redis server
         pipe.execute()
 
-    def retrieveSensorMessage(self, sensor):
+    def __retrieveSensorMessage(self, sensor):
         '''Retrieves the last message stored for a sensor
 
         Arg:
             sensor (str): Name of the sensor
-        '''
+        ''' 
         
         msg_key=self.r.lrange(sensor,0,0)
         msg = self.r.hmget(msg_key)

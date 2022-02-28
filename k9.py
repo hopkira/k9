@@ -1,23 +1,17 @@
 import math
 import sys
-import json
-import pyaudio # Audio handling
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import logo # k9 movement library
 print("Base classes and movement library loaded...")
 import numpy as np
 print("Numpy active...")
-import pandas as pd
-print("Pandas purring...")
 from state import State # Base FSM State class
 print("State machine with state...")
 from pvrecorder import PvRecorder # Porcupine hotword
 print("Recorder, recording...")
 from secrets import ACCESS_KEY # API key
 print("Access key found....")
-from datetime import datetime
-print("Datatime known...")
 from eyes import Eyes # k9 led eyes
 print("Eyes open...")
 from back_lights import BackLights # k9 back lights
@@ -32,12 +26,8 @@ import paho.mqtt.client as mqtt
 print("MQTT found...")
 from audio_tools import VADAudio # Voice activity detection
 print("Audio tools working...")
-from memory import 
+from memory import Memory
 print("All imports done!")
-
-sys.path.append('/home/pi/k9-chess-angular/python') 
-
-print("Init of pipeline complete")
 
 # Define K9 States   
 
@@ -158,7 +148,21 @@ class Scanning(State):
         speak("Scanning")
         while True:
             self.target = None
-            self.target = person_scan()
+            self.target = mem.retrieveSensorReading("person")
+            # retrieve direction and distance from Redis
+            # Retreive detections from Redis
+            # to store in Redis
+            # label == 15
+            # confidence > CONF
+            # if there's more than one person found,
+            # calculate the angle
+            # z = float(person.depth_z)
+            # x = float(person.depth_x)
+            # angle = abs(( math.pi / 2 ) - math.atan2(z, x))
+            # smallest angle wins
+            # return person
+            # person.depth_z
+            # person.depth_x
             if self.target is not None :
                 self.on_event('person_found')
 
@@ -228,9 +232,10 @@ class Following(State):
         speak("Mastah!")
         while True:
             # retrieve direction and distance from Redis
-            print("Following: direction:", direction, "distance:", distance)
-            angle = direction * math.radians(77.0)
-            move = (distance - SWEET_SPOT)
+            person = mem.retrieveSensorReading("follow")
+            print("Following: direction:", person.direction, "distance:", person.distance)
+            angle = person.direction * math.radians(77.0)
+            move = (person.distance - SWEET_SPOT)
             print("Following: angle:", angle, "move:", move)
             damp_angle = 3.0
             damp_distance = 2.0
@@ -259,6 +264,7 @@ k9eyes = Eyes()
 k9lights = BackLights()
 k9ears = K9Ears()
 k9qa = K9QA()
+mem = Memory()
 
 class K9(object):
     '''
@@ -308,28 +314,6 @@ class K9(object):
             # print("Event: ",str(event))
             self.on_event(event)
 
-def person_scan():
-    '''
-    Returns detectd person nearest centre of field
-
-    detection.label == 15
-
-    '''
-
-    while True:
-        # Retreive detections from Redis
-        # to store in Redis
-        # label == 15
-        # confidence > CONF
-        # if there's more than one person found,
-        # calculate the angle
-        # z = float(person.depth_z)
-        # x = float(person.depth_x)
-        # angle = abs(( math.pi / 2 ) - math.atan2(z, x))
-        # smallest angle wins
-        # return person
-        return person
-
 try:
     print("Creating K9 instance")
     k9 = K9()
@@ -340,4 +324,4 @@ except KeyboardInterrupt:
     print('Exiting from', str(k9.state).lower(),'state.')
     k9lights.off()
     k9eyes.set_level(0)
-    sys.exit(0) 
+    sys.exit(0)
