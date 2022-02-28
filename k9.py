@@ -232,7 +232,7 @@ class Following(State):
         speak("Mastah!")
         while True:
             # retrieve direction and distance from Redis
-            person = mem.retrieveSensorReading("follow")
+            person = mem.retrieveSensorReading("person")
             print("Following: direction:", person.direction, "distance:", person.distance)
             angle = person.direction * math.radians(77.0)
             move = (person.distance - SWEET_SPOT)
