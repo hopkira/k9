@@ -82,97 +82,15 @@ fy = 2.05
 prev_frame = 0
 now_frame = 0
 
+cam_h_fov = 73.0
+
 x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
 y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
 
 # calculate the horizontal angle per bucket
-h_bucket_fov = math.radians( 71.0 / 40.0)
+h_bucket_fov = math.radians( cam_h_fov / 40.0)
 
 print("Init of pipeline complete")
-
-# Define K9 States   
-
-
-class Turning(State):
-    '''
-    The child state where K9 is turning towards the target person
-    '''
-    def __init__(self, target):
-        super(Turning, self).__init__()
-        self.target = target
-        z = float(self.target.depth_z)
-        x = float(self.target.depth_x)
-        angle = ( math.pi / 2 ) - math.atan2(z, x)
-        if abs(angle) > 0.2 :
-            print("Turning: Moving ",angle," radians towards target")
-            logo.right(angle)
-        else:
-            self.on_event('turn_finished')
-        while True:
-            if logo.finished_move():
-                self.on_event('turn_finished')
-
-    def on_event(self, event):
-        if event == 'turn_finished':
-            return Moving_Forward(self.target)
-        return self
-
-
-class Moving_Forward(State):
-    '''
-    The child state where K9 is moving forwards to the target
-    '''
-    def __init__(self, target):
-        super(Moving_Forward, self).__init__()
-        self.target = target
-        # self.avg_dist = 4.0
-        z = float(self.target.depth_z)
-        distance = float(z - SWEET_SPOT)
-        if distance > 0:
-            print("Moving Forward: target is",z,"m away. Moving",distance,"m")
-            logo.forwards(distance)
-        while True:
-            if not logo.finished_move():
-                pass
-            else:
-                self.on_event('target_reached')
-
-    def on_event(self, event):
-        if event == 'target_reached':
-            return Following()
-        return self
-
-
-class Following(State):
-    '''
-    Having reached the target, now follow it blindly
-    '''
-    def __init__(self):
-        super(Following, self).__init__()
-        logo.stop()
-        speak("Mastah!")
-        while True:
-            depth_image = self.scan(min_range = 200.0, max_range = 1500.0,)
-            if depth_image is not None:
-                direction, distance = self.follow_vector(depth_image, certainty = CONF)
-                if distance is not None and direction is not None:
-                    distance = distance / 1000.0
-                    print("Following: direction:", direction, "distance:", distance)
-                    angle = direction * math.radians(77.0)
-                    move = (distance - SWEET_SPOT)
-                    print("Following: angle:", angle, "move:", move)
-                    damp_angle = 3.0
-                    damp_distance = 2.0
-                    if abs(angle) >= (0.1 * damp_angle) :
-                        logo.rt(angle / damp_angle, fast = True)
-                    else:
-                        if abs(move) >= (0.05 * damp_distance) :
-                            logo.fd(move / damp_distance)
-
-    def on_event(self, event):
-        if event == 'assistant_mode':
-            return Waitforhotword()
-        return self
 
 MAX_DIST = 1.5
 MIN_DIST = 0.3
@@ -204,12 +122,18 @@ def person_scan():
                     if angle < min_angle:
                         min_angle = angle
                         target = person
-                return target
+                # record
+                target_angle = min_angle
+                target_distance = math.sqrt(target.z ** 2 + target.x ** 2 )
+                mem.storeSensorReading("person",target_distance,target_angle)
 
-def scan(min_range = 500.0, max_range = 1200.0, decimate_level = 20, mean = True):
+def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean = True):
     '''
-    Generate a simplified image of the depth image stream from the camera.  This image
-    can be reduced in size by using the decimate_level parameter.  
+    Record the direction for somone to follow.  This is determined by generating 
+    a simplified image of the depth image stream from the camera and determing the
+    average direction and distance of the valid columns.
+    
+    The image can be reduced in size by using the decimate_level parameter.  
     It also will remove invalid data from the image (too close or too near pixels)
     The mechanism to determine the returned value of each new pixel can be the mean or 
     minimum values across the area can also be specified.
@@ -224,8 +148,14 @@ def scan(min_range = 500.0, max_range = 1200.0, decimate_level = 20, mean = True
         frame = depth.getFrame()
         valid_frame = (frame >= min_range) & (frame <= max_range)
         valid_image = np.where(valid_frame, frame, max_range)
-        decimated_valid_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
-        return decimated_valid_image
+        depth_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
+        direction, distance = follow_vector(depth_image, certainty = CONF)
+        if distance is not None and direction is not None:
+            distance = distance / 1000.0
+            angle = direction * math.radians(cam_h_fov)
+            move = (distance - SWEET_SPOT)
+            mem.storeSensorReading("follow", move, angle)
+
 
 def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
     '''
@@ -269,8 +199,15 @@ def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
     totals = binned_depths.groupby([y_index, x_index]).mean()
     # Reshape the bins into a 16 x 40 matrix
     totals = totals.values.reshape(16,40)
-    return totals
-
+    closest = np.amin(totals, axis = 0)
+    closest = np.around(closest, -2)
+    closest = closest.reshape(1,-1)
+    count = np.nditer(closest, flags=['f_index'])
+    for point in count:
+        angle = h_bucket_fov * (count.index - 20)
+        distance = point
+        mem.storeSensorReading("point_cloud", distance, angle)
+            
 def follow_vector(image, max_range = 1200.0, certainty = 0.75):
     """
     Determine direction and distance to person to approach
@@ -308,3 +245,9 @@ def follow_vector(image, max_range = 1200.0, certainty = 0.75):
     if len(indices[0]) > 0 :
         direction = (np.average(indices) - mid_point) / width
     return (direction, final_distance)
+
+
+while True:
+    person_scan()
+    follow_scan()
+    point_cloud()

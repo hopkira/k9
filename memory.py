@@ -38,7 +38,7 @@ class Memory():
         self.storeState("left:speed",0)
         self.storeState("right:speed",0)
             
-    def storeState(self, key, value):
+    def storeState(self, key:str, value:str) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
 
         Args:
@@ -53,7 +53,7 @@ class Memory():
         self.r.set(str(key) + ":now",str(value))
         self.r.set(str(key) + ":time:now",str(time.time()))
 
-    def retrieveState(self, key):
+    def retrieveState(self, key:str) -> str:
         '''Retrieves the last version of a desired key
 
         Args:
@@ -69,7 +69,7 @@ class Memory():
         msg_key = "message:"+str(self.r.incr("message_num",amount=1))
         return msg_key
 
-    def storeSensorReading(self, name, reading, angle):
+    def storeSensorReading(self, name:str, reading:float, angle:float) -> None:
         '''Stores a sensor reading as a JSON string, compatible with other sensor readings
 
         Args:
@@ -81,7 +81,7 @@ class Memory():
         json_data = '{"type":"sensor","sensor":"'+str(name)+'","distance":"'+str(reading)+'","angle":"'+str(angle)+'"}'
         self.storeSensorMessage(str(json_data))
 
-    def __storeSensorMessage(self, json_data):
+    def __storeSensorMessage(self, json_data:str):
         '''Stores a JSON string formatted sensor reading message
 
         Arg:
@@ -105,10 +105,10 @@ class Memory():
         # For each of the message generating devices e.g. sensors, create a list
         # where the most recent element is at the left of the list
         pipe.lpush("sensor:" + message["sensor"],msg_key)
-        # Ensure that the list for each device doesn't get any longer than 15 messages so
+        # Ensure that the list for each device doesn't get any longer than 40 messages so
         # stuff will fall of the right hand end of the list
         if not self.rec :
-            pipe.ltrim("sensor:" + message["sensor"],0,15)
+            pipe.ltrim("sensor:" + message["sensor"],0,40)
         # Execute all of the above as part of a single transactional interaction with the
         # Redis server
         pipe.execute()
@@ -120,12 +120,24 @@ class Memory():
             sensor (str): Name of the sensor
         ''' 
         
-        msg_key=self.r.lrange(sensor,0,0)
+        msg_key=self.r.lrange(sensor, 0, 0)
         msg = self.r.hmget(msg_key)
         return msg
 
-    def retrieveSensorReading(self, sensor):
-        '''Retrieves the last values stored for a sensor
+    def retrieveSensorReadings(self, sensor:str) -> list[str]:
+        '''Retrieves all the values stored for a sensor
+        
+        Arg:
+            sensor (str): Name of sensor
+        '''
+        msgs = []
+        msg_key_list = self.r.lrange(sensor, 0, -1)
+        for key in msg_key_list:
+            msgs.append(json.loads(self.r.hmget(key)))
+        return msgs
+
+    def retrieveLastSensorReading(self, sensor:str) -> str:
+        '''Retrieves the last value stored for a sensor
 
         Arg:
             sensor (str): Name of the sensor
