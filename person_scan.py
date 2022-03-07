@@ -104,28 +104,24 @@ def person_scan():
     detection.label == 15
 
     '''
-
-    with dai.Device(pipeline) as device:
-        detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-        inDet = detectionNNQueue.get()
-        detections = inDet.detections
-        if detections is not None :
-            people = [detection for detection in detections
-                        if detection.label == 15
-                        if detection.confidence > CONF]
-            if len(people) >= 1 :
-                min_angle = math.pi
-                for person in people:
-                    z = float(person.depth_z)
-                    x = float(person.depth_x)
-                    angle = abs(( math.pi / 2 ) - math.atan2(z, x))
-                    if angle < min_angle:
-                        min_angle = angle
-                        target = person
-                # record
-                target_angle = min_angle
-                target_distance = math.sqrt(target.z ** 2 + target.x ** 2 )
-                mem.storeSensorReading("person",target_distance,target_angle)
+    detections = inDet.detections
+    if detections is not None :
+        people = [detection for detection in detections
+                    if detection.label == 15
+                    if detection.confidence > CONF]
+        if len(people) >= 1 :
+            min_angle = math.pi
+            for person in people:
+                z = float(person.depth_z)
+                x = float(person.depth_x)
+                angle = abs(( math.pi / 2 ) - math.atan2(z, x))
+                if angle < min_angle:
+                    min_angle = angle
+                    target = person
+            # record
+            target_angle = min_angle
+            target_distance = math.sqrt(target.z ** 2 + target.x ** 2 )
+            mem.storeSensorReading("person",target_distance,target_angle)
 
 def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean = True):
     '''
@@ -142,22 +138,19 @@ def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean
     '''
 
     func = np.mean if mean else np.min
-    with dai.Device(pipeline) as device:
-        depthQueue = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
-        depth = depthQueue.get()
-        frame = depth.getFrame()
-        valid_frame = (frame >= min_range) & (frame <= max_range)
-        valid_image = np.where(valid_frame, frame, max_range)
-        depth_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
-        direction, distance = follow_vector(depth_image, certainty = CONF)
-        if distance is not None and direction is not None:
-            distance = distance / 1000.0
-            angle = direction * math.radians(cam_h_fov)
-            move = (distance - SWEET_SPOT)
-            mem.storeSensorReading("follow", move, angle)
+    frame = depth.getFrame()
+    valid_frame = (frame >= min_range) & (frame <= max_range)
+    valid_image = np.where(valid_frame, frame, max_range)
+    depth_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
+    direction, distance = follow_vector(depth_image, certainty = CONF)
+    if distance is not None and direction is not None:
+        distance = distance / 1000.0
+        angle = direction * math.radians(cam_h_fov)
+        move = (distance - SWEET_SPOT)
+        mem.storeSensorReading("follow", move, angle)
 
  
-def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
+def point_cloud(min_range = 200.0, max_range = 4000.0):
     '''
     Generates a point cloud based on the provided numpy 2D depth array.
     
@@ -167,7 +160,7 @@ def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
     Initial measures closer than the min_range are discarded.  Those outside of the
     max_range are set to the max_range.
     '''
-
+    frame = depth.getFrame()
     height, width = frame.shape
     # Convert depth map to point cloud with valid depths
     column, row = np.meshgrid(np.arange(width), np.arange(height), sparse=True)
@@ -246,8 +239,12 @@ def follow_vector(image, max_range = 1200.0, certainty = 0.75):
         direction = (np.average(indices) - mid_point) / width
     return (direction, final_distance)
 
-
-while True:
-    person_scan()
-    follow_scan()
-    point_cloud()
+with dai.Device(pipeline) as device:
+    depthQueue = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
+    depth = depthQueue.get()
+    detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
+    inDet = detectionNNQueue.get()
+    while True:
+        person_scan()
+        follow_scan()
+        point_cloud()
