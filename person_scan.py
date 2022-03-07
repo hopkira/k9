@@ -166,8 +166,6 @@ def point_cloud(min_range = 200.0, max_range = 4000.0):
     # Convert depth map to point cloud with valid depths
     column, row = np.meshgrid(np.arange(width), np.arange(height), sparse=True)
     valid = (frame >= min_range) & (frame <= max_range)
-    global test_image
-    test_image = np.where(valid, frame, max_range)
     z = np.where(valid, frame, 0.0)
     x = np.where(valid, (z * (column - cx) /cx / fx) + 120.0 , max_range)
     y = np.where(valid, 325.0 - (z * (row - cy) / cy / fy) , max_range)
