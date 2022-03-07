@@ -38,12 +38,12 @@ class Memory():
         self.storeState("left:speed",0)
         self.storeState("right:speed",0)
             
-    def storeState(self, key:str, value:str) -> None:
+    def storeState(self, key:str, value:float) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
 
         Args:
             key (str): Name of the key
-            value (str): New value for the key 
+            value (float): New value for the key 
         '''
 
         old_value = self.r.get(str(key) + ":now")
