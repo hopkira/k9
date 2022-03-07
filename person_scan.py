@@ -162,6 +162,7 @@ def point_cloud(min_range = 200.0, max_range = 4000.0):
     '''
     frame = depth.getFrame()
     height, width = frame.shape
+    print("Dimensions:",height,width)
     # Convert depth map to point cloud with valid depths
     column, row = np.meshgrid(np.arange(width), np.arange(height), sparse=True)
     valid = (frame >= min_range) & (frame <= max_range)
