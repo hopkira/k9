@@ -47,9 +47,8 @@ class Memory():
             value (float): New value for the key 
         '''
         print("Called: ", key, value)
-        try:
-            old_value = self.r.get(str(key) + ":now")
-        except redis.exceptions.DataError:
+        old_value = self.r.get(str(key) + ":now")
+        if not old_value:
             old_value = 0.0
         print("Old value: ", old_value)
         self.r.set(str(key) + ":old", old_value )
