@@ -12,6 +12,7 @@
 # be quickly retrieved on a per sensor basis
 
 import json
+from sqlite3 import DataError
 import time
 import redis
 
@@ -45,8 +46,10 @@ class Memory():
             key (str): Name of the key
             value (float): New value for the key 
         '''
-
-        old_value = self.r.get(str(key) + ":now")
+        try:
+            old_value = self.r.get(str(key) + ":now")
+        except DataError:
+            old_value = 0.0
         self.r.set(str(key) + ":old", old_value )
         old_value = self.r.get(str(key) + ":time:now")
         self.r.set(str(key) + ":time:old", old_value)
