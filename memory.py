@@ -35,8 +35,8 @@ class Memory():
         self.r = redis.Redis(host='127.0.0.1',port=6379)
         if self.rec:
             print("Recording data permanently") # let the user know they are in sim mode
-        self.storeState("left:speed",0)
-        self.storeState("right:speed",0)
+        self.storeState("left:speed",0.0)
+        self.storeState("right:speed",0.0)
             
     def storeState(self, key:str, value:float) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
