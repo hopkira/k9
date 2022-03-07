@@ -124,7 +124,7 @@ class Memory():
         msg = self.r.hmget(msg_key)
         return msg
 
-    def retrieveSensorReadings(self, sensor:str) -> list[str]:
+    def retrieveSensorReadings(self, sensor:str) -> list:
         '''Retrieves all the values stored for a sensor
         
         Arg:
