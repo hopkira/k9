@@ -243,7 +243,10 @@ with dai.Device(pipeline) as device:
     depth = depthQueue.get()
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     inDet = detectionNNQueue.get()
+    frame = 0
     while True:
+        print("Frame:", frame)
         person_scan()
         follow_scan()
         point_cloud()
+        frame = frame + 1
