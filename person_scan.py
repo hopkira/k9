@@ -156,7 +156,7 @@ def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean
             move = (distance - SWEET_SPOT)
             mem.storeSensorReading("follow", move, angle)
 
-
+ 
 def point_cloud(frame, min_range = 200.0, max_range = 4000.0):
     '''
     Generates a point cloud based on the provided numpy 2D depth array.
