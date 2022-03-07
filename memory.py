@@ -46,6 +46,7 @@ class Memory():
             key (str): Name of the key
             value (float): New value for the key 
         '''
+        print("Called: ", key, value)
         try:
             old_value = self.r.get(str(key) + ":now")
         except DataError:
