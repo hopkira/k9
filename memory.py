@@ -49,8 +49,9 @@ class Memory():
         print("Called: ", key, value)
         try:
             old_value = self.r.get(str(key) + ":now")
-        except DataError:
+        except redis.exceptions.DataError:
             old_value = 0.0
+        print("Old value: ", old_value)
         self.r.set(str(key) + ":old", old_value )
         old_value = self.r.get(str(key) + ":time:now")
         self.r.set(str(key) + ":time:old", old_value)
