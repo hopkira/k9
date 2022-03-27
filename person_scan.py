@@ -97,7 +97,7 @@ MIN_DIST = 0.3
 CONF = 0.2 # Normally 0.7
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
-def person_scan():
+def person_scan(queue):
     '''
     Returns detectd person nearest centre of field
 
@@ -105,7 +105,7 @@ def person_scan():
 
     '''
 
-    detections = inDet.detections
+    detections = queue.detections
     if len(detections) != 0:
         print("At least one object detected")
         people = [detection for detection in detections
