@@ -16,7 +16,7 @@ from sqlite3 import DataError
 import time
 import redis
 
-print("Redis library imported...")
+print("Short term memory loaded...")
 
 
 class Memory():

@@ -1,12 +1,12 @@
 import math
 import numpy as np
-print("Numpy active...")
+print("Numpy ready to crunch numbers...")
 import pandas as pd
 print("Pandas purring...")
 import skimage.measure as skim
 print("Skikit ready to decimate...")
 import depthai as dai
-print("Depthai loaded...")
+print("3D vision seeing the light...")
 from memory import Memory
 print("All imports done!")
 
