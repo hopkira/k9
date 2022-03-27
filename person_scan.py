@@ -104,9 +104,9 @@ def person_scan():
     detection.label == 15
 
     '''
-    inDet = detectionNNQueue.get()
+
     detections = inDet.detections
-    if detections is not None :
+    if len(detections) != 0:
         print("At least one object detected")
         people = [detection for detection in detections
                     if detection.label == 15
@@ -131,7 +131,7 @@ def person_scan():
         print("No person found")
         return
 
-def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean = True):
+def follow_scan(queue, min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean = True):
     '''
     Record the direction for somone to follow.  This is determined by generating 
     a simplified image of the depth image stream from the camera and determing the
@@ -145,9 +145,8 @@ def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean
     The image is returned as a 2D numpy array.
     '''
 
-    depth = depthQueue.get()
     func = np.mean if mean else np.min
-    frame = depth.getFrame()
+    frame = queue.getFrame()
     valid_frame = (frame >= min_range) & (frame <= max_range)
     valid_image = np.where(valid_frame, frame, max_range)
     depth_image = skim.block_reduce(valid_image,(decimate_level,decimate_level),func)
@@ -254,10 +253,10 @@ def follow_vector(image, max_range = 1200.0, certainty = 0.75):
 
 with dai.Device(pipeline) as device:
     depthQueue = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
-    
+    depth = depthQueue.get()
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    
+    inDet = detectionNNQueue.get()
     while True:
-        person_scan()
-        follow_scan()
+        person_scan(depth)
+        follow_scan(inDet)
         # point_cloud()
