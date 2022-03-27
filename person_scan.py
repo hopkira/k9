@@ -257,6 +257,6 @@ with dai.Device(pipeline) as device:
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
     inDet = detectionNNQueue.get()
     while True:
-        person_scan(depth)
-        follow_scan(inDet)
+        person_scan(inDet)
+        follow_scan(depth)
         # point_cloud()
