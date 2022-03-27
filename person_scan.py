@@ -94,7 +94,7 @@ print("Init of pipeline complete")
 
 MAX_DIST = 1.5
 MIN_DIST = 0.3
-CONF = 0.2
+CONF = 0.2 # Normally 0.7
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
 def person_scan():
@@ -122,6 +122,9 @@ def person_scan():
             target_angle = min_angle
             target_distance = math.sqrt(target.spatialCoordinates.z ** 2 + target.spatialCoordinates.x ** 2 )
             mem.storeSensorReading("person",target_distance,target_angle)
+    else:
+        print("No person found")
+        return
 
 def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean = True):
     '''
@@ -148,6 +151,9 @@ def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean
         angle = direction * math.radians(cam_h_fov)
         move = (distance - SWEET_SPOT)
         mem.storeSensorReading("follow", move, angle)
+    else:
+        print("Nothing to follow")
+    return
 
  
 def point_cloud(min_range = 200.0, max_range = 4000.0):
