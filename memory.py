@@ -86,7 +86,7 @@ class Memory():
         '''
 
         json_data = '{"type":"sensor","sensor":"'+str(name)+'","distance":"'+str(reading)+'","angle":"'+str(angle)+'"}'
-        self._storeSensorMessage(str(json_data))
+        self.__storeSensorMessage(str(json_data))
 
     def __storeSensorMessage(self, json_data:str):
         '''Stores a JSON string formatted sensor reading message
@@ -100,7 +100,7 @@ class Memory():
         message = json.loads(json_data)
         print(message)
         print(len(message))
-        msg_key = self._getMsgKey()
+        msg_key = self.__getMsgKey()
         # Create a transactional pipeline to store new message, this will be closed
         # and committed by the pipe.execute() command
         pipe = self.r.pipeline(transaction=True)
