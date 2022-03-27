@@ -106,10 +106,12 @@ def person_scan():
     '''
     detections = inDet.detections
     if detections is not None :
+        print("At least one object detected")
         people = [detection for detection in detections
                     if detection.label == 15
                     if detection.confidence > CONF]
         if len(people) >= 1 :
+            print("At least one of them is a person")
             min_angle = math.pi
             for person in people:
                 z = float(person.spatialCoordinates.z)
@@ -122,6 +124,8 @@ def person_scan():
             target_angle = min_angle
             target_distance = math.sqrt(target.spatialCoordinates.z ** 2 + target.spatialCoordinates.x ** 2 )
             mem.storeSensorReading("person",target_distance,target_angle)
+            print("Person stored in memory")
+            return
     else:
         print("No person found")
         return
@@ -151,6 +155,7 @@ def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean
         angle = direction * math.radians(cam_h_fov)
         move = (distance - SWEET_SPOT)
         mem.storeSensorReading("follow", move, angle)
+        "Follow target stored in memory"
     else:
         print("Nothing to follow")
     return
