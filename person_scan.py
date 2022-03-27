@@ -94,7 +94,7 @@ print("Init of pipeline complete")
 
 MAX_DIST = 1.5
 MIN_DIST = 0.3
-CONF = 0.7
+CONF = 0.2
 SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
 def person_scan():
