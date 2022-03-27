@@ -112,8 +112,8 @@ def person_scan():
         if len(people) >= 1 :
             min_angle = math.pi
             for person in people:
-                z = float(person.depth_z)
-                x = float(person.depth_x)
+                z = float(person.spatialCoordinates.z)
+                x = float(person.spatialCoordinates.x)
                 angle = abs(( math.pi / 2 ) - math.atan2(z, x))
                 if angle < min_angle:
                     min_angle = angle
