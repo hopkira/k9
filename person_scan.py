@@ -249,5 +249,5 @@ with dai.Device(pipeline) as device:
         print("Frame:", frame)
         person_scan()
         follow_scan()
-        point_cloud()
+        # point_cloud()
         frame = frame + 1
