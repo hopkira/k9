@@ -104,6 +104,7 @@ def person_scan():
     detection.label == 15
 
     '''
+    inDet = detectionNNQueue.get()
     detections = inDet.detections
     if detections is not None :
         print("At least one object detected")
@@ -144,6 +145,7 @@ def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean
     The image is returned as a 2D numpy array.
     '''
 
+    depth = depthQueue.get()
     func = np.mean if mean else np.min
     frame = depth.getFrame()
     valid_frame = (frame >= min_range) & (frame <= max_range)
@@ -252,9 +254,9 @@ def follow_vector(image, max_range = 1200.0, certainty = 0.75):
 
 with dai.Device(pipeline) as device:
     depthQueue = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
-    depth = depthQueue.get()
+    
     detectionNNQueue = device.getOutputQueue(name="detections", maxSize=4, blocking=False)
-    inDet = detectionNNQueue.get()
+    
     while True:
         person_scan()
         follow_scan()
