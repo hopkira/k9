@@ -120,7 +120,7 @@ def person_scan():
                     target = person
             # record
             target_angle = min_angle
-            target_distance = math.sqrt(target.z ** 2 + target.x ** 2 )
+            target_distance = math.sqrt(target.spatialCoordinates.z ** 2 + target.spatialCoordinates.x ** 2 )
             mem.storeSensorReading("person",target_distance,target_angle)
 
 def follow_scan(min_range = 200.0, max_range = 1500.0, decimate_level = 20, mean = True):
