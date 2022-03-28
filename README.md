@@ -1,5 +1,15 @@
 # k9localstt
-Prototype of offline wakeword, STT and TTS for K9 robot
+Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis acting as the integration point of the robot stake.
+* Finite state machine with offline wakeword that integrates the following Python modules:
+  * Back panel
+  * Eye lights
+  * Ear control
+  * Offline speech to text
+  * Offline text to speech
+  * Short term memory (Redis)
+* Oak-lite pipeline also integrated into Redis:
+  * Detect person at a distance
+  * Follow a nearby obstacle
 
 https://www.hackster.io/dmitrywat/offline-speech-recognition-on-raspberry-pi-4-with-respeaker-c537e7
 
