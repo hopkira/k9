@@ -44,6 +44,9 @@ cam_h_fov = 73.0
 # Path to NN model
 nnBlob = "/home/pi/depthai-python/examples/models/mobilenet-ssd_openvino_2021.4_5shave.blob"
 
+# Initially there is no identified target
+target = None
+
 # Create pipeline
 print("Creating Oak pipeline...")
 pipeline = dai.Pipeline()
@@ -190,7 +193,6 @@ with dai.Device(pipeline) as device:
         # move, they should be tracked
         #
         heel_range = heel_upper # reset range to max
-        target = None # reset to no target
         #
         #for t in trackletsData:
         #    print(t.id,t.status.name,t.spatialCoordinates.x, t.spatialCoordinates.z)
@@ -200,8 +202,9 @@ with dai.Device(pipeline) as device:
         track = qTrack.get()
         trackletsData = track.tracklets
         # if a target has been identified than look through the trackletData
-        # and retrieve the latest information tracklet and store it in the
-        # target object
+        # and retrieve the latest information tracklet for that id
+        # and store it in the target object
+        # if there is no active matching id, then drop them as a target
         # if there is NO target identified yet, then scan the trackletData and
         # find the closest NEW or TRACKED tracklet instance and make them the
         # target
