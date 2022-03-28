@@ -11,6 +11,7 @@ Major update to K9 in preparation for moving to ROS2.  Splits major programs dow
 * Oak-lite pipeline also integrated into Redis:
   * Detect person at a distance
   * Follow a nearby obstacle
+  * Oak-d-lite based point cloud
 
 https://www.hackster.io/dmitrywat/offline-speech-recognition-on-raspberry-pi-4-with-respeaker-c537e7
 
