@@ -7,6 +7,7 @@ Major update to K9 in preparation for moving to ROS2.  Splits major programs dow
   * Offline speech to text
   * Offline text to speech
   * Short term memory (Redis)
+  * Wolfram QA
 * Oak-lite pipeline also integrated into Redis:
   * Detect person at a distance
   * Follow a nearby obstacle
