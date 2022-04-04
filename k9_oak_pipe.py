@@ -180,9 +180,9 @@ with dai.Device(pipeline) as device:
         # determine the average angle that these columns as a multiplier for the h_fov
         if len(indices) > 0 :
             direction = (np.average(indices) - mid_point) / (width / decimate_level)
-            distance = final_distance / 1000.0 # convert to m
             angle = direction * math.radians(cam_h_fov)
-            move = (distance - sweet_spot)
+            move = (final_distance - sweet_spot)
+            move = move / 1000.0 # convert to m
             mem.storeSensorReading("follow", move, angle)
             print("Follow: ", move, angle)
         #
