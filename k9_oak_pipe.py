@@ -46,7 +46,12 @@ cam_h_fov = 73.0
 nnBlob = "/home/pi/depthai-python/examples/models/mobilenet-ssd_openvino_2021.4_5shave.blob"
 
 # Initially there is no identified target
-target = None
+target =   {
+    "id"    :   None,
+    "status":   None,
+    "x":        None,
+    "z":        None
+}
 
 # Create pipeline
 print("Creating Oak pipeline...")
@@ -202,8 +207,6 @@ with dai.Device(pipeline) as device:
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
-        for tracklet in trackletsData:
-            print(tracklet.status.name,tracklet.id, tracklet.spatialCoordinates.z)
         # if a target has been identified than look through the trackletData
         # and retrieve the latest information tracklet for that id
         # and store it in the target object
@@ -211,15 +214,18 @@ with dai.Device(pipeline) as device:
         # if there is NO target identified yet, then scan the trackletData and
         # find the closest NEW or TRACKED tracklet instance and make them the
         # target
-        if target is not None:
+        if target.id is not None:
             candidate = [tracklet for tracklet in trackletsData
                             if tracklet.id == target.id]
             print("Existing target " + str(target.id) + " seen again")
             if candidate is not None:
-                target  = copy.copy(candidate)
+                target.id  = candidate.id
+                target.status = candidate.status.name
+                target.x = candidate.spatialCoordinates.x
+                target.z = candidate.spatialCoordinates.z
                 print("Target data " + str(target.id) + " refreshed")
             else:
-                target =  None
+                target.id =  None
                 print("No target spotted")
         else:
             candidates = [tracklet for tracklet in trackletsData
@@ -230,13 +236,16 @@ with dai.Device(pipeline) as device:
                 if candidate.spatialCoordinates.z < heel_range:
                     print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
-                    target  = copy.copy(candidate)
+                    target.id  = candidate.id
+                    target.status = candidate.status.name
+                    target.x = candidate.spatialCoordinates.x
+                    target.z = candidate.spatialCoordinates.z
                     print("Closest target id:",str(target.id))
         
         if target is not None:
-            z = float(target.spatialCoordinates.z)
-            x = float(target.spatialCoordinates.x)
+            z = float(target.z)
+            x = float(target.x)
             angle = abs(( math.pi / 2 ) - math.atan2(z, x))
-            distance = math.sqrt(target.spatialCoordinates.z ** 2 + target.spatialCoordinates.x ** 2 )
+            distance = math.sqrt(z ** 2 + x ** 2 )
             mem.storeSensorReading("person",distance,angle)
             # print("Person:", distance, angle)
