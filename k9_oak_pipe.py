@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 # Author: Richard Hopkins
-# Date: 28 March 2022
+# Date: 4 April 2022
 #
 # This program uses the Oak-Lite camera from Luxonis
 # to support two key functions:
@@ -9,7 +9,6 @@
 #   * to identify the vector to the nearest vertical obstacle
 #     that is near K9 (that may not be recognisable as a person)
 
-import copy
 import skimage.measure as skim
 print("Skikit ready to decimate...")
 import depthai as dai
@@ -220,18 +219,18 @@ with dai.Device(pipeline) as device:
                             if tracklet.id == target["id"]
                             if tracklet.status.name == "TRACKED"
                             ]
-            print("Existing target " + str(target["id"]) + " seen again")
+            # print("Existing target " + str(target["id"]) + " seen again")
             if candidate:
                 # refresh the data if identified
                 target["id"]  = candidate[0].id
                 target["status"] = candidate[0].status.name
                 target["x"] = candidate[0].spatialCoordinates.x
                 target["z"] = candidate[0].spatialCoordinates.z
-                print("Target data " + str(target["id"]) + " refreshed")
+                # print("Target data " + str(target["id"]) + " refreshed")
             else:
                 # drop the target otherwise
                 target["id"] =  None
-                print("Target lost and forgotten")
+                # print("Target lost and forgotten")
         else:
             # look for any new or tracked tracklets
             candidates = [tracklet for tracklet in trackletsData
