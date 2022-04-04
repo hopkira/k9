@@ -219,13 +219,12 @@ with dai.Device(pipeline) as device:
             candidate = [tracklet for tracklet in trackletsData
                             if tracklet.id == target["id"] ]
             print("Existing target " + str(target["id"]) + " seen again")
-            print(candidate[0].id, candidate[0].status.name, candidate[0].spatialCoordinates.x)
             if candidate is not None:
                 # refresh the data if identified
-                target["id"]  = candidate.id
-                target["status"] = candidate.status.name
-                target["x"] = candidate.spatialCoordinates.x
-                target["z"] = candidate.spatialCoordinates.z
+                target["id"]  = candidate[0].id
+                target["status"] = candidate[0].status.name
+                target["x"] = candidate[0].spatialCoordinates.x
+                target["z"] = candidate[0].spatialCoordinates.z
                 print("Target data " + str(target["id"]) + " refreshed")
             else:
                 # drop the target otherwise
