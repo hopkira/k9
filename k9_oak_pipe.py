@@ -4,10 +4,11 @@
 # Date: 4 April 2022
 #
 # This program uses the Oak-Lite camera from Luxonis
-# to support two key functions:
-#   * to identify the vector to the person in front of K9
-#   * to identify the vector to the nearest vertical obstacle
+# to support three key functions:
+#   1. to identify the vector to the person in front of K9
+#   2. to identify the vector to the nearest vertical obstacle
 #     that is near K9 (that may not be recognisable as a person)
+#   * generate a point cloud to help avoid collisions (to be added back in)
 
 # import time
 print("Time started...")
@@ -149,7 +150,7 @@ with dai.Device(pipeline) as device:
     while True:
         # start_time = time.time() # start time of the loop
         #
-        # Follow section of code
+        # 1. Follow section of code
         #
         # The follow capability ueses the depth stream to determine
         # where the nearest pair of legs  are
@@ -194,7 +195,7 @@ with dai.Device(pipeline) as device:
             mem.storeSensorReading("follow", move, angle)
             # print("Follow: ", move, angle)
         #
-        # Heeling/tracking section of code
+        # 2. Heeling/tracking section of code
         #
         # This part of the code will identify the nearest
         # person in front of K9 (up to about 5m away).  As they
@@ -256,6 +257,9 @@ with dai.Device(pipeline) as device:
             z = float(target["z"])
             x = float(target["x"])
             angle = ( math.pi / 2 ) - math.atan2(z, x)
-            distance = math.sqrt(z ** 2 + x ** 2 )
+            distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
             mem.storeSensorReading("person",distance,angle)
+        #
+        # 3. Point cloud funcitonality
+        #
         # print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop

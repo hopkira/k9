@@ -1,5 +1,16 @@
+#!/usr/bin/env python
+# coding: utf-8
+# Author: Richard Hopkins
+# Date: 4 April 2022
+#
+# This program runs the base state machine for
+# the K9 robot and responds to commands received
+# by voice and MQTT/Bluetooth.
+#
 import math
 import sys
+import json
+from tkinter.messagebox import NO
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import logo # k9 movement library
@@ -148,21 +159,7 @@ class Scanning(State):
         speak("Scanning")
         while True:
             self.target = None
-            self.target = mem.retrieveSensorReading("person")
-            # retrieve direction and distance from Redis
-            # Retreive detections from Redis
-            # to store in Redis
-            # label == 15
-            # confidence > CONF
-            # if there's more than one person found,
-            # calculate the angle
-            # z = float(person.depth_z)
-            # x = float(person.depth_x)
-            # angle = abs(( math.pi / 2 ) - math.atan2(z, x))
-            # smallest angle wins
-            # return person
-            # person.depth_z
-            # person.depth_x
+            self.target = mem.retrieveLastSensorReading("person")
             if self.target is not None :
                 self.on_event('person_found')
 
@@ -178,13 +175,12 @@ class Turning(State):
     '''
     def __init__(self, target):
         super(Turning, self).__init__()
-        self.target = target
-        z = float(self.target.depth_z)
-        x = float(self.target.depth_x)
-        angle = ( math.pi / 2 ) - math.atan2(z, x)
-        if abs(angle) > 0.2 :
-            print("Turning: Moving ",angle," radians towards target")
-            logo.right(angle)
+        target_dict = json.loads(target)
+        self.angle = target_dict["angle"]
+        self.distance = target_dict["distance"]
+        if abs(self.angle) > 0.2 :
+            print("Turning: Moving ",self.angle," radians towards target")
+            logo.right(self.angle)
         else:
             self.on_event('turn_finished')
         while True:
@@ -193,7 +189,7 @@ class Turning(State):
 
     def on_event(self, event):
         if event == 'turn_finished':
-            return Moving_Forward(self.target)
+            return Moving_Forward(self.distance)
         return self
 
 
@@ -201,15 +197,18 @@ class Moving_Forward(State):
     '''
     The child state where K9 is moving forwards to the target
     '''
-    def __init__(self, target):
+    def __init__(self, distance):
         super(Moving_Forward, self).__init__()
-        self.target = target
+        self.distance = distance
         # self.avg_dist = 4.0
-        z = float(self.target.depth_z)
-        distance = float(z - SWEET_SPOT)
-        if distance > 0:
-            print("Moving Forward: target is",z,"m away. Moving",distance,"m")
-            logo.forwards(distance)
+        # z = float(self.target.depth_z)
+        # distance = float(z - SWEET_SPOT)
+        if self.distance > 0:
+            print("Moving Forward: ",self.distance,"m")
+            logo.forwards(self.distance)
+        else:
+            print("Moving Forward: no need to move")
+            self.on_event('target_reached')
         while True:
             if not logo.finished_move():
                 pass
@@ -232,28 +231,24 @@ class Following(State):
         speak("Mastah!")
         while True:
             # retrieve direction and distance from Redis
-            person = mem.retrieveSensorReading("person")
-            print("Following: direction:", person.direction, "distance:", person.distance)
-            angle = person.direction * math.radians(77.0)
-            move = (person.distance - SWEET_SPOT)
-            print("Following: angle:", angle, "move:", move)
-            damp_angle = 3.0
-            damp_distance = 2.0
-            if abs(angle) >= (0.1 * damp_angle) :
-                logo.rt(angle / damp_angle, fast = True)
-            else:
-                if abs(move) >= (0.05 * damp_distance) :
-                    logo.fd(move / damp_distance)
+            follow = mem.retrieveLastSensorReading("follow")
+            if follow is not None:
+                target_dict = json.loads(follow)
+                self.angle = target_dict["angle"]
+                self.move = target_dict["distance"]
+                print("Following: direction:", self.angle, "distance:", self.move)
+                damp_angle = 3.0
+                damp_distance = 2.0
+                if abs(self.angle) >= (0.1 * damp_angle) :
+                    logo.rt(self.angle / damp_angle, fast = True)
+                else:
+                    if abs(self.move) >= (0.05 * damp_distance) :
+                        logo.fd(self.move / damp_distance)
 
     def on_event(self, event):
         if event == 'assistant_mode':
             return Waitforhotword()
         return self
-
-MAX_DIST = 1.5
-MIN_DIST = 0.3
-CONF = 0.7
-SWEET_SPOT = MIN_DIST + (MAX_DIST - MIN_DIST) / 2.0
 
 model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
 model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
