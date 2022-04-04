@@ -7,7 +7,6 @@
 # the K9 robot and responds to commands received
 # by voice and MQTT/Bluetooth.
 #
-import math
 import sys
 import json
 from tkinter.messagebox import NO
