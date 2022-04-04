@@ -45,13 +45,13 @@ cam_h_fov = 73.0
 # Path to NN model
 nnBlob = "/home/pi/depthai-python/examples/models/mobilenet-ssd_openvino_2021.4_5shave.blob"
 
-# Initially there is no identified target
+# Initially there is no identified target, so dictionary is empty
 target =   {
     "id"    :   None,
     "status":   None,
-    "x":        None,
-    "z":        None
-}
+    "x"     :   None,
+    "z"     :   None
+    }
 
 # Create pipeline
 print("Creating Oak pipeline...")
@@ -219,7 +219,7 @@ with dai.Device(pipeline) as device:
             candidate = [tracklet for tracklet in trackletsData
                             if tracklet.id == target["id"] ]
             print("Existing target " + str(target["id"]) + " seen again")
-            print(candidate)
+            print(candidate.id, candidate.status.name, candidate.spatialCoordinates.x)
             if candidate is not None:
                 # refresh the data if identified
                 target["id"]  = candidate.id
