@@ -10,8 +10,8 @@
 #     that is near K9 (that may not be recognisable as a person)
 #   * generate a point cloud to help avoid collisions (to be added back in)
 
-# import time
-#print("Time started...")
+import time
+print("Time started...")
 # import skimage.measure as skim
 #print("Skikit ready to decimate...")
 import depthai as dai
@@ -154,7 +154,7 @@ with dai.Device(pipeline) as device:
     print("Oak pipeline running...")
     # Main loop  starts  here
     while True:
-        # start_time = time.time() # start time of the loop
+        start_time = time.time() # start time of the loop
         #
         # 1. Follow section of code
         #
@@ -268,5 +268,5 @@ with dai.Device(pipeline) as device:
         #
         # 3. Point cloud funcitonality
         #
-        # print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
+        print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
         #
