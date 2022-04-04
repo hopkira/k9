@@ -84,9 +84,15 @@ class Memory():
             reading (float): Distance measured by sensor
             angle (float): Angle measured by sensor
         '''
-
-        json_data = '{"type":"sensor","sensor":"'+str(name)+'","distance":"'+str(reading)+'","angle":"'+str(angle)+'"}'
-        self.storeSensorMessage(str(json_data))
+        reading = {
+            "type":"sensor",
+            "sensor": str(name),
+            "distance": reading,
+            "angle": angle
+        }
+        json_data = json.dumps(reading)
+        # json_data = '{"type":"sensor","sensor":"'+str(name)+'","distance":"'+str(reading)+'","angle":"'+str(angle)+'"}'
+        self.storeSensorMessage(json_data)
 
     def storeSensorMessage(self, json_data:str):
         '''Stores a JSON string formatted sensor reading message
