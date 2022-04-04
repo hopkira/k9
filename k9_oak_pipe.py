@@ -216,7 +216,7 @@ with dai.Device(pipeline) as device:
             print("Existing target " + str(target.id) + " seen again")
             if candidate is not None:
                 target  = candidate
-                print("Target data " + target.id + " refreshed")
+                print("Target data " + str(target.id) + " refreshed")
             else:
                 target =  None
                 print("No target spotted")
@@ -225,12 +225,12 @@ with dai.Device(pipeline) as device:
                         if (tracklet.status.name == "NEW"
                             or tracklet.status.name == "TRACKED")]
             for candidate in candidates:
-                print("New or tracked candidate: " + candidate.id)
+                print("New or tracked candidate: " + str(candidate.id))
                 if candidate.spatialCoordinates.z < heel_range:
                     print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
                     target = candidate
-                    print("Closest target id:",target.id)
+                    print("Closest target id:",str(target.id))
         
         if target is not None:
             z = float(target.spatialCoordinates.z)
