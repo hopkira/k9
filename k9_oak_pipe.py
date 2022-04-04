@@ -251,6 +251,6 @@ with dai.Device(pipeline) as device:
         if target["id"] is not None:
             z = float(target["z"])
             x = float(target["x"])
-            angle = abs(( math.pi / 2 ) - math.atan2(z, x))
+            angle = ( math.pi / 2 ) - math.atan2(z, x)
             distance = math.sqrt(z ** 2 + x ** 2 )
             mem.storeSensorReading("person",distance,angle)
