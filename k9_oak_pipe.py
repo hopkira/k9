@@ -32,8 +32,8 @@ certainty = 0.7 # likelihood that a person in in the column
 
 # Heel loop  constants
 heel_confidence = 0.7 # NN certainty that its a person
-heel_lower = 200.0 # minimum depth for person detection
-heel_upper = 5000.0 # maximu depth for person detection
+heel_lower = 200 # minimum depth for person detection
+heel_upper = 5000 # maximu depth for person detection
 
 # Heeling distance
 sweet_spot = min_range + (max_range - min_range) / 2.0
