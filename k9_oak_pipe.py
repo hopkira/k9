@@ -11,9 +11,9 @@
 #   * generate a point cloud to help avoid collisions (to be added back in)
 
 # import time
-print("Time started...")
-import skimage.measure as skim
-print("Skikit ready to decimate...")
+#print("Time started...")
+# import skimage.measure as skim
+#print("Skikit ready to decimate...")
 import depthai as dai
 print("Depthai looking forward...")
 import numpy as np
@@ -28,8 +28,8 @@ mem = Memory()
 # Follow loop constants 
 min_range = 300.0 # default for device is mm
 max_range = 1500.0 # default for device is mm
-decimate_level = 7 # reduces size of depth image
-func = np.mean # averages cells during decimation
+# decimate_level = 7 # reduces size of depth image
+# func = np.mean # averages cells during decimation
 keep_top = 0.85 # bottom 15% of image tends to include floor
 certainty = 0.7 # likelihood that a person in in the column
 
@@ -138,6 +138,12 @@ trackerOut.setStreamName("tracklets")
 #objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
 objectTracker.out.link(trackerOut.input)
 
+# Decimate the depth image
+config = stereo.initialConfig.get()
+config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
+config.postProcessing.decimationFilter.decimationFactor = 4
+stereo.initialConfig.set(config)
+
 # Declare the device
 # device = dai.Device(pipeline)
 with dai.Device(pipeline) as device:
@@ -155,16 +161,16 @@ with dai.Device(pipeline) as device:
         # The follow capability ueses the depth stream to determine
         # where the nearest pair of legs  are
         inDepth = qDep.get()
-        frame = inDepth.getFrame() # get latest information from queue
+        depth_image = inDepth.getFrame() # get latest information from queue
 
         # reduce the size of the depth image by decimating it by
         # a factor (numbers between 3 and 20 seem to work best)
         # remove the bottom of the image as the figures that
         # are valid are mostly floor
-        height, width = frame.shape
-        pix_width = int(width / decimate_level)
-        pix_height = int(keep_top * height / decimate_level)
-        depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
+        pix_height, pix_width = depth_image.shape
+        # pix_width = int(width / decimate_level)
+        # pix_height = int(keep_top * height / decimate_level)
+        # depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
         # just use the depth data within valid ranges
         valid_frame = (depth_image >= min_range) & (depth_image <= max_range)
         valid_image = np.where(valid_frame, depth_image, max_range)
@@ -182,13 +188,13 @@ with dai.Device(pipeline) as device:
         if len(subset) > 0:
             final_distance = np.average(subset)
         # determine the middle of the depth image
-        mid_point = int(((width / decimate_level) - 1.0 ) / 2.0)
+        mid_point = int((pix_width - 1.0 ) / 2.0)
         # collate a list of all the column numbers that have the
         # 'vertical' data in them
         indices = columns.nonzero()[1]
         # determine the average angle that these columns as a multiplier for the h_fov
         if len(indices) > 0 :
-            direction = (np.average(indices) - mid_point) / (width / decimate_level)
+            direction = (np.average(indices) - mid_point) / pix_width
             angle = direction * math.radians(cam_h_fov)
             move = (final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
@@ -263,3 +269,4 @@ with dai.Device(pipeline) as device:
         # 3. Point cloud funcitonality
         #
         # print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
+        #
