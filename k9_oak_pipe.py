@@ -9,6 +9,7 @@
 #   * to identify the vector to the nearest vertical obstacle
 #     that is near K9 (that may not be recognisable as a person)
 
+import copy
 import skimage.measure as skim
 print("Skikit ready to decimate...")
 import depthai as dai
@@ -215,7 +216,7 @@ with dai.Device(pipeline) as device:
                             if tracklet.id == target.id]
             print("Existing target " + str(target.id) + " seen again")
             if candidate is not None:
-                target  = candidate
+                target  = copy.copy(candidate)
                 print("Target data " + str(target.id) + " refreshed")
             else:
                 target =  None
@@ -229,7 +230,7 @@ with dai.Device(pipeline) as device:
                 if candidate.spatialCoordinates.z < heel_range:
                     print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
-                    target = candidate
+                    target  = copy.copy(candidate)
                     print("Closest target id:",str(target.id))
         
         if target is not None:
