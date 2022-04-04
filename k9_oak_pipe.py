@@ -9,7 +9,7 @@
 #   * to identify the vector to the nearest vertical obstacle
 #     that is near K9 (that may not be recognisable as a person)
 
-import time
+# import time
 print("Time started...")
 import skimage.measure as skim
 print("Skikit ready to decimate...")
@@ -147,7 +147,7 @@ with dai.Device(pipeline) as device:
     print("Oak pipeline running...")
     # Main loop  starts  here
     while True:
-        start_time = time.time() # start time of the loop
+        # start_time = time.time() # start time of the loop
         #
         # Follow section of code
         #
@@ -258,4 +258,4 @@ with dai.Device(pipeline) as device:
             angle = ( math.pi / 2 ) - math.atan2(z, x)
             distance = math.sqrt(z ** 2 + x ** 2 )
             mem.storeSensorReading("person",distance,angle)
-        print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
+        # print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
