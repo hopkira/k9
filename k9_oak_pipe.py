@@ -201,6 +201,7 @@ with dai.Device(pipeline) as device:
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
+        print("Track data: ", trackletsData)
         # if a target has been identified than look through the trackletData
         # and retrieve the latest information tracklet for that id
         # and store it in the target object
