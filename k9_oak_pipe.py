@@ -216,14 +216,14 @@ with dai.Device(pipeline) as device:
             print("Existing target " + str(target.id) + " seen again")
             if candidate is not None:
                 target  = candidate
-                print("New target " + target.id + " found")
+                print("Target data " + target.id + " refreshed")
             else:
                 target =  None
                 print("No target spotted")
         else:
             candidates = [tracklet for tracklet in trackletsData
-                        if tracklet.status.name == "NEW"
-                        if tracklet.status.name == "TRACKED"]
+                        if (tracklet.status.name == "NEW"
+                            or tracklet.status.name == "TRACKED")]
             for candidate in candidates:
                 print("New or tracked candidate: " + candidate.id)
                 if candidate.spatialCoordinates.z < heel_range:
