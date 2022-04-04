@@ -139,7 +139,7 @@ objectTracker.out.link(trackerOut.input)
 # device = dai.Device(pipeline)
 with dai.Device(pipeline) as device:
     # declare buffer queues for the streams
-    qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
+    qDep = device.getOutputQueue(name="depth", maxSize=4, blocking=False)
     # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=4, blocking=False)
     print("Oak pipeline running...")
