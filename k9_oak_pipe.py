@@ -214,24 +214,29 @@ with dai.Device(pipeline) as device:
         # if there is NO target identified yet, then scan the trackletData and
         # find the closest NEW or TRACKED tracklet instance and make them the
         # target
-        if target.id is not None:
+        if target["id"] is not None:
+            # extract the tracklet id that matches the existing id
             candidate = [tracklet for tracklet in trackletsData
                             if tracklet.id == target["id"] ]
             print("Existing target " + str(target["id"]) + " seen again")
             if candidate is not None:
+                # refresh the data if identified
                 target["id"]  = candidate.id
                 target["status"] = candidate.status.name
                 target["x"] = candidate.spatialCoordinates.x
                 target["z"] = candidate.spatialCoordinates.z
                 print("Target data " + str(target["id"]) + " refreshed")
             else:
+                # drop the target otherwise
                 target["id"] =  None
                 print("No target spotted")
         else:
+            # look for any new or tracked tracklets
             candidates = [tracklet for tracklet in trackletsData
                         if (tracklet.status.name == "NEW"
                             or tracklet.status.name == "TRACKED")]
             for candidate in candidates:
+                # identify the closest tracklet
                 print("New or tracked candidate: " + str(candidate.id))
                 if candidate.spatialCoordinates.z < heel_range:
                     print("Closer candidate spotted")
@@ -241,8 +246,9 @@ with dai.Device(pipeline) as device:
                     target["x"] = candidate.spatialCoordinates.x
                     target["z"] = candidate.spatialCoordinates.z
                     print("Closest target id:",str(target["id"]))
-        
-        if target is not None:
+        # store the nearest tracket (if there is one) in
+        # the short term memory
+        if target["id"] is not None:
             z = float(target["z"])
             x = float(target["x"])
             angle = abs(( math.pi / 2 ) - math.atan2(z, x))
