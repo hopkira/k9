@@ -216,16 +216,16 @@ with dai.Device(pipeline) as device:
         # target
         if target.id is not None:
             candidate = [tracklet for tracklet in trackletsData
-                            if tracklet.id == target.id]
-            print("Existing target " + str(target.id) + " seen again")
+                            if tracklet.id == target["id"] ]
+            print("Existing target " + str(target["id"]) + " seen again")
             if candidate is not None:
-                target.id  = candidate.id
-                target.status = candidate.status.name
-                target.x = candidate.spatialCoordinates.x
-                target.z = candidate.spatialCoordinates.z
-                print("Target data " + str(target.id) + " refreshed")
+                target["id"]  = candidate.id
+                target["status"] = candidate.status.name
+                target["x"] = candidate.spatialCoordinates.x
+                target["z"] = candidate.spatialCoordinates.z
+                print("Target data " + str(target["id"]) + " refreshed")
             else:
-                target.id =  None
+                target["id"] =  None
                 print("No target spotted")
         else:
             candidates = [tracklet for tracklet in trackletsData
@@ -236,16 +236,15 @@ with dai.Device(pipeline) as device:
                 if candidate.spatialCoordinates.z < heel_range:
                     print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
-                    target.id  = candidate.id
-                    target.status = candidate.status.name
-                    target.x = candidate.spatialCoordinates.x
-                    target.z = candidate.spatialCoordinates.z
-                    print("Closest target id:",str(target.id))
+                    target["id"]  = candidate.id
+                    target["status"] = candidate.status.name
+                    target["x"] = candidate.spatialCoordinates.x
+                    target["z"] = candidate.spatialCoordinates.z
+                    print("Closest target id:",str(target["id"]))
         
         if target is not None:
-            z = float(target.z)
-            x = float(target.x)
+            z = float(target["z"])
+            x = float(target["x"])
             angle = abs(( math.pi / 2 ) - math.atan2(z, x))
             distance = math.sqrt(z ** 2 + x ** 2 )
             mem.storeSensorReading("person",distance,angle)
-            # print("Person:", distance, angle)
