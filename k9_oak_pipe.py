@@ -125,14 +125,14 @@ xOut.setStreamName("depth")
 stereo.depth.link(xOut.input)
 
 # Create rgb output stream
-xOutRgb = pipeline.create(dai.node.XLinkOut)
-xOutRgb.setStreamName("rgb")
-camRgb.video.link(xOutRgb.input)
+#xOutRgb = pipeline.create(dai.node.XLinkOut)
+#xOutRgb.setStreamName("rgb")
+#camRgb.video.link(xOutRgb.input)
 
 # Create tracker output stream
 trackerOut = pipeline.create(dai.node.XLinkOut)
 trackerOut.setStreamName("tracklets")
-objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
+#objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
 objectTracker.out.link(trackerOut.input)
 
 # Declare the device
@@ -140,7 +140,7 @@ objectTracker.out.link(trackerOut.input)
 with dai.Device(pipeline) as device:
     # declare buffer queues for the streams
     qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
-    qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
+    # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=4, blocking=False)
     print("Oak pipeline running...")
     # Main loop  starts  here
