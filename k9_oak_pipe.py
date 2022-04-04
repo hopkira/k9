@@ -218,8 +218,7 @@ with dai.Device(pipeline) as device:
             # extract the tracklet id that matches the existing id
             candidate = [tracklet for tracklet in trackletsData
                             if tracklet.id == target["id"]
-                            if (tracklet.status.name == "NEW"
-                            or tracklet.status.name == "TRACKED")
+                            if tracklet.status.name == "TRACKED"
                             ]
             print("Existing target " + str(target["id"]) + " seen again")
             if candidate:
@@ -232,7 +231,7 @@ with dai.Device(pipeline) as device:
             else:
                 # drop the target otherwise
                 target["id"] =  None
-                print("Target forgotten")
+                print("Target lost and forgotten")
         else:
             # look for any new or tracked tracklets
             candidates = [tracklet for tracklet in trackletsData
