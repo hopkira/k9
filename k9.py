@@ -180,7 +180,7 @@ class Turning(State):
         self.distance = target_dict["distance"]
         if abs(self.angle) > 0.2 :
             print("Turning: Moving ",self.angle," radians towards target")
-            logo.right(self.angle)
+            # logo.right(self.angle)
         else:
             self.on_event('turn_finished')
         while True:
@@ -205,7 +205,7 @@ class Moving_Forward(State):
         # distance = float(z - SWEET_SPOT)
         if self.distance > 0:
             print("Moving Forward: ",self.distance,"m")
-            logo.forwards(self.distance)
+            # logo.forwards(self.distance)
         else:
             print("Moving Forward: no need to move")
             self.on_event('target_reached')
@@ -240,10 +240,12 @@ class Following(State):
                 damp_angle = 3.0
                 damp_distance = 2.0
                 if abs(self.angle) >= (0.1 * damp_angle) :
-                    logo.rt(self.angle / damp_angle, fast = True)
+                    # logo.rt(self.angle / damp_angle, fast = True)
+                    print("Turning: ",str(self.angle / damp_angle))
                 else:
                     if abs(self.move) >= (0.05 * damp_distance) :
-                        logo.fd(self.move / damp_distance)
+                        # logo.fd(self.move / damp_distance)
+                        print("Moving forward: ",str(self.move / damp_distance))
 
     def on_event(self, event):
         if event == 'assistant_mode':
