@@ -217,7 +217,10 @@ with dai.Device(pipeline) as device:
         if target["id"] is not None:
             # extract the tracklet id that matches the existing id
             candidate = [tracklet for tracklet in trackletsData
-                            if tracklet.id == target["id"] ]
+                            if tracklet.id == target["id"]
+                            if (tracklet.status.name == "NEW"
+                            or tracklet.status.name == "TRACKED")
+                            ]
             print("Existing target " + str(target["id"]) + " seen again")
             if candidate:
                 # refresh the data if identified
@@ -229,7 +232,7 @@ with dai.Device(pipeline) as device:
             else:
                 # drop the target otherwise
                 target["id"] =  None
-                print("No target spotted")
+                print("Target forgotten")
         else:
             # look for any new or tracked tracklets
             candidates = [tracklet for tracklet in trackletsData
@@ -237,15 +240,15 @@ with dai.Device(pipeline) as device:
                             or tracklet.status.name == "TRACKED")]
             for candidate in candidates:
                 # identify the closest tracklet
-                print("New or tracked candidate: " + str(candidate.id))
+                # print("New or tracked candidate: " + str(candidate.id))
                 if candidate.spatialCoordinates.z < heel_range:
-                    print("Closer candidate spotted")
+                    # print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
                     target["id"]  = candidate.id
                     target["status"] = candidate.status.name
                     target["x"] = candidate.spatialCoordinates.x
                     target["z"] = candidate.spatialCoordinates.z
-                    print("Closest target id:",str(target["id"]))
+                    # print("Closest target id:",str(target["id"]))
         # store the nearest tracket (if there is one) in
         # the short term memory
         if target["id"] is not None:
