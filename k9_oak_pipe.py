@@ -184,7 +184,7 @@ with dai.Device(pipeline) as device:
             move = (final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
             mem.storeSensorReading("follow", move, angle)
-            print("Follow: ", move, angle)
+            # print("Follow: ", move, angle)
         #
         # Heeling/tracking section of code
         #
@@ -230,4 +230,4 @@ with dai.Device(pipeline) as device:
             angle = abs(( math.pi / 2 ) - math.atan2(z, x))
             distance = math.sqrt(target.spatialCoordinates.z ** 2 + target.spatialCoordinates.x ** 2 )
             mem.storeSensorReading("person",distance,angle)
-            print("Person:", distance, angle)
+            # print("Person:", distance, angle)
