@@ -219,7 +219,7 @@ with dai.Device(pipeline) as device:
             candidate = [tracklet for tracklet in trackletsData
                             if tracklet.id == target["id"] ]
             print("Existing target " + str(target["id"]) + " seen again")
-            if candidate is not None:
+            if candidate[0] is not None:
                 # refresh the data if identified
                 target["id"]  = candidate[0].id
                 target["status"] = candidate[0].status.name
