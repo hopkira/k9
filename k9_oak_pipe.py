@@ -8,7 +8,7 @@
 #   1. to identify the vector to the person in front of K9
 #   2. to identify the vector to the nearest vertical obstacle
 #     that is near K9 (that may not be recognisable as a person)
-#   * generate a point cloud to help avoid collisions (to be added back in)
+#   3. generate a point cloud to help avoid collisions
 
 import time
 print("Time started...")
@@ -27,7 +27,7 @@ print("All imports done!")
 
 mem = Memory()
 
-# Fixed elements for the point cloud
+# Point cloud loop constants
 x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
 y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
 fx = 1.4 # values found by measuring known sized objects at known distances
@@ -70,6 +70,7 @@ target =   {
     "z"     :   None
     }
 
+# Pre-calculate the 40 angles in the point cloud
 angles_array = []
 angles = np.arange(-19.5, 20.5, 1)
 for angle in angles:
@@ -77,7 +78,7 @@ for angle in angles:
     round_angle = round(my_angle, 3)
     angles_array.append(round_angle)
 
-# Create pipeline
+# Create OAK-D Lite pipeline
 print("Creating Oak pipeline...")
 pipeline = dai.Pipeline()
 
@@ -160,7 +161,7 @@ trackerOut.setStreamName("tracklets")
 #objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
 objectTracker.out.link(trackerOut.input)
 
-# Decimate the depth image
+# Decimate the depth image by a factor of 4
 config = stereo.initialConfig.get()
 config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
 config.postProcessing.decimationFilter.decimationFactor = 4
@@ -290,7 +291,9 @@ with dai.Device(pipeline) as device:
         #
         # 3. Point cloud to Redis funcitonality
         #
+        # Ignore points too close or too far away
         valid = (depth_image >= pc_min_range) & (depth_image <= pc_max_range)
+        # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
         x = np.where(valid, (z * (column - cx) /cx / fx) + 120.0 , pc_max_range)
         y = np.where(valid, 268 - (z * (row - cy) / cy / fy) , pc_max_range) # measured height is 268mm
@@ -298,17 +301,29 @@ with dai.Device(pipeline) as device:
         x2 = x.flatten()
         y2 = y.flatten()
         cloud = np.column_stack((x2,y2,z2))
+        # Remove points that are projected to fall outside the field of view
+        # points below floor level, above 1.6m or those more than 2m to the
+        # sides of the robot are ignored
         in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 2000) & (cloud[:,0] > -2000)
         in_scope = np.repeat(in_scope, 3)
         in_scope = in_scope.reshape(-1, 3)
         scope = np.where(in_scope, cloud, np.nan)
         scope = scope[~np.isnan(scope).any(axis=1)]
+        # place the points into a set of 10cm square bins
         x_index = pd.cut(scope[:,0], x_bins)
         y_index = pd.cut(scope[:,1], y_bins)
         binned_depths = pd.Series(scope[:,2])
+        # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
+        # shape the simplified bins into a 2D array
         totals = totals.values.reshape(16,40)
+        # for each column in the array, find out the closest
+        # bin; as the robot cannot duck or jump, the
+        # y values are irrelevant
         point_cloud = np.nanmin(totals, axis = 0)
+        # inject the resulting 40 sensor points into the
+        # short term memory of the robot
         for index,point in enumerate(point_cloud):
             mem.storeSensorReading("oak",float(point),float(angles_array[index]))
+        # print out the FPS achieved
         print("FPS: ", 1.0 / (time.time() - start_time))
