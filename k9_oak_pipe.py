@@ -12,18 +12,31 @@
 
 import time
 print("Time started...")
+import math
+print("Counting on fingers... yep")
 # import skimage.measure as skim
 #print("Skikit ready to decimate...")
 import depthai as dai
 print("Depthai looking forward...")
 import numpy as np
 print("Numpy is running...")
-import math
-print("Counting on fingers... yep")
+import pandas as pd
+print("Pandas are frolicking...")
 from memory import Memory
 print("All imports done!")
 
 mem = Memory()
+
+# Bins for point cloud
+x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
+y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
+fx = 1.4 # values found by measuring known sized objects at known distances
+fy = 3.3
+pc_width = 160
+pc_height = 100
+pc_max_range  = 10000.0
+pc_min_range  = 200.0
+column, row = np.meshgrid(np.arange(pc_width), np.arange(pc_height), sparse=True)
 
 # Follow loop constants 
 min_range = 300.0 # default for device is mm
@@ -54,6 +67,13 @@ target =   {
     "x"     :   None,
     "z"     :   None
     }
+
+angles_array = []
+angles = np.arange(-19.5, 20.5, 1)
+for angle in angles:
+    my_angle = math.radians(angle / 19.5 * cam_h_fov / 2.0)
+    round_angle = round(my_angle, 3)
+    angles_array.append(round_angle)
 
 # Create pipeline
 print("Creating Oak pipeline...")
@@ -266,7 +286,27 @@ with dai.Device(pipeline) as device:
             distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
             mem.storeSensorReading("person",distance,angle)
         #
-        # 3. Point cloud funcitonality
+        # 3. Point cloud to Redis funcitonality
         #
-        print("FPS: ", 1.0 / (time.time() - start_time)) # FPS = 1 / time to process loop
-        #
+        valid = (depth_image >= pc_min_range) & (depth_image <= pc_max_range)
+        z = np.where(valid, depth_image, 0.0)
+        x = np.where(valid, (z * (column - cx) /cx / fx) + 120.0 , pc_max_range)
+        y = np.where(valid, 268 - (z * (row - cy) / cy / fy) , pc_max_range) # measured height is 268mm
+        z2 = z.flatten()
+        x2 = x.flatten()
+        y2 = y.flatten()
+        cloud = np.column_stack((x2,y2,z2))
+        in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 2000) & (cloud[:,0] > -2000)
+        in_scope = np.repeat(in_scope, 3)
+        in_scope = in_scope.reshape(-1, 3)
+        scope = np.where(in_scope, cloud, np.nan)
+        scope = scope[~np.isnan(scope).any(axis=1)]
+        x_index = pd.cut(scope[:,0], x_bins)
+        y_index = pd.cut(scope[:,1], y_bins)
+        binned_depths = pd.Series(scope[:,2])
+        totals = binned_depths.groupby([y_index, x_index]).median()
+        totals = totals.values.reshape(16,40)
+        point_cloud = np.nanmin(totals, axis = 0)
+        for index,point in enumerate(point_cloud):
+            mem.storeSensorReading("oak",float(point),float(angles_array[index]))
+        print("FPS: ", 1.0 / (time.time() - start_time))
