@@ -27,13 +27,15 @@ print("All imports done!")
 
 mem = Memory()
 
-# Bins for point cloud
+# Fixed elements for the point cloud
 x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
 y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
 fx = 1.4 # values found by measuring known sized objects at known distances
 fy = 3.3
 pc_width = 160
+cx = pc_width / 2
 pc_height = 100
+cy = pc_height / 2
 pc_max_range  = 10000.0
 pc_min_range  = 200.0
 column, row = np.meshgrid(np.arange(pc_width), np.arange(pc_height), sparse=True)
