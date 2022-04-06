@@ -27,56 +27,21 @@ print("All imports done!")
 
 mem = Memory()
 
-# Point cloud loop constants
-x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
-y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
-fx = 1.4 # values found by measuring known sized objects at known distances
-fy = 3.3
-pc_width = 160
-cx = pc_width / 2
-pc_height = 100
-cy = pc_height / 2
-pc_max_range  = 10000.0
-pc_min_range  = 200.0
-column, row = np.meshgrid(np.arange(pc_width), np.arange(pc_height), sparse=True)
+# Oak-Lite Horizontal FoV
+cam_h_fov = 73.0
 
-# Follow loop constants 
+# Shared contraints 
 min_range = 300.0 # default for device is mm
 max_range = 1500.0 # default for device is mm
-# decimate_level = 7 # reduces size of depth image
-# func = np.mean # averages cells during decimation
-keep_top = 0.85 # bottom 15% of image tends to include floor
-certainty = 0.7 # likelihood that a person in in the column
+sweet_spot = min_range + (max_range - min_range) / 2.0
 
-# Heel loop  constants
+# Heel constants
 heel_confidence = 0.7 # NN certainty that its a person
 heel_lower = 200 # minimum depth for person detection
 heel_upper = 5000 # maximu depth for person detection
 
-# Heeling distance
-sweet_spot = min_range + (max_range - min_range) / 2.0
-
-# Oak-Lite Horizontal FoV
-cam_h_fov = 73.0
-
 # Path to NN model
 nnBlob = "/home/pi/depthai-python/examples/models/mobilenet-ssd_openvino_2021.4_5shave.blob"
-
-# Initially there is no identified target, so dictionary is empty
-target =   {
-    "id"    :   None,
-    "status":   None,
-    "x"     :   None,
-    "z"     :   None
-    }
-
-# Pre-calculate the 40 angles in the point cloud
-angles_array = []
-angles = np.arange(-19.5, 20.5, 1)
-for angle in angles:
-    my_angle = math.radians(angle / 19.5 * cam_h_fov / 2.0)
-    round_angle = round(my_angle, 3)
-    angles_array.append(round_angle)
 
 # Create OAK-D Lite pipeline
 print("Creating Oak pipeline...")
@@ -167,136 +132,39 @@ config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
 config.postProcessing.decimationFilter.decimationFactor = 4
 stereo.initialConfig.set(config)
 
-# Declare the device
-# device = dai.Device(pipeline)
-with dai.Device(pipeline) as device:
-    # declare buffer queues for the streams
-    qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
-    # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
-    qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
-    print("Oak pipeline running...")
-    # Main loop  starts  here
-    while True:
-        start_time = time.time() # start time of the loop
-        #
-        # 1. Follow section of code
-        #
-        # The follow capability ueses the depth stream to determine
-        # where the nearest pair of legs  are
-        inDepth = qDep.get()
-        depth_image = inDepth.getFrame() # get latest information from queue
+class Point_Cloud():
 
-        # reduce the size of the depth image by decimating it by
-        # a factor (numbers between 3 and 20 seem to work best)
-        # remove the bottom of the image as the figures that
-        # are valid are mostly floor
-        pix_height, pix_width = depth_image.shape
-        # pix_width = int(width / decimate_level)
-        # pix_height = int(keep_top * height / decimate_level)
-        # depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
-        # just use the depth data within valid ranges
-        valid_frame = (depth_image >= min_range) & (depth_image <= max_range)
-        valid_image = np.where(valid_frame, depth_image, max_range)
-        valid_image = valid_image[0:pix_height,:]
-        # work out which columns are likely to contain a vertical object
-        columns = np.sum(valid_image < max_range, axis = 0) >= (certainty*pix_height)
-        columns = columns.reshape(1,-1)
-        # work out the average distance per column for valid readings
-        distance = np.average(valid_image, axis = 0)
-        # eliminate any readings not in a column with a consistent vertical object
-        useful_distances = distance * columns
-        # narrow down the array to just those 'vertical' columns
-        subset = useful_distances[np.where((useful_distances < max_range) & (useful_distances > 0.0))]
-        # determine the average distance to all valid columns
-        if len(subset) > 0:
-            final_distance = np.average(subset)
-        # determine the middle of the depth image
-        mid_point = int((pix_width - 1.0 ) / 2.0)
-        # collate a list of all the column numbers that have the
-        # 'vertical' data in them
-        indices = columns.nonzero()[1]
-        # determine the average angle that these columns as a multiplier for the h_fov
-        if len(indices) > 0 :
-            direction = (np.average(indices) - mid_point) / pix_width
-            angle = direction * math.radians(cam_h_fov)
-            move = (final_distance - sweet_spot)
-            move = move / 1000.0 # convert to m
-            mem.storeSensorReading("follow", move, angle)
-            # print("Follow: ", move, angle)
-        #
-        # 2. Heeling/tracking section of code
-        #
-        # This part of the code will identify the nearest
-        # person in front of K9 (up to about 5m away).  As they
-        # move, they should be tracked
-        #
-        heel_range = heel_upper # reset range to max
-        #
-        #for t in trackletsData:
-        #    print(t.id,t.status.name,t.spatialCoordinates.x, t.spatialCoordinates.z)
-        # Tracklets can have the status NEW, TRACKED or LOST
-        #
-        # Retrieve latest tracklets
-        track = qTrack.get()
-        trackletsData = track.tracklets
-        # if a target has been identified than look through the trackletData
-        # and retrieve the latest information tracklet for that id
-        # and store it in the target object
-        # if there is no active matching id, then drop them as a target
-        # if there is NO target identified yet, then scan the trackletData and
-        # find the closest NEW or TRACKED tracklet instance and make them the
-        # target
-        if target["id"] is not None:
-            # extract the tracklet id that matches the existing id
-            candidate = [tracklet for tracklet in trackletsData
-                            if tracklet.id == target["id"]
-                            if tracklet.status.name == "TRACKED"
-                            ]
-            # print("Existing target " + str(target["id"]) + " seen again")
-            if candidate:
-                # refresh the data if identified
-                target["id"]  = candidate[0].id
-                target["status"] = candidate[0].status.name
-                target["x"] = candidate[0].spatialCoordinates.x
-                target["z"] = candidate[0].spatialCoordinates.z
-                # print("Target data " + str(target["id"]) + " refreshed")
-            else:
-                # drop the target otherwise
-                target["id"] =  None
-                # print("Target lost and forgotten")
-        else:
-            # look for any new or tracked tracklets
-            candidates = [tracklet for tracklet in trackletsData
-                        if (tracklet.status.name == "NEW"
-                            or tracklet.status.name == "TRACKED")]
-            for candidate in candidates:
-                # identify the closest tracklet
-                # print("New or tracked candidate: " + str(candidate.id))
-                if candidate.spatialCoordinates.z < heel_range:
-                    # print("Closer candidate spotted")
-                    heel_range = candidate.spatialCoordinates.z
-                    target["id"]  = candidate.id
-                    target["status"] = candidate.status.name
-                    target["x"] = candidate.spatialCoordinates.x
-                    target["z"] = candidate.spatialCoordinates.z
-                    # print("Closest target id:",str(target["id"]))
-        # store the nearest tracket (if there is one) in
-        # the short term memory
-        if target["id"] is not None:
-            z = float(target["z"])
-            x = float(target["x"])
-            angle = ( math.pi / 2 ) - math.atan2(z, x)
-            distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
-            mem.storeSensorReading("person",distance,angle)
+    def __init__(self):
+        # Point cloud loop constants
+        self.x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
+        self.fx = 1.4 # values found by measuring known sized objects at known distances
+        self.fy = 3.3
+        self.pc_width = 160
+        self.cx = self.pc_width / 2
+        self.pc_height = 100
+        self.cy = self.pc_height / 2
+        self.pc_max_range  = 10000.0
+        self.pc_min_range  = 200.0
+        self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
+        # Pre-calculate the 40 angles in the point cloud
+        self.angles_array = []
+        angles = np.arange(-19.5, 20.5, 1)
+        for angle in angles:
+            my_angle = math.radians(angle / 19.5 * cam_h_fov / 2.0)
+            round_angle = round(my_angle, 3)
+            self.angles_array.append(round_angle)
+
+    def record_point_cloud(self,depth_image):
         #
         # 3. Point cloud to Redis funcitonality
         #
         # Ignore points too close or too far away
-        valid = (depth_image >= pc_min_range) & (depth_image <= pc_max_range)
+        valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
-        x = np.where(valid, (z * (column - cx) /cx / fx) + 120.0 , pc_max_range)
-        y = np.where(valid, 268 - (z * (row - cy) / cy / fy) , pc_max_range) # measured height is 268mm
+        x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
+        y = np.where(valid, 268 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
         z2 = z.flatten()
         x2 = x.flatten()
         y2 = y.flatten()
@@ -310,8 +178,8 @@ with dai.Device(pipeline) as device:
         scope = np.where(in_scope, cloud, np.nan)
         scope = scope[~np.isnan(scope).any(axis=1)]
         # place the points into a set of 10cm square bins
-        x_index = pd.cut(scope[:,0], x_bins)
-        y_index = pd.cut(scope[:,1], y_bins)
+        x_index = pd.cut(scope[:,0], self.x_bins)
+        y_index = pd.cut(scope[:,1], self.y_bins)
         binned_depths = pd.Series(scope[:,2])
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
@@ -324,6 +192,161 @@ with dai.Device(pipeline) as device:
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         for index,point in enumerate(point_cloud):
-            mem.storeSensorReading("oak",float(point),float(angles_array[index]))
+            mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
+
+class Legs_Detector():
+
+    def __init__ (self):
+        # decimate_level = 7 # reduces size of depth image
+        # func = np.mean # averages cells during decimation
+        self.keep_top = 0.85 # bottom 15% of image tends to include floor
+        self.certainty = 0.7 # likelihood that a person in in the column
+        # Heeling distanc
+
+    def record_legs_vector(self,depth_image):
+        #
+        # 1. Follow section of code
+        #
+        # The follow capability ueses the depth stream to determine
+        # where the nearest pair of legs  are
+
+
+        # reduce the size of the depth image by decimating it by
+        # a factor (numbers between 3 and 20 seem to work best)
+        # remove the bottom of the image as the figures that
+        # are valid are mostly floor
+        pix_height, pix_width = depth_image.shape
+        # pix_width = int(width / decimate_level)
+        # pix_height = int(keep_top * height / decimate_level)
+        # depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
+        # just use the depth data within valid ranges
+        valid_frame = (depth_image >= self.min_range) & (depth_image <= self.max_range)
+        valid_image = np.where(valid_frame, depth_image, self.max_range)
+        valid_image = valid_image[0:pix_height,:]
+        # work out which columns are likely to contain a vertical object
+        columns = np.sum(valid_image < self.max_range, axis = 0) >= (self.certainty*pix_height)
+        columns = columns.reshape(1,-1)
+        # work out the average distance per column for valid readings
+        distance = np.average(valid_image, axis = 0)
+        # eliminate any readings not in a column with a consistent vertical object
+        useful_distances = distance * columns
+        # narrow down the array to just those 'vertical' columns
+        subset = useful_distances[np.where((useful_distances < self.max_range) & (useful_distances > 0.0))]
+        # determine the average distance to all valid columns
+        if len(subset) > 0:
+            final_distance = np.average(subset)
+        # determine the middle of the depth image
+        mid_point = int((pix_width - 1.0 ) / 2.0)
+        # collate a list of all the column numbers that have the
+        # 'vertical' data in them
+        indices = columns.nonzero()[1]
+        # determine the average angle that these columns as a multiplier for the h_fov
+        if len(indices) > 0 :
+            direction = (np.average(indices) - mid_point) / pix_width
+            angle = direction * math.radians(cam_h_fov)
+            move = (final_distance - self.sweet_spot)
+            move = move / 1000.0 # convert to m
+            mem.storeSensorReading("follow", move, angle)
+
+class Person_Detector():
+
+    def __init__(self):
+        # Initially there is no identified target, so dictionary is empty
+        self.target =   {
+            "id"    :   None,
+            "status":   None,
+            "x"     :   None,
+            "z"     :   None
+            }
+
+    def record_person_vector (self, trackletsData):
+        # 2. Heeling/tracking section of code
+        #
+        # This part of the code will identify the nearest
+        # person in front of K9 (up to about 5m away).  As they
+        # move, they should be tracked
+        #
+        #
+        #for t in trackletsData:
+        #    print(t.id,t.status.name,t.spatialCoordinates.x, t.spatialCoordinates.z)
+        # Tracklets can have the status NEW, TRACKED or LOST
+        #
+        # if a target has been identified than look through the trackletData
+        # and retrieve the latest information tracklet for that id
+        # and store it in the target object
+        # if there is no active matching id, then drop them as a target
+        # if there is NO target identified yet, then scan the trackletData and
+        # find the closest NEW or TRACKED tracklet instance and make them the
+        # target
+        heel_range = self.heel_upper # reset range to max
+        if self.target["id"] is not None:
+            # extract the tracklet id that matches the existing id
+            candidate = [tracklet for tracklet in trackletsData
+                            if tracklet.id == self.target["id"]
+                            if tracklet.status.name == "TRACKED"
+                            ]
+            # print("Existing target " + str(target["id"]) + " seen again")
+            if candidate:
+                # refresh the data if identified
+                self.target["id"]  = candidate[0].id
+                self.target["status"] = candidate[0].status.name
+                self.target["x"] = candidate[0].spatialCoordinates.x
+                self.target["z"] = candidate[0].spatialCoordinates.z
+                # print("Target data " + str(target["id"]) + " refreshed")
+            else:
+                # drop the target otherwise
+                self.target["id"] =  None
+                # print("Target lost and forgotten")
+        else:
+            # look for any new or tracked tracklets
+            candidates = [tracklet for tracklet in trackletsData
+                        if (tracklet.status.name == "NEW"
+                            or tracklet.status.name == "TRACKED")]
+            for candidate in candidates:
+                # identify the closest tracklet
+                # print("New or tracked candidate: " + str(candidate.id))
+                if candidate.spatialCoordinates.z < heel_range:
+                    # print("Closer candidate spotted")
+                    heel_range = candidate.spatialCoordinates.z
+                    self.target["id"]  = candidate.id
+                    self.target["status"] = candidate.status.name
+                    self.target["x"] = candidate.spatialCoordinates.x
+                    self.target["z"] = candidate.spatialCoordinates.z
+                    # print("Closest target id:",str(target["id"]))
+        # store the nearest tracket (if there is one) in
+        # the short term memory
+        if self.target["id"] is not None:
+            z = float(self.target["z"])
+            x = float(self.target["x"])
+            angle = ( math.pi / 2 ) - math.atan2(z, x)
+            distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
+            mem.storeSensorReading("person",distance,angle)
+
+# Declare the device
+# device = dai.Device(pipeline)
+with dai.Device(pipeline) as device:
+    # declare buffer queues for the streams
+    qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
+    # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
+    qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
+    print("Oak pipeline running...")
+    f_pc = Point_Cloud()
+    f_ld = Legs_Detector()
+    f_pd = Person_Detector()
+    # Main loop  starts  here
+    counter =  0
+    while True:
+        start_time = time.time() # start time of the loop
+        inDepth = qDep.get()
+        depth_image = inDepth.getFrame() # get latest information from queue
+        # Retrieve latest tracklets
+        track = qTrack.get()
+        trackletsData = track.tracklets
+        if counter == 10:
+            f_pc.record_point_cloud(depth_image)
+            counter = 0
+        f_ld.record_legs_vector(depth_image)
+        f_pd.record_person_vector(trackletsData)
         # print out the FPS achieved
         print("FPS: ", 1.0 / (time.time() - start_time))
+        counter += 1
