@@ -12,7 +12,6 @@
 # be quickly retrieved on a per sensor basis
 
 import json
-from sqlite3 import DataError
 import time
 import redis
 
