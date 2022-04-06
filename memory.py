@@ -104,7 +104,7 @@ class Memory():
         # Parse message into dictionary of name value pairs
         message = {}
         message = json.loads(json_data)
-        print(message)
+        # print(message)
         msg_key = self.getMsgKey()
         # Create a transactional pipeline to store new message, this will be closed
         # and committed by the pipe.execute() command
