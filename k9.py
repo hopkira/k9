@@ -9,7 +9,7 @@
 #
 import sys
 import json
-from tkinter.messagebox import NO
+#from tkinter.messagebox import NO
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import logo # k9 movement library
@@ -262,7 +262,7 @@ k9ears = K9Ears()
 k9qa = K9QA()
 mem = Memory()
 
-class K9(object):
+class K9:
     '''
     A K9 finite state machine that starts in waiting state and
     will transition to a new state on when a transition event occurs.
@@ -312,7 +312,9 @@ class K9(object):
 
 try:
     print("Creating K9 instance")
-    k9 = K9()
+    my_k9 = K9()
+    my_k9.client.loop_start()
+    print("MQTT loop started")
 except KeyboardInterrupt:
     logo.stop()
     k9.client.loop_stop()
