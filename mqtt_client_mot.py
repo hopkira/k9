@@ -35,6 +35,7 @@ class K9MQTT:
             print("Event: ",str(event))
 
 try:
+    # adding comment
     print("Creating K9 instance")
     k9 = K9MQTT()
     k9.client.loop_start()
