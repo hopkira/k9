@@ -39,7 +39,7 @@ try:
     # adding  comment
     print("Creating K9 instance")
     k9 = K9MQTT()
-    k9.client.loop_start()
+    #k9.client.loop_start()
     print("MQTT loop started")
     while True:
         for msg_num in range(10):
