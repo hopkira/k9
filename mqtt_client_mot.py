@@ -16,7 +16,7 @@ class K9MQTT:
         ''' Initialise K9 in his waiting state. '''
 
         self.last_message = ""
-        self.client = mqtt.Client("k9-python")
+        self.client = mqtt.Client("k9-motor")
         self.client.connect("localhost")
         self.client.on_message = self.mqtt_callback # attach function to callback
         self.client.subscribe("/ble/advertise/watch/m")
