@@ -27,14 +27,7 @@ class ManualControl(State):
     '''
     def __init__(self):
         super(ManualControl, self).__init__()
-        #
-        # ADD:
-        # Needs a loop for receiving commands
-        # can receive the command externally
-        #
-        # ADD: Listen for 'come' command from MQTT
-        # 
-        pass
+        logo.stop()
 
     def on_event(self, event):
         if event == 'come':
@@ -83,6 +76,8 @@ class Turning(State):
     def on_event(self, event):
         if event == 'turn_finished':
             return Moving_Forward(self.distance)
+        if event == 'stay':
+            return  ManualControl()
         return self
 
 
@@ -111,6 +106,8 @@ class Moving_Forward(State):
     def on_event(self, event):
         if event == 'target_reached':
             return ManualControl()
+        if event == 'stay':
+            return  ManualControl()
         return self
 
 
@@ -160,10 +157,11 @@ class K9MotorSM:
         ''' Initialise K9 in his manual control state. '''
 
         self.last_message = ""
-        self.client = mqtt.Client("k9-python")
+        self.client = mqtt.Client("k9-motor")
         self.client.connect("localhost")
         self.client.on_message = self.mqtt_callback # attach function to callback
-        self.client.subscribe("/ble/advertise/watch/m")
+        # self.client.subscribe("/ble/advertise/watch/m")
+        self.client.loop_start()
         self.state = ManualControl()
 
     def on_event(self,event):
@@ -183,17 +181,16 @@ class K9MotorSM:
         """
 
         payload = str(message.payload.decode("utf-8"))
-        if payload != self.last_message:
-            self.last_message = payload
-            event = payload[3:-1].lower()
-            # print("Event: ",str(event))
-            self.on_event(event)
+        #if payload != self.last_message:
+        #    self.last_message = payload
+        #    event = payload[3:-1].lower()
+        #    # print("Event: ",str(event))
+        print(payload," received by motor state machine")
+        self.on_event(payload)
 
 try:
     print("Creating K9 Motor State Machine instance")
-    my_k9 = K9MotorSM()
-    my_k9.client.loop_start()
-    print("MQTT loop started")
+    k9 = K9MotorSM()
 except KeyboardInterrupt:
     logo.stop()
     k9.client.loop_stop()

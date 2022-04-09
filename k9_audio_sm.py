@@ -128,6 +128,9 @@ class Responding(State):
         if 'follow' in self.command:
             speak("Folllowing master")
             self.on_event('follow')
+        if 'stop' in self.command or 'stay' in self.command:
+            speak("Staying master")
+            self.on_event('stay')
         k9ears.think()
         answer = k9qa.ask_question(self.command)
         k9ears.stop()
@@ -140,10 +143,15 @@ class Responding(State):
         if event == 'stop_listening':
             return Waitforhotword()
         if event == 'scanning':
-            # send MQTT Message for scanning
+            # send MQTT Message for come
+            k9.client.publish("k9/events/motor", payload="come", qos=2, retain=False)
             return Listening()
         if event == 'follow':
-            # send MQTT Message for following
+            # send MQTT Message for heel
+            k9.client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
+            return Listening()
+        if event == 'stay':
+            k9.client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
             return Listening()
         return self
 
@@ -170,13 +178,15 @@ class K9AudioSM:
         ''' Initialise K9 in his waiting state. '''
 
         self.last_message = ""
-        self.client = mqtt.Client("k9-python")
+        self.client = mqtt.Client("k9-audio")
         self.client.connect("localhost")
         self.client.on_message = self.mqtt_callback # attach function to callback
-        self.client.subscribe("/ble/advertise/watch/m")
+        # self.client.subscribe("/ble/advertise/watch/m")
+        self.client.subscribe("k9/events/audio", qos=2)
         k9lights.on()
         k9eyes.set_level(1)
         k9ears.scan()
+        self.client.loop_start()
         speak("K9 is active")
         k9lights.off()
         k9eyes.set_level(0)
@@ -200,17 +210,17 @@ class K9AudioSM:
         """
 
         payload = str(message.payload.decode("utf-8"))
-        if payload != self.last_message:
-            self.last_message = payload
-            event = payload[3:-1].lower()
-            # print("Event: ",str(event))
-            self.on_event(event)
+        #if payload != self.last_message:
+        #    self.last_message = payload
+        #    event = payload[3:-1].lower()
+        #    # print("Event: ",str(event))
+        print(str(payload)," received by audio state machine")
+        self.on_event(payload)
 
 try:
-    print("Creating K9 instance")
-    my_k9 = K9AudioSM()
-    my_k9.client.loop_start()
-    print("MQTT loop started")
+    print("Creating K9 audio state machine")
+    k9 = K9AudioSM()
+
 except KeyboardInterrupt:
     k9.client.loop_stop()
     speak("Inactive")
