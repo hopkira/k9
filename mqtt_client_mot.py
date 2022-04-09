@@ -38,11 +38,11 @@ try:
     # adding comment
     print("Creating K9 instance")
     k9 = K9MQTT()
-    # k9.client.loop_start()
+    k9.client.loop_start()
     print("MQTT loop started")
     while True:
         for msg_num in range(10):
-            k9.client.loop(0.1)
+            # k9.client.loop(0.1)
             message =  "Send to Audio Event " + str(msg_num)
             k9.client.publish("k9/events/audio", payload = message, qos = 2, retain = False)
             print(message)
