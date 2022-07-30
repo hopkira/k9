@@ -219,7 +219,7 @@ k9ears = K9Ears()
 k9qa = K9QA()
 mem = Memory()
 try:
-    dog = K9AudioSM
+    k9 = K9AudioSM()
 
 except KeyboardInterrupt:
     speak("Inactive")
