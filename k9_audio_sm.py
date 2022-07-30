@@ -144,27 +144,17 @@ class Responding(State):
             return Waitforhotword()
         if event == 'scanning':
             # send MQTT Message for come
-            k9.client.publish("k9/events/motor", payload="come", qos=2, retain=False)
+            self.client.publish("k9/events/motor", payload="come", qos=2, retain=False)
             return Listening()
         if event == 'follow':
             # send MQTT Message for heel
-            k9.client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
+            self.client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
             return Listening()
         if event == 'stay':
-            k9.client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
+            self.client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
             return Listening()
         return self
 
-model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
-
-print("Deepspeech loaded")
-
-k9eyes = Eyes()
-k9lights = BackLights()
-k9ears = K9Ears()
-k9qa = K9QA()
-mem = Memory()
 
 class K9AudioSM:
     '''
@@ -217,14 +207,22 @@ class K9AudioSM:
         print(str(payload)," received by audio state machine")
         self.on_event(payload)
 
+
+model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
+model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
+
+print("Deepspeech loaded")
+
+k9eyes = Eyes()
+k9lights = BackLights()
+k9ears = K9Ears()
+k9qa = K9QA()
+mem = Memory()
 try:
-    print("Creating K9 audio state machine")
-    k9 = K9AudioSM()
+    dog = K9AudioSM
 
 except KeyboardInterrupt:
-    k9.client.loop_stop()
     speak("Inactive")
-    print('Exiting from', str(k9.state).lower(),'state.')
     k9lights.off()
     k9eyes.set_level(0)
     sys.exit(0)
