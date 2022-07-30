@@ -144,14 +144,14 @@ class Responding(State):
             return Waitforhotword()
         if event == 'scanning':
             # send MQTT Message for come
-            self.client.publish("k9/events/motor", payload="come", qos=2, retain=False)
+            k9.client.publish("k9/events/motor", payload="come", qos=2, retain=False)
             return Listening()
         if event == 'follow':
             # send MQTT Message for heel
-            self.client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
+            k9.client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
             return Listening()
         if event == 'stay':
-            self.client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
+            k9.client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
             return Listening()
         return self
 
