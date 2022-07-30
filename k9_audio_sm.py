@@ -26,7 +26,7 @@ from back_lights import BackLights # k9 back lights
 print("Backlights on...")
 from ears import K9Ears # k9 radar ears
 print("Ears wiggling...")
-from wolframqa import K9QA # wolfram qa skill
+from k9gpt3conv import K9QA # wolfram qa skill
 print("Know it all mode active...")
 from k9tts import speak # speak in K9 voice
 print("Speech initiated...")
