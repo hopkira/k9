@@ -129,17 +129,20 @@ class Responding(State):
         if ('here' in self.command) or ('over' in self.command):
             speak("Coming master")
             self.on_event('scanning')
+            k9tail.center()
         if 'follow' in self.command:
             speak("Folllowing master")
+            k9tail.up()
             self.on_event('follow')
         if 'stop' in self.command or 'stay' in self.command:
             speak("Staying master")
+            k9tail.down()
             self.on_event('stay')
         k9ears.think()
         answer = k9qa.ask_question(self.command)
         k9ears.stop()
         speak(answer)
-        if 'thank' in answer:
+        if (' thank' in answer) or (' wag ' in answer):
             k9tail.wag_h()
         self.on_event('responded')
 
@@ -175,6 +178,7 @@ class K9AudioSM:
         k9lights.on()
         k9eyes.set_level(1)
         k9ears.scan()
+        k9tail.center()
         speak("K9 is active")
         k9lights.off()
         k9eyes.set_level(0)
@@ -234,4 +238,5 @@ except KeyboardInterrupt:
     speak("Inactive")
     k9lights.off()
     k9eyes.set_level(0)
+    k9tail.center()
     sys.exit(0)
