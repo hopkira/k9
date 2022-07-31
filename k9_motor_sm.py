@@ -12,8 +12,6 @@ import json
 #from tkinter.messagebox import NO
 import logo # k9 movement library
 from state import State # Base FSM State class
-from k9tts import speak # speak in K9 voice
-print("Speech initiated...")
 import paho.mqtt.client as mqtt
 print("MQTT found...")
 from memory import Memory
@@ -42,7 +40,6 @@ class Scanning(State):
     '''
     def __init__(self):
         super(Scanning, self).__init__()
-        speak("Scanning")
         while True:
             self.target = None
             self.target = mem.retrieveLastSensorReading("person")
@@ -118,7 +115,6 @@ class Following(State):
     def __init__(self):
         super(Following, self).__init__()
         logo.stop()
-        speak("Mastah!")
         while True:
             #
             # ADD: Listen for 'stay' commands from MQTT
@@ -155,13 +151,6 @@ class K9MotorSM:
 
     def __init__(self):
         ''' Initialise K9 in his manual control state. '''
-
-        self.last_message = ""
-        self.client = mqtt.Client("k9-motor")
-        self.client.connect("localhost")
-        self.client.on_message = self.mqtt_callback # attach function to callback
-        # self.client.subscribe("/ble/advertise/watch/m")
-        self.client.loop_start()
         self.state = ManualControl()
 
     def on_event(self,event):
@@ -174,25 +163,34 @@ class K9MotorSM:
         print("Event:",event, "raised in state", str(self.state).lower())
         self.state = self.state.on_event(event)
 
-    def mqtt_callback(self,client, userdata, message):
-        """
-        Enables K9 to receive a message from an Epruino Watch via
-        MQTT over Bluetooth (BLE) to place it into active or inactive States
-        """
+def mqtt_callback(client, userdata, message):
+    """
+    Enables K9 to receive a message from an Epruino Watch via
+    MQTT over Bluetooth (BLE) to place it into active or inactive States
+    """
 
-        payload = str(message.payload.decode("utf-8"))
-        #if payload != self.last_message:
-        #    self.last_message = payload
-        #    event = payload[3:-1].lower()
-        #    # print("Event: ",str(event))
-        print(payload," received by motor state machine")
-        self.on_event(payload)
+    payload = str(message.payload.decode("utf-8"))
+    #if payload != self.last_message:
+    #    self.last_message = payload
+    #    event = payload[3:-1].lower()
+    #    # print("Event: ",str(event))
+    print(payload," received by motor state machine")
+    k9.state.on_event(payload)
 
 try:
+
+    last_message = ""
+    client = mqtt.Client("k9-motor")
+    client.connect("localhost")
+    client.on_message = mqtt_callback # attach function to callback
+    # self.client.subscribe("/ble/advertise/watch/m")
+    client.loop_start()
+    print("MQTT subscription interface active")
+
     print("Creating K9 Motor State Machine instance")
     k9 = K9MotorSM()
 except KeyboardInterrupt:
     logo.stop()
-    k9.client.loop_stop()
-    print('Exiting from', str(k9.state).lower(),'state.')
+    client.loop_stop()
+    "Motors stopped and MQTT client stopped"
     sys.exit(0)
