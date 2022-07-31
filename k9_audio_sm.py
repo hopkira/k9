@@ -34,6 +34,8 @@ import paho.mqtt.client as mqtt
 print("MQTT found...")
 from audio_tools import VADAudio # Voice activity detection
 print("Audio tools working...")
+from tail import Tail
+print("Tail activated!")
 from memory import Memory
 print("All imports done!")
 
@@ -46,6 +48,7 @@ class Waitforhotword(State):
     def __init__(self):
         super(Waitforhotword, self).__init__()
         k9lights.off()
+        k9tail.centre()
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_1_0.ppn']
@@ -85,6 +88,7 @@ class Listening(State):
         print("Listening: init complete")
         k9eyes.set_level(0.01)
         k9lights.on()
+        k9tail.up()
         while True:
             self.frames = self.vad_audio.vad_collector()
             for frame in self.frames:
@@ -135,6 +139,8 @@ class Responding(State):
         answer = k9qa.ask_question(self.command)
         k9ears.stop()
         speak(answer)
+        if 'thank' in answer:
+            k9tail.wag_h()
         self.on_event('responded')
 
     def on_event(self, event):
@@ -144,14 +150,14 @@ class Responding(State):
             return Waitforhotword()
         if event == 'scanning':
             # send MQTT Message for come
-            k9.client.publish("k9/events/motor", payload="come", qos=2, retain=False)
+            client.publish("k9/events/motor", payload="come", qos=2, retain=False)
             return Listening()
         if event == 'follow':
             # send MQTT Message for heel
-            k9.client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
+            client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
             return Listening()
         if event == 'stay':
-            k9.client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
+            client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
             return Listening()
         return self
 
@@ -166,17 +172,9 @@ class K9AudioSM:
 
     def __init__(self):
         ''' Initialise K9 in his waiting state. '''
-
-        self.last_message = ""
-        self.client = mqtt.Client("k9-audio")
-        self.client.connect("localhost")
-        self.client.on_message = self.mqtt_callback # attach function to callback
-        # self.client.subscribe("/ble/advertise/watch/m")
-        self.client.subscribe("k9/events/audio", qos=2)
         k9lights.on()
         k9eyes.set_level(1)
         k9ears.scan()
-        self.client.loop_start()
         speak("K9 is active")
         k9lights.off()
         k9eyes.set_level(0)
@@ -193,31 +191,42 @@ class K9AudioSM:
         print("Event:",event, "raised in state", str(self.state).lower())
         self.state = self.state.on_event(event)
 
-    def mqtt_callback(self,client, userdata, message):
-        """
-        Enables K9 to receive a message from an Epruino Watch via
-        MQTT over Bluetooth (BLE) to place it into active or inactive States
-        """
+def mqtt_callback(self,client, userdata, message):
+    """
+    Enables K9 to receive a message from an Epruino Watch via
+    MQTT over Bluetooth (BLE) to place it into active or inactive States
+    """
 
-        payload = str(message.payload.decode("utf-8"))
-        #if payload != self.last_message:
-        #    self.last_message = payload
-        #    event = payload[3:-1].lower()
-        #    # print("Event: ",str(event))
-        print(str(payload)," received by audio state machine")
-        self.on_event(payload)
+    payload = str(message.payload.decode("utf-8"))
+    #if payload != self.last_message:
+    #    self.last_message = payload
+    #    event = payload[3:-1].lower()
+    #    # print("Event: ",str(event))
+    print(str(payload)," received by audio state machine")
+    k9.state.on_event(payload)
 
+# Set up mqtt client and subscribe to events
+last_message = ""
+client = mqtt.Client("k9-audio")
+client.connect("localhost")
+client.on_message = mqtt_callback # attach function to callback
+# self.client.subscribe("/ble/advertise/watch/m")
+client.subscribe("k9/events/audio", qos=2)
+client.loop_start()
+print("MQTT active...")
 
+# Create Mozilla deepspeech STT capablity
 model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
 model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
-
-print("Deepspeech loaded")
+print("Deepspeech active...")
 
 k9eyes = Eyes()
 k9lights = BackLights()
 k9ears = K9Ears()
 k9qa = K9QA()
+k9tail = Tail()
 mem = Memory()
+
 try:
     k9 = K9AudioSM()
 
