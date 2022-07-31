@@ -48,7 +48,7 @@ class Waitforhotword(State):
     def __init__(self):
         super(Waitforhotword, self).__init__()
         k9lights.off()
-        k9tail.centre()
+        k9tail.center()
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_1_0.ppn']
