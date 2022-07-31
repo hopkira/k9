@@ -1,6 +1,6 @@
 # k9localstt
 Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis acting as the integration point of the robot state.
-* Finite state machine with offline wakeword that integrates the following Python modules:
+* k9_audio_sm.py - Finite state machine with offline wakeword that integrates the following Python modules:
   * Back panel
   * Eye lights
   * Ear control
