@@ -22,10 +22,8 @@ import numpy as np
 print("Numpy is running...")
 import pandas as pd
 print("Pandas are frolicking...")
-from memory import Memory
+from memory import Memory as mem
 print("All imports done!")
-
-mem = Memory()
 
 # Oak-Lite Horizontal FoV
 cam_h_fov = 73.0
@@ -133,6 +131,9 @@ config.postProcessing.decimationFilter.decimationFactor = 4
 stereo.initialConfig.set(config)
 
 class Point_Cloud():
+    '''
+    Creates a point cloud that determines any obstacles in front of the robot
+    '''
 
     def __init__(self):
         # Point cloud loop constants
@@ -156,9 +157,11 @@ class Point_Cloud():
             self.angles_array.append(round_angle)
 
     def record_point_cloud(self,depth_image):
-        #
-        # 3. Point cloud to Redis funcitonality
-        #
+        '''
+        Distills the point cloud down to a single value that is the distance to the
+        nearest obstacle that is directly in front of the robot
+        '''
+
         # Ignore points too close or too far away
         valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
         # Calculate the point cloud using simple extrapolation from depth
@@ -191,10 +194,19 @@ class Point_Cloud():
         point_cloud = np.nanmin(totals, axis = 0)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
-        for index,point in enumerate(point_cloud):
-            mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
+        #for index,point in enumerate(point_cloud):
+        #    mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
+        point_cloud = point_cloud[16:24]
+        min_dist = np.amin(point_cloud)
+        mem.storeState("forward", min_dist)
 
 class Legs_Detector():
+    ''''
+    Detects legs and records the vector to them.  This is done by 
+    detecting vertical slices of the image that include an object
+    and then averaging the distance for each slice. Te valid slices
+    are averaged to detemine the likely centre of the legs
+    '''
 
     def __init__ (self):
         # decimate_level = 7 # reduces size of depth image
@@ -204,13 +216,9 @@ class Legs_Detector():
         # Heeling distanc
 
     def record_legs_vector(self,depth_image):
-        #
-        # 1. Follow section of code
-        #
-        # The follow capability ueses the depth stream to determine
-        # where the nearest pair of legs  are
-
-
+        '''
+        Analysse image and record vector to legs
+        '''
         # reduce the size of the depth image by decimating it by
         # a factor (numbers between 3 and 20 seem to work best)
         # remove the bottom of the image as the figures that
@@ -249,6 +257,11 @@ class Legs_Detector():
             mem.storeSensorReading("follow", move, angle)
 
 class Person_Detector():
+    '''
+    This part of the code will identify the nearest
+    person in front of K9 (up to about 5m away).  As they
+    move, they should be tracked
+    '''
 
     def __init__(self):
         # Initially there is no identified target, so dictionary is empty
@@ -260,24 +273,16 @@ class Person_Detector():
             }
 
     def record_person_vector (self, trackletsData):
-        # 2. Heeling/tracking section of code
-        #
-        # This part of the code will identify the nearest
-        # person in front of K9 (up to about 5m away).  As they
-        # move, they should be tracked
-        #
-        #
-        #for t in trackletsData:
-        #    print(t.id,t.status.name,t.spatialCoordinates.x, t.spatialCoordinates.z)
-        # Tracklets can have the status NEW, TRACKED or LOST
-        #
-        # if a target has been identified than look through the trackletData
-        # and retrieve the latest information tracklet for that id
-        # and store it in the target object
-        # if there is no active matching id, then drop them as a target
-        # if there is NO target identified yet, then scan the trackletData and
-        # find the closest NEW or TRACKED tracklet instance and make them the
-        # target
+        '''
+        If a target has been identified than look through the trackletData
+        and retrieve the latest information tracklet for that id
+        and store it in the target object
+        if there is no active matching id, then drop them as a target
+        if there is NO target identified yet, then scan the trackletData and
+        find the closest NEW or TRACKED tracklet instance and make them the
+        target.  Record the tracklet vector in robot dog's memory
+        '''
+
         heel_range = self.heel_upper # reset range to max
         if self.target["id"] is not None:
             # extract the tracklet id that matches the existing id
