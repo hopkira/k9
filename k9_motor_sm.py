@@ -14,7 +14,7 @@ import logo # k9 movement library
 from state import State # Base FSM State class
 import paho.mqtt.client as mqtt
 print("MQTT found...")
-from memory import Memory
+from memory import Memory as mem
 print("All imports done!")
 
 # Define K9 Motor States
@@ -69,10 +69,16 @@ class Turning(State):
         while True:
             if logo.finished_move():
                 self.on_event('turn_finished')
+            # check to see if rotation is safe
+            if mem.retrieveState("rotate") < 0.0:
+                self.on_event('turn_blocked')
 
     def on_event(self, event):
         if event == 'turn_finished':
             return Moving_Forward(self.distance)
+        if event == 'turn_blocked':
+            print("Turn blocked")
+            return ManualControl()
         if event == 'stay':
             return  ManualControl()
         return self
@@ -129,19 +135,29 @@ class Following(State):
                 damp_angle = 3.0
                 damp_distance = 2.0
                 if abs(self.angle) >= (0.1 * damp_angle) :
-                    # logo.rt(self.angle / damp_angle, fast = True)
-                    print("Turning: ",str(self.angle / damp_angle))
+                    if mem.retrieveState("rotate") > 0.0:
+                        # logo.rt(self.angle / damp_angle, fast = True)
+                        print("Turning: ",str(self.angle / damp_angle))
+                    else:
+                        self.on_event('turn_blocked')
                 else:
                     if abs(self.move) >= (0.05 * damp_distance) :
-                        # logo.fd(self.move / damp_distance)
-                        print("Moving forward: ",str(self.move / damp_distance))
+                        distance = self.move / damp_distance
+                        safe_forward = mem.retrieveState("forward")
+                        # nb should also retrieve a backward state
+                        if  safe_forward > distance:
+                            logo.forward(distance)
+                            print("Moving forward: ", str(distance) )
+                        else:
+                            logo.forward(safe_forward)
+                            print("Moving forward: ", str(safe_forward))
 
     def on_event(self, event):
         if event == 'stay':
             return ManualControl()
+        if event == 'turn_blocked':
+            return ManualControl()
         return self
-
-mem = Memory()
 
 class K9MotorSM:
     '''
