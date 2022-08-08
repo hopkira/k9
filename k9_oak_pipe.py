@@ -9,6 +9,7 @@
 #   2. to identify the vector to the nearest vertical obstacle
 #     that is near K9 (that may not be recognisable as a person)
 #   3. generate a point cloud to help avoid collisions
+#   4. generate a focussed point cloud to avoid forward collisions
 
 import time
 print("Time started...")
@@ -24,6 +25,8 @@ import pandas as pd
 print("Pandas are frolicking...")
 from memory import Memory as mem
 print("All imports done!")
+from matplotlib import pyplot as plt
+print("Picture drawing loaded...")
 
 # Oak-Lite Horizontal FoV
 cam_h_fov = 73.0
@@ -196,14 +199,13 @@ class Point_Cloud():
         # short term memory of the robot
         for index,point in enumerate(point_cloud):
             mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
-        # point_cloud = point_cloud[16:24]
-        # min_dist = np.amin(point_cloud)
-        # mem.storeState("forward", min_dist)
 
-class Forward_Collision():
+
+class Fwd_Collision_Detect():
     '''
     Creates a focussed point cloud that determines any obstacles
-    directly in front of the robot
+    directly in front of the robot and returns the minimum distance
+    to the closest
     '''
 
     def __init__(self):
@@ -220,7 +222,7 @@ class Forward_Collision():
         self.pc_min_range  = 200.0
         self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
 
-    def record_point_cloud(self,depth_image):
+    def record_min_dist(self,depth_image):
         '''
         Distills the point cloud down to a single value that is the distance to the
         nearest obstacle that is directly in front of the robot
@@ -255,15 +257,18 @@ class Forward_Collision():
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
-        point_cloud = np.nanmin(totals, axis = 0)
-        min_dist = np.nanmin(point_cloud)
+        min_dist = np.nanmin(totals)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         mem.storeState("forward", min_dist)
         # point_cloud = point_cloud[16:24]
         # min_dist = np.amin(point_cloud)
         # mem.storeState("forward", min_dist)
-
+        plt.scatter(x2,-y2,c=z2,cmap='afmhot',s=10)
+        plt.xlim(-350,350)
+        plt.ylim(-200,1600)
+        plt.show()
+        
 
 class Legs_Detector():
     ''''
@@ -400,11 +405,12 @@ with dai.Device(pipeline) as device:
     # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
     print("Oak pipeline running...")
-    f_pc = Point_Cloud()
+    # f_pc = Point_Cloud()
     f_ld = Legs_Detector()
     f_pd = Person_Detector()
+    f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
-    counter =  0
+    # counter =  0
     while True:
         start_time = time.time() # start time of the loop
         inDepth = qDep.get()
@@ -412,11 +418,12 @@ with dai.Device(pipeline) as device:
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
-        if counter == 10:
-            f_pc.record_point_cloud(depth_image)
-            counter = 0
-        f_ld.record_legs_vector(depth_image)
-        f_pd.record_person_vector(trackletsData)
+        #if counter == 10:
+        #    f_pc.record_point_cloud(depth_image)
+        #    counter = 0
+        f_cd.record_min_dist(depth_image=depth_image)
+        f_ld.record_legs_vector(depth_image=depth_image)
+        f_pd.record_person_vector(trackletsData=trackletsData)
         # print out the FPS achieved
         print("FPS: ", 1.0 / (time.time() - start_time))
-        counter += 1
+        # counter += 1
