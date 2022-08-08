@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # coding: utf-8
 # Author: Richard Hopkins
-# Date: 4 April 2022
+# Date: 8 August 2022
 #
 # This program uses the Oak-Lite camera from Luxonis
 # to support three key functions:
 #   1. to identify the vector to the person in front of K9
 #   2. to identify the vector to the nearest vertical obstacle
-#     that is near K9 (that may not be recognisable as a person)
+#      that is near K9 (that may not be recognisable as a person)
 #   3. generate a point cloud to help avoid collisions
 #   4. generate a focussed point cloud to avoid forward collisions
 
@@ -132,6 +132,7 @@ config = stereo.initialConfig.get()
 config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
 config.postProcessing.decimationFilter.decimationFactor = 4
 stereo.initialConfig.set(config)
+
 
 class Point_Cloud():
     '''
@@ -326,6 +327,7 @@ class Legs_Detector():
             move = move / 1000.0 # convert to m
             mem.storeSensorReading("follow", move, angle)
 
+
 class Person_Detector():
     '''
     This part of the code will identify the nearest
@@ -397,6 +399,7 @@ class Person_Detector():
             distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
             mem.storeSensorReading("person",distance,angle)
 
+
 # Declare the device
 # device = dai.Device(pipeline)
 with dai.Device(pipeline) as device:
@@ -425,5 +428,5 @@ with dai.Device(pipeline) as device:
         f_ld.record_legs_vector(depth_image=depth_image)
         f_pd.record_person_vector(trackletsData=trackletsData)
         # print out the FPS achieved
-        print("FPS: ", 1.0 / (time.time() - start_time))
         # counter += 1
+        print("FPS: ", 1.0 / (time.time() - start_time))
