@@ -1,3 +1,4 @@
+import string
 import time
 from urllib.parse import ParseResultBytes
 import serial
@@ -19,23 +20,37 @@ class K9Ears():
             timeout=10
             )
         self.mem = Memory()
+        self.following = False
 
-    def __write(self,text):
+    def __write(self,text:string) -> None:
         self.ser.write(str.encode(text+"()\n"))
 
-    def stop(self):
+    def stop(self) -> None:
+        self.following = False
         self.__write("stop")
 
-    def scan(self):
+    def scan(self) -> None:
+        self.following = False
         self.__write("scan")
 
-    def fast(self):
+    def fast(self) -> None:
+        self.following = False
         self.__write("fast")
 
-    def think(self):
+    def think(self) -> None :
+        self.following = False
         self.__write("think")
     
-    def rotate_scan(self):
+    def follow_read(self) -> float:
+        if self.following is False:
+            self.__write("follow")
+            self.following = True
+        json_reading = self.ser.readline().decode("ascii")
+        reading = json.loads(json_reading)
+        dist = reading['distance']
+        return dist
+
+    def safe_rotate(self) -> bool:
         '''
         Performs an up to four second ear scan to
         detects if there is an obstacle to the side of K9's head
@@ -45,10 +60,11 @@ class K9Ears():
         # potential collision
         safe_x = 0.3
         safe_y = 0.6
+        duration = 4
         detected = False
         # start ears moving and scanning
         self.__write("fast")
-        end_scan = time.time() + 4 # time to end scan
+        end_scan = time.time() + duration # time to end scan
         #
         # now loop for up to four seconds and listen
         # for message; stop looping if a potential
@@ -73,6 +89,4 @@ class K9Ears():
         # if a potential collisison was detected then
         # store that in K9's shared short term memory
         #
-        if detected:
-            distance = safe_x - dist
-            self.mem.storeState("rotate", distance)
+        return not detected
