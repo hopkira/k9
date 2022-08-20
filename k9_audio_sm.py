@@ -138,6 +138,9 @@ class Responding(State):
             speak("Staying master")
             k9tail.down()
             self.on_event('stay')
+        if 'turn around' or 'about turn' in self.command:
+            speak('Turning around master')
+            self.on_event('turn_around')
         k9ears.think()
         answer = k9qa.ask_question(self.command)
         k9ears.stop()
@@ -161,6 +164,9 @@ class Responding(State):
             return Listening()
         if event == 'stay':
             client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
+            return Listening()
+        if event == 'turn_around':
+            client.publish("k9.events/motor", payload="turn", qos=2, retain=False)
             return Listening()
         return self
 

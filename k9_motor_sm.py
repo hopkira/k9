@@ -9,6 +9,7 @@
 #
 import sys
 import json
+import math
 #from tkinter.messagebox import NO
 import logo # k9 movement library
 from state import State # Base FSM State class
@@ -32,6 +33,8 @@ class ManualControl(State):
             return Scanning()
         if event == 'heel':
             return Following()
+        if event == 'turn_around':
+            return Turn_Around()
         return self
 
 class Scanning(State):
@@ -83,6 +86,26 @@ class Turning(State):
             return  ManualControl()
         return self
 
+class Turn_Around(State):
+    '''
+    The child state where K9 rotates by 180 degrees
+    '''
+    def __init__(self):
+        super(Turn_Around, self).__init__()
+        logo.right(math.PI * 2)
+        while True:
+            if logo.finished_move():
+                self.on_event('turn_finished')
+            # check to see if rotation is safe
+            if mem.retrieveState("rotate") < 0.0:
+                self.on_event('turn_blocked')
+
+    def on_event(self, event):
+        if event == 'turn_blocked':
+            return ManualControl()
+        if event == 'turn_finished':
+            return ManualControl()
+        return self
 
 class Moving_Forward(State):
     '''
