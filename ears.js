@@ -125,7 +125,7 @@ function calculateServoPos(step) {
  }
 
  // send a JSON message to the Rapsberry Pi via a USB serial connection
- function sendMsg(type,sensor,distance,angle) {
+ function sendMsg(message) {
     messageStr = JSON.stringify(message);
     if (transmit) {
         USB.println(messageStr);
