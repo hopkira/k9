@@ -94,7 +94,7 @@ class Turn_Around(State):
     '''
     def __init__(self):
         super(Turn_Around, self).__init__()
-        logo.right(math.PI * 2)
+        # logo.right(math.PI * 2)
         while True:
             if logo.finished_move():
                 self.on_event('turn_finished')
@@ -172,10 +172,10 @@ class Following(State):
                         safe_forward = mem.retrieveState("forward")
                         # nb should also retrieve a backward state
                         if  safe_forward > distance:
-                            logo.forward(distance)
+                            # logo.forward(distance)
                             print("Moving forward: ", str(distance) )
                         else:
-                            logo.forward(safe_forward)
+                            # logo.forward(safe_forward)
                             print("Moving forward: ", str(safe_forward))
 
     def on_event(self, event):
