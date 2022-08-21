@@ -10,6 +10,7 @@
 #
 import sys
 #from tkinter.messagebox import NO
+import requests
 import pvporcupine  # Porcupine hotword
 import deepspeech  # Mozilla STT
 import numpy as np
@@ -123,50 +124,62 @@ class Responding(State):
         print("Responding.init() - started")
         print(self.command)
         k9eyes.set_level(0.5)
-        if 'listen' in self.command:
-            speak("No longer listening")
-            self.on_event('stop_listening')
-        if ('here' in self.command) or ('over' in self.command):
-            speak("Coming master")
-            self.on_event('scanning')
-            k9tail.center()
-        if 'follow' in self.command:
-            speak("Folllowing master")
-            k9tail.up()
-            self.on_event('follow')
-        if 'stop' in self.command or 'stay' in self.command:
-            speak("Staying master")
-            k9tail.down()
-            self.on_event('stay')
-        if 'turn around' or 'about turn' in self.command:
-            speak('Turning around master')
-            self.on_event('turn_around')
         k9ears.think()
-        answer = k9qa.ask_question(self.command)
+        if connected():
+            answer, intent = k9qa.robot_response(self.command)
+        else:
+            if 'listen' in self.command:
+                answer = "No longer listening"
+                intent = 'StopListening'
+            elif 'here' in self.command or 'over' in self.command:
+                answer = 'Coming master'
+                intent = 'ComeHere'
+            elif 'follow' in self.command:
+                answer = 'Folllowing master'
+                intent = 'FollowMe'
+            elif 'stop' in self.command or 'stay' in self.command:
+                answer = 'Staying master'
+                intent = 'StayThere'
+            elif 'turn around' or 'about turn' in self.command:
+                answer = 'Turning around'
+                intent = 'TurnAbout'
+            elif 'thank' in self.command:
+                answer = 'Thanks are not necessary, master'
+                intent = 'PraiseMe'
+            else:
+                answer = 'Apologies I did not understand'
+                intent = 'QuestionMe'
+                pass
         k9ears.stop()
         speak(answer)
-        if (' thank' in answer) or (' wag ' in answer):
-            k9tail.wag_h()
+        self.on_event(intent)            
         self.on_event('responded')
+
+    def notify_motors(event:str):
+        client.publish("k9/events/motor", payload = event, qos = 2, retain = False)
 
     def on_event(self, event):
         if event == 'responded':
             return Listening()
-        if event == 'stop_listening':
+        if event == 'StopListening':
             return Waitforhotword()
-        if event == 'scanning':
-            # send MQTT Message for come
-            client.publish("k9/events/motor", payload="come", qos=2, retain=False)
+        if event == 'ComeHere':
+            k9tail.center()
+            self.notify_motors(event)
             return Listening()
-        if event == 'follow':
-            # send MQTT Message for heel
-            client.publish("k9/events/motor", payload="heel", qos=2, retain=False)
+        if event == 'FollowMe':
+            k9tail.up()
+            self.notify_motors(event)
             return Listening()
-        if event == 'stay':
-            client.publish("k9/events/motor", payload="stay", qos=2, retain=False)
+        if event == 'StayThere':
+            k9tail.down()
+            self.notify_motors(event)
             return Listening()
         if event == 'turn_around':
-            client.publish("k9.events/motor", payload="turn", qos=2, retain=False)
+            self.notify_motors(event)
+            return Listening()
+        if event == 'PraiseMe':
+            k9tail.wag_h()
             return Listening()
         return self
 
@@ -200,6 +213,14 @@ class K9AudioSM:
         # The next state will be the result of the on_event function.
         print("Event:",event, "raised in state", str(self.state).lower())
         self.state = self.state.on_event(event)
+
+
+def connected(timeout: float = 1.0) -> bool:
+    try:
+        requests.head("http://www.ibm.com/", timeout=timeout)
+        return True
+    except requests.ConnectionError:
+        return False
 
 def mqtt_callback(self,client, userdata, message):
     """

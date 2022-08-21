@@ -29,13 +29,14 @@ class ManualControl(State):
         logo.stop()
 
     def on_event(self, event):
-        if event == 'come':
+        if event == 'ComeHere':
             return Scanning()
-        if event == 'heel':
+        if event == 'FollowMe':
             return Following()
-        if event == 'turn_around':
+        if event == 'TurnAbout':
             return Turn_Around()
         return self
+
 
 class Scanning(State):
     '''
@@ -82,9 +83,10 @@ class Turning(State):
         if event == 'turn_blocked':
             print("Turn blocked")
             return ManualControl()
-        if event == 'stay':
+        if event == 'StayHere':
             return  ManualControl()
         return self
+
 
 class Turn_Around(State):
     '''
@@ -106,6 +108,7 @@ class Turn_Around(State):
         if event == 'turn_finished':
             return ManualControl()
         return self
+
 
 class Moving_Forward(State):
     '''
@@ -132,7 +135,7 @@ class Moving_Forward(State):
     def on_event(self, event):
         if event == 'target_reached':
             return ManualControl()
-        if event == 'stay':
+        if event == 'StayHere':
             return  ManualControl()
         return self
 
@@ -176,11 +179,12 @@ class Following(State):
                             print("Moving forward: ", str(safe_forward))
 
     def on_event(self, event):
-        if event == 'stay':
+        if event == 'StayHere':
             return ManualControl()
         if event == 'turn_blocked':
             return ManualControl()
         return self
+
 
 class K9MotorSM:
     '''
@@ -201,6 +205,7 @@ class K9MotorSM:
         # The next state will be the result of the on_event function.
         print("Event:",event, "raised in state", str(self.state).lower())
         self.state = self.state.on_event(event)
+
 
 def mqtt_callback(client, userdata, message):
     """
