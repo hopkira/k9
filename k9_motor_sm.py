@@ -27,6 +27,8 @@ class ManualControl(State):
     def __init__(self):
         super(ManualControl, self).__init__()
         logo.stop()
+        while True:
+            pass
 
     def on_event(self, event):
         if event == 'ComeHere':
