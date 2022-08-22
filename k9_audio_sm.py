@@ -56,13 +56,13 @@ class Waitforhotword(State):
         )   
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
-        print(f'Using device: {self.recorder.selected_device}')
+        # print(f'Using device: {self.recorder.selected_device}')
         k9eyes.set_level(0.001)
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
             if result >= 0:
-                print('Detected hotword')
+                print('AudioSM: Detected hotword')
                 self.on_event('hotword_detected')
 
     def on_event(self, event):
@@ -86,7 +86,7 @@ class Listening(State):
         input_rate=16000,
         file=None)
         self.stream_context = model.createStream()
-        print("Listening: init complete")
+        # print("Listening: init complete")
         k9eyes.set_level(0.01)
         k9lights.on()
         k9tail.up()
@@ -96,10 +96,10 @@ class Listening(State):
                 if frame is not None:
                     self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 else:
-                    print("Stream finished")
+                    # print("Stream finished")
                     self.command = self.stream_context.finishStream()
                     del self.stream_context
-                    print("Listen.run() - I heard:",self.command)
+                    print("AudioSM heard:",self.command)
                     if self.command != "":
                         self.vad_audio.destroy()
                         self.on_event('command_received')
@@ -121,8 +121,8 @@ class Responding(State):
     def __init__(self, command):
         super(Responding, self).__init__()
         self.command = command
-        print("Responding.init() - started")
-        print(self.command)
+        # print("Responding.init() - started")
+        # print(self.command)
         k9eyes.set_level(0.5)
         k9ears.think()
         if connected():
@@ -151,10 +151,7 @@ class Responding(State):
                 intent = 'QuestionMe'
                 pass
         k9ears.stop()
-        print("+++++++++++++++++++++++++++++++++++++++")
         print("Intent:",intent)
-        print("Answer:",answer)
-        print("+++++++++++++++++++++++++++++++++++++++")
         speak(answer)
         self.on_event(intent)            
         self.on_event('responded')

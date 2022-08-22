@@ -32,7 +32,7 @@ def speak(speech):
         < will lower it
         '''
         
-        print('speech:', speech)
+        print('Speech:', speech)
         speaking = None
         clauses = speech.split("|")
         for clause in clauses:
