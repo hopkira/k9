@@ -229,10 +229,10 @@ try:
     client = mqtt.Client("k9-motor")
     client.connect("localhost")
     client.on_message = mqtt_callback # attach function to callback
+    client.subscribe("k9/events/motor")
     # self.client.subscribe("/ble/advertise/watch/m")
     client.loop_start()
     print("MQTT subscription interface active")
-
     print("Creating K9 Motor State Machine instance")
     k9 = K9MotorSM()
 except KeyboardInterrupt:
