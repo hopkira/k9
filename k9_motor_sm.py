@@ -28,7 +28,8 @@ class ManualControl(State):
         super(ManualControl, self).__init__()
         logo.stop()
         while True:
-            msg = client.loop_read()
+            msg = client.loop_read(0.1)
+            print("MQTT Received:",str(msg))
             self.on_event(msg)
 
     def on_event(self, event):
@@ -225,11 +226,9 @@ def mqtt_callback(client, userdata, message):
     k9.state.on_event(payload)
 
 try:
-
-    last_message = ""
     client = mqtt.Client("k9-motor")
     client.connect("localhost")
-    client.on_message = mqtt_callback # attach function to callback
+    # client.on_message = mqtt_callback # attach function to callback
     client.subscribe("k9/events/motor")
     # self.client.subscribe("/ble/advertise/watch/m")
     # client.loop_start()
