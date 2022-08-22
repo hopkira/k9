@@ -2,12 +2,34 @@ import time, logging
 from datetime import datetime
 import threading, collections, queue, os, os.path
 
+from ctypes import *
+from contextlib import contextmanager
+
 import numpy as np
 import pyaudio
 import wave
 import webrtcvad
 from halo import Halo
 from scipy import signal
+
+#
+# Error handling code courtesy of Nils Werner on StackOverflow
+# https://stackoverflow.com/questions/7088672/pyaudio-working-but-spits-out-error-messages-each-time/17673011#17673011
+#
+
+ERROR_HANDLER_FUNC = CFUNCTYPE(None, c_char_p, c_int, c_char_p, c_int, c_char_p)
+
+def py_error_handler(filename, line, function, err, fmt):
+    pass
+
+c_error_handler = ERROR_HANDLER_FUNC(py_error_handler)
+
+@contextmanager
+def noalsaerr():
+    asound = cdll.LoadLibrary('libasound.so')
+    asound.snd_lib_error_set_handler(c_error_handler)
+    yield
+    asound.snd_lib_error_set_handler(None)
 
 class Audio(object):
     """Streams raw audio from microphone. Data is received in a separate thread, and stored in a buffer, to be read from."""
@@ -32,7 +54,8 @@ class Audio(object):
         self.sample_rate = self.RATE_PROCESS
         self.block_size = int(self.RATE_PROCESS / float(self.BLOCKS_PER_SECOND))
         self.block_size_input = int(self.input_rate / float(self.BLOCKS_PER_SECOND))
-        self.pa = pyaudio.PyAudio()
+        with noalsaerr():
+            self.pa = pyaudio.PyAudio()
 
         kwargs = {
             'format': self.FORMAT,
