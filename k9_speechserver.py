@@ -69,8 +69,8 @@ def mqtt_callback(client, userdata, message):
     """
     Enables K9 to receive an MQTT message and place it in a queue
     """
-
     payload = str(message.payload.decode("utf-8"))
+    print("Server payload:", payload)
     queue.put(payload)
 
 queue = Queue()
