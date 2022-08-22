@@ -242,6 +242,6 @@ try:
     k9 = K9MotorSM()
 except KeyboardInterrupt:
     logo.stop()
-    # client.loop_stop()
+    client.loop_stop()
     "Motors stopped and MQTT client stopped"
     sys.exit(0)

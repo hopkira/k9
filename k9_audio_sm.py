@@ -159,7 +159,7 @@ class Responding(State):
         self.on_event('responded')
 
     def notify_motors(self, event:str):
-        client.publish("k9/events/motor", payload = event, qos = 2, retain = False)
+        client.publish(topic="k9/events/motor", payload = event, qos = 2, retain = False)
 
     def on_event(self, event:str) -> State:
         if event == 'responded':
