@@ -151,6 +151,10 @@ class Responding(State):
                 intent = 'QuestionMe'
                 pass
         k9ears.stop()
+        print("+++++++++++++++++++++++++++++++++++++++")
+        print("Intent:",intent)
+        print("Answer:",answer)
+        print("+++++++++++++++++++++++++++++++++++++++")
         speak(answer)
         self.on_event(intent)            
         self.on_event('responded')
