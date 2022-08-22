@@ -34,8 +34,8 @@ class K9QA:
             stop=["\n"]
             )
         intent = intent_obj['choices'][0]['text']
-        intent = intent.strip('\n')
-        # Determine response for K9 to speak
+        intent = ''.join(intent.split()) # remove spaces, newlines etc
+        # Now determine response for K9 to speak
         response_obj = openai.Completion.create(
         model = self.model,
         prompt = self.base_story + self.conversation + command + self.k9_suffix,
@@ -48,6 +48,7 @@ class K9QA:
         )
         response = response_obj['choices'][0]['text']
         response =  response.strip('\n')
+
         # print("K9: " + response)
         self.conversation = self.conversation + command + self.k9_suffix + response + self.human_suffix
         # print(conversation)
