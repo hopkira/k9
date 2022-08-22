@@ -29,14 +29,16 @@ from ears import K9Ears # k9 radar ears
 print("Ears wiggling...")
 from k9gpt3conv import K9QA # wolfram qa skill
 print("Know it all mode active...")
-from k9tts import speak # speak in K9 voice
-print("Speech initiated...")
+#from k9tts import speak # speak in K9 voice
+#print("Speech initiated...")
 import paho.mqtt.client as mqtt
 print("MQTT found...")
 from audio_tools import VADAudio # Voice activity detection
 print("Audio tools working...")
 from tail import Tail
 print("Tail activated!")
+from  voice import Voice
+print("Cleared voice...")
 from memory import Memory
 print("All imports done!")
 
@@ -87,6 +89,9 @@ class Listening(State):
         file=None)
         self.stream_context = model.createStream()
         # print("Listening: init complete")
+        speaking = mem.retrieveState("speaking")
+        while speaking:
+            speaking = mem.retrieveState("speaking")
         k9lights.on()
         k9tail.up()
         k9eyes.set_level(0.01)
@@ -154,7 +159,9 @@ class Responding(State):
                 pass
         k9ears.stop()
         print("Intent:",intent)
-        speak(answer)
+        mem.storeState("speaking",True)
+        k9voice.speak(answer)
+        #speak(answer)
         self.on_event(intent)            
         self.on_event('responded')
 
@@ -201,7 +208,8 @@ class K9AudioSM:
         k9eyes.set_level(1)
         k9ears.scan()
         k9tail.center()
-        speak("K9 is active")
+        k9voice.speak("Waiting for hotword")
+        # speak("K9 is active")
         k9lights.off()
         k9eyes.set_level(0)
         k9ears.stop()
@@ -265,12 +273,13 @@ k9ears = K9Ears()
 k9qa = K9QA()
 k9tail = Tail()
 mem = Memory()
+k9voice =  Voice()
 
 try:
     k9 = K9AudioSM()
 
 except KeyboardInterrupt:
-    speak("Inactive")
+    k9voice.speak("Inactive")
     k9lights.off()
     k9eyes.set_level(0)
     k9tail.center()
