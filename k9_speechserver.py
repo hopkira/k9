@@ -75,7 +75,7 @@ def mqtt_callback(client, userdata, message):
 
 try:
     queue = Queue()
-    client = mqtt.Client("k9-speech")
+    client = mqtt.Client("k9-speech-server")
     client.connect("localhost")
     client.on_message = mqtt_callback # attach function to callback
     client.subscribe("k9/events/speech", qos=2)
@@ -87,6 +87,7 @@ try:
             utterance = queue.get()
             if utterance is None:
                 continue
+            print("Voice server:", utterance)
             speak(utterance)
 except KeyboardInterrupt:
     client.loop_stop()

@@ -17,8 +17,9 @@ class Voice():
     '''
 
     def __init__(self) -> None:
-        self.client = mqtt.Client("k9-speech-test")
+        self.client = mqtt.Client("k9-speech-client")
         self.client.connect("localhost")
         
     def speak(self, speech:str) -> None:
         self.client.publish("k9/events/speech", payload = speech, qos = 2, retain = False)
+        print("Voice published:",speech)
