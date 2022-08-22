@@ -15,6 +15,7 @@ import logo # k9 movement library
 from state import State # Base FSM State class
 import paho.mqtt.client as mqtt
 print("MQTT found...")
+from queue import Queue
 from memory import Memory as mem
 print("All imports done!")
 
@@ -28,7 +29,11 @@ class ManualControl(State):
         super(ManualControl, self).__init__()
         logo.stop()
         while True:
-            pass
+            while not queue.empty():
+                message = queue.get()
+                if message is None:
+                    continue
+                self.on_event(message)
 
     def on_event(self, event):
         if event == 'ComeHere':
@@ -220,15 +225,19 @@ def mqtt_callback(client, userdata, message):
     #    self.last_message = payload
     #    event = payload[3:-1].lower()
     #    # print("Event: ",str(event))
-    print(str(payload)," received by motor state machine")
+    '''
     try:
         k9
     except NameError:
         pass
     else:
         k9.state.on_event(payload)
+    '''
+    queue.put(payload)
+    print(str(payload),"put on queue by motor state machine")
 
 try:
+    queue = Queue()
     client = mqtt.Client("k9-motor")
     client.connect("localhost")
     client.on_message = mqtt_callback # attach function to callback
