@@ -73,15 +73,15 @@ def mqtt_callback(client, userdata, message):
     payload = str(message.payload.decode("utf-8"))
     queue.put(payload)
 
+queue = Queue()
+client = mqtt.Client("k9-speech-server")
+client.connect("localhost")
+client.on_message = mqtt_callback # attach function to callback
+client.subscribe("k9/events/speech", qos=2)
+# self.client.subscribe("/ble/advertise/watch/m")
+client.loop_start()
+print("Speech MQTT interface active")
 try:
-    queue = Queue()
-    client = mqtt.Client("k9-speech-server")
-    client.connect("localhost")
-    client.on_message = mqtt_callback # attach function to callback
-    client.subscribe("k9/events/speech", qos=2)
-    # self.client.subscribe("/ble/advertise/watch/m")
-    client.loop_start()
-    print("Speech MQTT interface active")
     while True:
         while not queue.empty():
             utterance = queue.get()
@@ -92,4 +92,4 @@ try:
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
-    sys.exit(0)
+    sys.exit(0) 
