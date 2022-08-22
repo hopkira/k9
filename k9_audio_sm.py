@@ -178,7 +178,7 @@ class Responding(State):
             k9tail.down()
             self.notify_motors(event)
             return Listening()
-        if event == 'turn_around':
+        if event == 'TurnAbout':
             self.notify_motors(event)
             return Listening()
         if event == 'PraiseMe':
