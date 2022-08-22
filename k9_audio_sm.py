@@ -237,7 +237,12 @@ def mqtt_callback(client, userdata, message):
     #    event = payload[3:-1].lower()
     #    # print("Event: ",str(event))
     print(str(payload)," received by audio state machine")
-    k9.state.on_event(payload)
+    try:
+        k9
+    except NameError:
+        pass
+    else:
+        k9.state.on_event(payload)
 
 # Set up mqtt client and subscribe to events
 last_message = ""
