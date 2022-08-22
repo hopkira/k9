@@ -101,7 +101,7 @@ class Turn_Around(State):
     '''
     def __init__(self):
         super(Turn_Around, self).__init__()
-        logo.right(math.pi * 2)
+        logo.right(math.pi)
         while True:
             if logo.finished_move():
                 self.on_event('turn_finished')
