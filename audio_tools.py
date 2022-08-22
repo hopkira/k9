@@ -9,7 +9,10 @@ import webrtcvad
 from halo import Halo
 from scipy import signal
 
-# Suppress errrors
+#
+# Suppress ALSA errrors; thanks to Louie on StackOverflow
+# https://stackoverflow.com/questions/7088672/pyaudio-working-but-spits-out-error-messages-each-time
+#
 
 @contextlib.contextmanager
 def ignoreStderr():
