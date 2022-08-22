@@ -225,7 +225,7 @@ def connected(timeout: float = 1.0) -> bool:
     except requests.ConnectionError:
         return False
 
-def mqtt_callback(self,client, userdata, message):
+def mqtt_callback(client, userdata, message):
     """
     Enables K9 to receive a message from an Epruino Watch via
     MQTT over Bluetooth (BLE) to place it into active or inactive States
