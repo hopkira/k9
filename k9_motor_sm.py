@@ -30,11 +30,12 @@ class ManualControl(State):
     def __init__(self):
         super(ManualControl, self).__init__()
         logo.stop()
-        while not q.empty():
-            message = q.get()
-            if message is None:
-                continue
-            print("Received from queue:", message)
+        while True:
+            while not q.empty():
+                message = q.get()
+                if message is None:
+                    continue
+                print("Received from queue:", message)
 
     def on_event(self, event):
         if event == 'ComeHere':
