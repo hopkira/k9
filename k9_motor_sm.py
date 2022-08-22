@@ -17,6 +17,9 @@ import paho.mqtt.client as mqtt
 print("MQTT found...")
 from memory import Memory as mem
 print("All imports done!")
+from queue import Queue
+
+q = Queue()
 
 # Define K9 Motor States
 
@@ -27,10 +30,11 @@ class ManualControl(State):
     def __init__(self):
         super(ManualControl, self).__init__()
         logo.stop()
-        while True:
-            msg = client.loop_read(0.1)
-            print("MQTT Received:",str(msg))
-            self.on_event(msg)
+        while not q.empty():
+            message = q.get()
+            if message is None:
+                continue
+            print("Received from queue:", message)
 
     def on_event(self, event):
         if event == 'ComeHere':
@@ -218,20 +222,20 @@ def mqtt_callback(client, userdata, message):
     """
 
     payload = str(message.payload.decode("utf-8"))
+    q.put(payload)
     #if payload != self.last_message:
     #    self.last_message = payload
     #    event = payload[3:-1].lower()
     #    # print("Event: ",str(event))
-    print(payload," received by motor state machine")
-    k9.state.on_event(payload)
+    print(payload," put on queue")
 
 try:
     client = mqtt.Client("k9-motor")
     client.connect("localhost")
-    # client.on_message = mqtt_callback # attach function to callback
+    client.on_message = mqtt_callback # attach function to callback
     client.subscribe("k9/events/motor")
     # self.client.subscribe("/ble/advertise/watch/m")
-    # client.loop_start()
+    client.loop_start()
     print("MQTT subscription interface active")
     print("Creating K9 Motor State Machine instance")
     k9 = K9MotorSM()
