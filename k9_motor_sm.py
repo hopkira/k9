@@ -28,7 +28,8 @@ class ManualControl(State):
         super(ManualControl, self).__init__()
         logo.stop()
         while True:
-            pass
+            msg = client.loop_read()
+            self.on_event(msg)
 
     def on_event(self, event):
         if event == 'ComeHere':
@@ -231,12 +232,12 @@ try:
     client.on_message = mqtt_callback # attach function to callback
     client.subscribe("k9/events/motor")
     # self.client.subscribe("/ble/advertise/watch/m")
-    client.loop_start()
+    # client.loop_start()
     print("MQTT subscription interface active")
     print("Creating K9 Motor State Machine instance")
     k9 = K9MotorSM()
 except KeyboardInterrupt:
     logo.stop()
-    client.loop_stop()
+    # client.loop_stop()
     "Motors stopped and MQTT client stopped"
     sys.exit(0)
