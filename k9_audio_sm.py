@@ -87,24 +87,26 @@ class Listening(State):
         file=None)
         self.stream_context = model.createStream()
         # print("Listening: init complete")
-        k9eyes.set_level(0.01)
         k9lights.on()
         k9tail.up()
+        k9eyes.set_level(0.01)
         while True:
             self.frames = self.vad_audio.vad_collector()
             for frame in self.frames:
                 if frame is not None:
                     self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                 else:
-                    # print("Stream finished")
+                    k9eyes.set_level(0.0)
                     self.command = self.stream_context.finishStream()
                     del self.stream_context
-                    print("AudioSM heard:",self.command)
                     if self.command != "":
+                        print("AudioSM heard:",self.command)
                         self.vad_audio.destroy()
                         self.on_event('command_received')
                     else:
+                        print("AudioSM: TTS did not understand")
                         self.stream_context = model.createStream()
+                        k9eyes.set_level(0.01)
 
     def on_event(self, event):
         if event == 'command_received':
