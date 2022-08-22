@@ -126,7 +126,7 @@ class Responding(State):
         k9eyes.set_level(0.5)
         k9ears.think()
         if connected():
-            answer, intent = k9qa.robot_response(self.command)
+            intent, answer = k9qa.robot_response(self.command)
         else:
             if 'listen' in self.command:
                 answer = "No longer listening"
