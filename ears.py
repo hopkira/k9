@@ -7,7 +7,7 @@ import math
 from memory import Memory
 
 
-class K9Ears():
+class Ears():
     """Class that communicates with the Espruino controlling K9's LIDAR ears"""
 
     def __init__(self) -> None:

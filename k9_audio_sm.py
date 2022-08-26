@@ -25,9 +25,9 @@ from eyes import Eyes # k9 led eyes
 print("Eyes open...")
 from back_lights import BackLights # k9 back lights
 print("Backlights on...")
-from ears import K9Ears # k9 radar ears
+from ears import Ears # k9 radar ears
 print("Ears wiggling...")
-from k9gpt3conv import K9QA # wolfram qa skill
+from k9gpt3conv import Respond # wolfram qa skill
 print("Know it all mode active...")
 #from k9tts import speak # speak in K9 voice
 #print("Speech initiated...")
@@ -39,6 +39,8 @@ from tail import Tail
 print("Tail activated!")
 from  voice import Voice
 print("Cleared voice...")
+from listen import Listen
+print("Able to listen...")
 from memory import Memory
 print("All imports done!")
 
@@ -83,35 +85,8 @@ class Listening(State):
     '''
     def __init__(self):
         super(Listening, self).__init__()
-        self.vad_audio = VADAudio(aggressiveness=1,
-        device=None,
-        input_rate=16000,
-        file=None)
-        self.stream_context = model.createStream()
-        # print("Listening: init complete")
-        speaking = mem.retrieveState("speaking")
-        while speaking:
-            speaking = mem.retrieveState("speaking")
-        k9lights.on()
-        k9tail.up()
-        k9eyes.set_level(0.01)
-        while True:
-            self.frames = self.vad_audio.vad_collector()
-            for frame in self.frames:
-                if frame is not None:
-                    self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
-                else:
-                    k9eyes.set_level(0.0)
-                    self.command = self.stream_context.finishStream()
-                    del self.stream_context
-                    if self.command != "":
-                        print("AudioSM heard:",self.command)
-                        self.vad_audio.destroy()
-                        self.on_event('command_received')
-                    else:
-                        print("AudioSM: TTS did not understand")
-                        self.stream_context = model.createStream()
-                        k9eyes.set_level(0.01)
+        self.command = k9stt.listen_for_command()
+        self.on_event('command_received')
 
     def on_event(self, event):
         if event == 'command_received':
@@ -269,11 +244,12 @@ print("Deepspeech active...")
 
 k9eyes = Eyes()
 k9lights = BackLights()
-k9ears = K9Ears()
-k9qa = K9QA()
+k9ears = Ears()
+k9qa = Respond()
 k9tail = Tail()
 mem = Memory()
 k9voice =  Voice()
+k9stt = Listen()
 
 try:
     k9 = K9AudioSM()
@@ -281,6 +257,7 @@ try:
 except KeyboardInterrupt:
     k9voice.speak("Inactive")
     k9lights.off()
-    k9eyes.set_level(0)
+    k9eyes.off()
     k9tail.center()
+    k9ears.stop()
     sys.exit(0)

@@ -8,7 +8,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 #       text-davinci-002
 #       text-curie-001
 
-class K9QA:
+class Respond:
     """A class to provide conversational access to GPT3"""
 
     def __init__(self) -> None:
