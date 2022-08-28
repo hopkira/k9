@@ -1,5 +1,5 @@
 # k9localstt
-Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis acting as the integration point of the robot state.
+Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
 * **k9_audio_sm.py** - Audio controller with voice recognition, finite state machine and offline wakeword.  Can issue MQTT messages that indicate state changes for the motor state machine.  The controller integrates the following Python modules:
   * Back panel (back_lights.py)
   * Eye lights (eyes.py)
@@ -10,6 +10,8 @@ Major update to K9 in preparation for moving to ROS2.  Splits major programs dow
   * Offline text to speech (k9tts.py)
   * Redis Short term memory (memory.py)
   * Wolfram QA or GPT3 (wolframqy.py or k9gpt3conv.py)
+  * K9's speech client (voice.py)
+* **k9_speechserver.py** - provides speech to text capability that can be used by multiple modules on a FIFO basis
 * **k9_oak_pipe** - A complex Oak-lite sensor pipeline that is used to provide scanning functions from the Oak stereoscopic camea.  This includes the scanning functionality to support heeling, following and collision avoidance.  All data is simplified and stored in Redis for other modules to use:
   * Detect person at a distance (for heeling; recorded in Redis as 'person')
   * Follow a nearby obstacle (recorded in Redis as 'follow')
