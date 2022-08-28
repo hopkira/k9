@@ -7,7 +7,6 @@ import time
 
 from lichess import Lichess
 
-from k9tts import speak
 from listen import Listen
 from eyes import Eyes
 from back_lights import BackLights
@@ -15,16 +14,15 @@ from ears import Ears
 from voice import Voice
 from memory import Memory as mem
 
-
 bot_token = os.getenv("LICHESS_BOT_TOKEN")
 player_token = os.getenv("LICHESS_PLAYER_TOKEN")
+stockfish_path = os.getenv("STOCKFISH_PATH")
+username = os.getenv("LICHESS_USERNAME")
 lichess_url = "https://lichess.org/"
-
-username = "hopkira"
 
 li = Lichess(token=bot_token, url=lichess_url)
 
-engine = chess.engine.SimpleEngine.popen_uci("/usr/local/opt/stockfish/bin/stockfish")
+engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 
 INFO_SCORE = 2
 
