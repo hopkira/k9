@@ -85,9 +85,6 @@ params = {"rated": False,
 
 player = chess.WHITE
 
-def parse_ndjson(data):
-    return [json.loads(l) for l in data]
-
 print(username, params)
 response = li.create_challenge(username, params)
 game_id = response.get("game", {}).get("id")
@@ -103,22 +100,20 @@ print("Moves:",moves)
 try:
     while True:
         binary_chunk = next(lines)
-        event_json = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
-        print("Event",event_json)
-        if event_json != "\n" and event_json != None:
-            event_obj = parse_ndjson(event_json)
-            if event_obj["type"] == 'gameState':
-                game.state = event_obj
-                moves = game.state["moves"].split()
-                print("Moves:",moves)
-                board = chess.Board()
-                for move in moves:
-                    board = update_board(board, move)
-                print(board)
-                if board.turn != player:
-                    result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
-                    move = result.move
-                    li.make_move(game_id=game_id,move=move)
+        event_obj = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
+        print("Event",str(event_obj))
+        if event_obj["type"] == 'gameState':
+            game.state = event_obj
+            moves = game.state["moves"].split()
+            print("Moves:",moves)
+            board = chess.Board()
+            for move in moves:
+                board = update_board(board, move)
+            print(board)
+            if board.turn != player:
+                result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
+                move = result.move
+                li.make_move(game_id=game_id,move=move)
 
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
