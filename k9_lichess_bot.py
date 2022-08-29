@@ -93,6 +93,7 @@ class Game:
     def __repr__(self):
         return self.__str__()
 
+
 def get_phrase():
     if (context['score'].is_mate()):
         context.update(to_mate = context['score'].mate())
@@ -214,7 +215,7 @@ def play_game(game_id:str):
     lines = stream.iter_lines()
     print("Lines:",lines)
     initial_state = json.loads(next(lines).decode('utf-8'))
-    game = Game(initial_state,username, li.baseUrl, 20)
+    game = Game(initial_state, username, li.baseUrl, 20)
     moves = game.state["moves"].split()
     for move in moves:
         board = update_board(board, move)
