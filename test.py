@@ -101,20 +101,20 @@ try:
     while True:
         binary_chunk = next(lines)
         event_obj = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
-        print("Event",str(event_obj))
-        if event_obj["type"] == 'gameState':
-            game.state = event_obj
-            moves = game.state["moves"].split()
-            print("Moves:",moves)
-            board = chess.Board()
-            for move in moves:
-                board = update_board(board, move)
-            print(board)
-            if board.turn != player:
-                result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
-                move = result.move
-                li.make_move(game_id=game_id,move=move)
-
+        print("Event:",str(event_obj))
+        if event_obj is not None: 
+            if event_obj["type"] == 'gameState':
+                game.state = event_obj
+                moves = game.state["moves"].split()
+                print("Moves:",moves)
+                board = chess.Board()
+                for move in moves:
+                    board = update_board(board, move)
+                print(board)
+                if board.turn != player:
+                    result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
+                    move = result.move
+                    li.make_move(game_id=game_id,move=move)
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
     sys.exit(0)
