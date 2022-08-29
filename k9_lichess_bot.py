@@ -30,6 +30,8 @@ bot = li.get_profile()
 
 board = chess.Board()
 
+game_id = None
+
 pieces = ("Pawn","Knight","Bishop","Rook","Queen","King")
 message = ""
 
@@ -124,7 +126,8 @@ def random_msg(phrase_dict):
     return message
 
 def speak(command:str):
-    li.chat(game_id=game_id, room="K9", text=command)
+    if game_id is not None:
+        li.chat(game_id=game_id, room="K9", text=command)
     k9voice.speak(command)
 
 def update_board(board, move):
