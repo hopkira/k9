@@ -182,6 +182,7 @@ speak("Hello " + str(name) + "!")
 '''
 speak("Would you like to play black or white?")
 
+'''
 while True:
     # side = input ("Do you want to play black or white? ")
     side = k9listen.listen_for_command()
@@ -194,6 +195,10 @@ while True:
         player = chess.BLACK
         side = "white"
         break
+'''
+
+player = chess.BLACK
+side = "white"
 
 speak("Affirmative. I will play " + str(side))
 
