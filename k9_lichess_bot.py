@@ -188,14 +188,14 @@ while True:
     print("I heard: "+side)
     if "white" in side or "what" in side:
         player = chess.WHITE
-        side = "white"
+        side = "black"
         break
     if "black" in side:
         player = chess.BLACK
-        side = "black"
+        side = "white"
         break
 
-speak("Affirmative. You are playing " + str(side))
+speak("Affirmative. I will play " + str(side))
 
 game_id = create_game(username=username, token=player_token, color=side)
 
@@ -207,6 +207,7 @@ mem.storeState("chess",True)
 def play_game(game_id:str):
     stream = li.get_stream(game_id)
     lines = stream.iter_lines()
+    print("Lines:",lines)
     initial_state = json.loads(next(lines).decode('utf-8'))
     game = Game(initial_state,username, li.baseUrl, 20)
     moves = game.state["moves"].split()
@@ -214,6 +215,7 @@ def play_game(game_id:str):
         board = update_board(board, move)
     while True:
         for event in stream:
+            print("Event:",event)
             if event['type'] == 'gameState':
                 game.state = event
                 if game.state["status"] != "started":
