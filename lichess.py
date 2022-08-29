@@ -94,10 +94,10 @@ class Lichess():
 
         return r.json()
 
-    def create_challenge(self, username:str, params:object):
+    def create_challenge(self, username, params):
         url = self.baseUrl + ENDPOINTS["challenge"].format(username)
         print(url)
-        r = requests.post(url, headers=self.header, params = params)
+        r = requests.post(url, headers=self.header, data = params)
         print(r.json())
         if r.status_code != 200:
             print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
