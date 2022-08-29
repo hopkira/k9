@@ -1,6 +1,3 @@
-from email import header
-import json
-from signal import raise_signal
 import requests
 
 ENDPOINTS = {
