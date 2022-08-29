@@ -60,6 +60,8 @@ lichess_url = "https://lichess.org/api/"
 
 li = Lichess(token=bot_token, url=lichess_url)
 
+engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
+INFO_SCORE = 2
 
 def update_board(board, move):
     uci_move = chess.Move.from_uci(move)
@@ -80,6 +82,8 @@ params = {"rated": False,
                 "acceptByToken": player_token,
                 "keepAliveStream": "true"
                 }
+
+player = chess.WHITE
 
 print(username, params)
 response = li.create_challenge(username, params)
@@ -108,7 +112,9 @@ try:
                     for move in moves:
                         board = update_board(board, move)
                     print(board)
-            
+            if board.turn != player:
+                result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
+
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
     sys.exit(0)
