@@ -88,8 +88,9 @@ try:
             event_json = event.decode('utf8').replace("'", '"')
             print(event_json)
             if event_json != "\n":
-                if event_json["type"] == 'gameState':
-                    game.state = event_json
+                event_obj = json.loads(event_json)
+                if event_obj["type"] == 'gameState':
+                    game.state = event_obj
                     moves = game.state["moves"].split()
                     print("Moves:",moves)
             
