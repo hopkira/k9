@@ -86,8 +86,7 @@ try:
     while True:
         for event in stream:
             event_json = event.decode('utf8').replace("'", '"')
-            if event_json != "\n":
-                new_event = json.loads(event_json)
+            new_event = json.loads(event_json)
             if new_event["type"] == 'gameState':
                 game.state = new_event
                 moves = game.state["moves"].split()
