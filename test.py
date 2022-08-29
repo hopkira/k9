@@ -56,8 +56,6 @@ lichess_url = "https://lichess.org/api/"
 
 li = Lichess(token=bot_token, url=lichess_url)
 
-color = "white"
-
 # player_token = str({"Authorization": "Bearer {}".format(player_token)})
 
 params = {"rated": False, 
@@ -65,7 +63,7 @@ params = {"rated": False,
                 "rated": "false",
                 "clock.limit": "300",
                 "clock.increment": "15",
-                "color": "white",
+                "color": "black",
                 "acceptByToken": player_token,
                 "keepAliveStream": "true"
                 }
@@ -84,4 +82,6 @@ moves = game.state["moves"].split()
 print("Moves:",moves)
 while True:
     for event in stream:
-        print("Event:",str(event))
+        event_json = event.decode('utf8').replace("'", '"')
+        if event_json != "\n":
+            print("Event:",event_json)
