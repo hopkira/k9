@@ -82,3 +82,6 @@ print("Initial state:",str(initial_state))
 game = Game(initial_state, username, li.baseUrl, 20)
 moves = game.state["moves"].split()
 print("Moves:",moves)
+while True:
+    for event in stream:
+        print("Event:",str(event))
