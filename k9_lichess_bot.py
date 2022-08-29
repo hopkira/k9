@@ -62,7 +62,6 @@ class Game:
         self.initial_fen = json.get("initialFen")
         self.state = json.get("state")
         self.base_url = base_url
-        self.white_starts = self.initial_fen == "startpos" or self.initial_fen.split()[1] == "w"
         self.abort_at = time.time() + abort_time
         self.terminate_at = time.time() + (self.clock_initial + self.clock_increment) / 1000 + abort_time + 60
         self.disconnect_at = time.time()
