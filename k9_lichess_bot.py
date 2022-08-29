@@ -197,8 +197,8 @@ while True:
         break
 '''
 
-player = chess.BLACK
-side = "white"
+player = chess.WHITE
+side = "black"
 
 speak("Affirmative. I will play " + str(side))
 
