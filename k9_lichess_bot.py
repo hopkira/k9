@@ -4,6 +4,7 @@ import random
 import os
 import json
 import time
+import requests
 
 from lichess import Lichess
 
@@ -154,11 +155,13 @@ def create_game(username, token:str, color:str):
         response = li.create_challenge(username, params)
         # nb, as we used token, challenge_id may be game_id
         game_id = response.get("game", {}).get("id")
-        print(game_id)
+        print("GameID:",game_id)
         return game_id
     except Exception:
         print("Could not create game")
         return None
+
+end_of_game = False
 
 stop_now = False
 
@@ -174,16 +177,8 @@ k9back.off()
 k9ears.stop()
 print("Lights turned off...")
 
-'''
-speak("what is your name?")
-name = k9listen.listen_for_command()
-# name = input ("What is your name? ")
-speak("Hello " + str(name) + "!")
-
-'''
 speak("Would you like to play black or white?")
 
-'''
 while True:
     # side = input ("Do you want to play black or white? ")
     side = k9listen.listen_for_command()
@@ -196,10 +191,6 @@ while True:
         player = chess.BLACK
         side = "white"
         break
-'''
-
-player = chess.WHITE
-side = "black"
 
 speak("Affirmative. I will play " + str(side))
 
@@ -213,64 +204,74 @@ mem.storeState("chess",True)
 def play_game(game_id:str):
     stream = li.get_stream(game_id)
     lines = stream.iter_lines()
-    print("Lines:",lines)
+    print("Lines:",str(lines))
     initial_state = json.loads(next(lines).decode('utf-8'))
     game = Game(initial_state, username, li.baseUrl, 20)
     moves = game.state["moves"].split()
-    for move in moves:
-        board = update_board(board, move)
-    while True:
-        for event in stream:
-            print("Event:",event)
-            if event['type'] == 'gameState':
-                game.state = event
-                if game.state["status"] != "started":
-                    print("Finished game ID:{} with status: {}".format(game_id, game.state["status"]))
-                    return
-            if board.turn == player:
-                # analyse the board
-                if board.is_check(): speak(random_msg(check)) # announce check
-                result = engine.analyse(board=board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
-                score = result.score.pov(chess.WHITE)
-                # prompt player for their move
-                speak(random_msg(your_move))
-            else:
-                # determine the best move for K9 bot and analyse the board
-                k9ears.think()
-                result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
-                move = result.move
-                score = result.info.score.pov(chess.WHITE)
-                k9ears.stop()
-            # Extract move context from board
-            move_piece = pieces[board.piece_type_at(move.from_square)-1] 
-            move_color = board.turn
-            move_from = chess.SQUARE_NAMES[move.from_square]
-            move_to = chess.SQUARE_NAMES[move.to_square]  
-            if 'score' in context:
-                old_score = context["score"]
-                context.update(old_score = old_score)
-            # Announce if piece is taken
-            taken = board.piece_type_at(move.to_square)
-            if taken is not None:
-                if (board.turn == player):
-                    if (random.random() < (taken*0.2)):
-                        speak("You have taken my " + pieces[taken-1])
-                else:
-                    speak("My " + move_piece + " " + random_msg(takes) + " your " + pieces[taken-1])
-            # if no piece is taken, announce K9's move
-            else:
-                if (board.turn != player):
-                    speak(random_msg(instruction) + move_piece + " from " + move_from + " to " + move_to)
-            context.update(player = player,
-                        mv_color = move_color,
-                        mv_from = move_from,
-                        mv_to = move_to,
-                        score = score,
-                        piece = move_piece)
-            # number = 3 and random 0.8
-            if ((board.fullmove_number > 3) and (random.random()>0.7)): speak(get_phrase())
-            board.push(move)
-            li.make_move(game_id=game_id,move=move)
+    try:
+        while game.state["status"] == "started":
+            try:
+                binary_chunk = next(lines)
+            except StopIteration:
+                print("Game finished")
+                return
+            event_obj = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
+            print("Event:",str(event_obj))
+            if event_obj is not None:
+                if event_obj["type"] == 'gameState':
+                    game.state = event_obj
+                    moves = game.state["moves"].split()
+                    print("Moves:",moves)
+                    board = chess.Board()
+                    for move in moves:
+                        board = update_board(board, move)
+                    print(board)
+                    if board.turn == player:
+                        # analyse the board
+                        if board.is_check(): speak(random_msg(check)) # announce check
+                        result = engine.analyse(board=board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
+                        score = result.score.pov(chess.WHITE)
+                        # prompt player for their move
+                        speak(random_msg(your_move))
+                    else:
+                        k9ears.think()
+                        result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
+                        move = result.move
+                        score = result.info.score.pov(chess.WHITE)
+                        k9ears.stop()
+                        li.make_move(game_id=game_id,move=move)
+                        move_piece = pieces[board.piece_type_at(move.from_square)-1] 
+                        move_color = board.turn
+                        move_from = chess.SQUARE_NAMES[move.from_square]
+                        move_to = chess.SQUARE_NAMES[move.to_square]  
+                        if 'score' in context:
+                            old_score = context["score"]
+                            context.update(old_score = old_score)
+                        # Announce if piece is taken
+                        taken = board.piece_type_at(move.to_square)
+                        if taken is not None:
+                            if (board.turn == player):
+                                if (random.random() < (taken*0.2)):
+                                    speak("You have taken my " + pieces[taken-1])
+                            else:
+                                speak("My " + move_piece + " " + random_msg(takes) + " your " + pieces[taken-1])
+                        # if no piece is taken, announce K9's move
+                        else:
+                            if (board.turn != player):
+                                speak(random_msg(instruction) + move_piece + " from " + move_from + " to " + move_to)
+                        context.update(player = player,
+                                    mv_color = move_color,
+                                    mv_from = move_from,
+                                    mv_to = move_to,
+                                    score = score,
+                                    piece = move_piece)
+                        # number = 3 and random 0.8
+                        if ((board.fullmove_number > 3) and (random.random()>0.7)): speak(get_phrase())
+    except requests.exceptions.StreamConsumedError:
+        print("Game aborted by player")
+        return
+    print("Game finished")
+    return
 
 # END GAME STATE
 
