@@ -15,12 +15,12 @@ color = "white"
 
 params = {"rated": False, 
                 "variant": "standard",
-                "rated": False,
-                "clock.limit": 300.0,
-                "clock.increment": 15,
+                "rated": "False",
+                "clock.limit": "300",
+                "clock.increment": "15",
                 "color": "white",
                 "acceptByToken": player_token,
-                "keepAliveStream": True
+                "keepAliveStream": "True"
                 }
 
 print(username, params)
