@@ -13,7 +13,7 @@ li = Lichess(token=bot_token, url=lichess_url)
 color = "white"
 side = "white"
 
-player_token = {"Authorization": "Bearer {}".format(player_token)}
+# player_token = {"Authorization": "Bearer {}".format(player_token)}
 
 def create_game(username, token, color):
     params = {"rated": False, 
