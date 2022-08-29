@@ -96,8 +96,9 @@ class Lichess():
 
     def create_challenge(self, username:str, params:object):
         url = self.baseUrl + ENDPOINTS["challenge"].format(username)
+        print(url)
         r = requests.post(url, headers=self.header, payload = params)
-
+        print(r.json())
         if r.status_code != 200:
             print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
             return None
