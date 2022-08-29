@@ -85,6 +85,9 @@ params = {"rated": False,
 
 player = chess.WHITE
 
+def parse_ndjson(data):
+    return [json.loads(l) for l in data]
+
 print(username, params)
 response = li.create_challenge(username, params)
 game_id = response.get("game", {}).get("id")
@@ -103,7 +106,7 @@ try:
             event_json = event.decode('utf8').replace("'", '"')
             print(event_json)
             if event_json != "\n":
-                event_obj = json.loads(event_json)
+                event_obj = parse_ndjson(event_json)
                 if event_obj["type"] == 'gameState':
                     game.state = event_obj
                     moves = game.state["moves"].split()
