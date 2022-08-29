@@ -25,4 +25,10 @@ params = {"rated": False,
 
 print(username, params)
 response = li.create_challenge(username, params)
-print(response)
+game_id = response.get("game", {}).get("id")
+print("GameID:",game_id)
+stream = li.get_stream(game_id)
+lines = stream.iter_lines()
+print("Lines:",str(lines))
+initial_state = json.loads(next(lines).decode('utf-8'))
+print("Initial state:",str(initial_state))
