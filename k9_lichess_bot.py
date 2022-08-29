@@ -141,17 +141,16 @@ def update_board(board, move):
 
 def create_game(username, token:str, color:str):
     params = {"rated": False, 
-                "variant": "standard",
-                "clock.limit": 300,
-                "clock.increment": 15,
-                "color": color,
-                "acceptByToken": token,
-                "message": "K9 is ready to play!"
-                }
+                    "variant": "standard",
+                    "rated": "false",
+                    "clock.limit": "300",
+                    "clock.increment": "15",
+                    "color": color,
+                    "acceptByToken": token,
+                    "keepAliveStream": "true"
+                    }
     try:
-        print(username, params)
         response = li.create_challenge(username, params)
-        print(response)
         # nb, as we used token, challenge_id may be game_id
         game_id = response.get("game", {}).get("id")
         print(game_id)
