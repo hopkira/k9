@@ -12,7 +12,7 @@ from eyes import Eyes
 from back_lights import BackLights
 from ears import Ears
 from voice import Voice
-from memory import Memory as mem
+from memory import Memory
 
 bot_token = os.getenv("LICHESS_BOT_TOKEN")
 player_token = os.getenv("LICHESS_PLAYER_TOKEN")
@@ -25,6 +25,8 @@ li = Lichess(token=bot_token, url=lichess_url)
 engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 
 INFO_SCORE = 2
+
+mem = Memory()
 
 bot = li.get_profile()
 
