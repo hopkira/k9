@@ -87,7 +87,12 @@ try:
         for event in stream:
             event_json = event.decode('utf8').replace("'", '"')
             if event_json != "\n":
-                print("Event:",event_json)
+                new_event = json.loads(event_json)
+            if new_event["type"] == 'gameState':
+                game.state = new_event
+                moves = game.state["moves"].split()
+                print("Moves:",moves)
+            
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
     sys.exit(0)
