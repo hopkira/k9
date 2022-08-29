@@ -149,10 +149,12 @@ def create_game(username, token:str, color:str):
                 "message": "K9 is ready to play!"
                 }
     try:
-        response = li.challenge(username, params)
+        print(username, params)
+        response = li.create_challenge(username, params)
         print(response)
         # nb, as we used token, challenge_id may be game_id
         game_id = response.get("game", {}).get("id")
+        print(game_id)
         return game_id
     except Exception:
         print("Could not create game")
