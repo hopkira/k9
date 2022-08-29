@@ -25,13 +25,13 @@ class Eyes():
         '''
         Turns eye panel off
         '''
-        self.set_level(self,0)
+        self.set_level(0)
 
     def on(self) -> None:
         '''
         Turns eye panel to full brightness
         '''
-        self.set_level(self,1)
+        self.set_level(1)
 
     def get_level(self) -> float:
         '''
