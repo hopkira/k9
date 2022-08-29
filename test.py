@@ -112,10 +112,10 @@ try:
                     for move in moves:
                         board = update_board(board, move)
                     print(board)
-            if board.turn != player:
-                result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
-                move = result.move
-                li.make_move(game_id=game_id,move=move)
+                    if board.turn != player:
+                        result = engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
+                        move = result.move
+                        li.make_move(game_id=game_id,move=move)
 
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
