@@ -85,6 +85,8 @@ params = {"rated": False,
 
 player = chess.WHITE
 
+end_of_game = False
+
 print(username, params)
 response = li.create_challenge(username, params)
 game_id = response.get("game", {}).get("id")
@@ -98,8 +100,12 @@ game = Game(initial_state, username, li.baseUrl, 20)
 moves = game.state["moves"].split()
 print("Moves:",moves)
 try:
-    while True:
-        binary_chunk = next(lines)
+    while game.state["status"] == "started":
+        try:
+            binary_chunk = next(lines)
+        except StopIteration:
+            print("Game finished")
+            sys.exit(0)
         event_obj = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
         print("Event:",str(event_obj))
         if event_obj is not None: 
@@ -118,3 +124,4 @@ try:
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
     sys.exit(0)
+print("Game finished")
