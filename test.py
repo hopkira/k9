@@ -4,6 +4,8 @@ import json
 import time
 import requests
 import sys
+import chess
+import chess.engine
 
 class Game:
     def __init__(self, json, username, base_url, abort_time):
@@ -58,6 +60,15 @@ lichess_url = "https://lichess.org/api/"
 
 li = Lichess(token=bot_token, url=lichess_url)
 
+
+def update_board(board, move):
+    uci_move = chess.Move.from_uci(move)
+    if board.is_legal(uci_move):
+        board.push(uci_move)
+    else:
+        print('Ignoring illegal move {} on board {}'.format(move, board.fen()))
+    return board
+
 # player_token = str({"Authorization": "Bearer {}".format(player_token)})
 
 params = {"rated": False, 
@@ -93,6 +104,10 @@ try:
                     game.state = event_obj
                     moves = game.state["moves"].split()
                     print("Moves:",moves)
+                    board = chess.Board()
+                    for move in moves:
+                        board = update_board(board, move)
+                    print(board)
             
 except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
