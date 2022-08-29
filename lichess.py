@@ -1,7 +1,7 @@
 import requests
 
 ENDPOINTS = {
-    "profile": "account/me",
+    "profile": "account",
     "stream": "bot/game/stream/{}",
     "stream_event": "api/stream/event",
     "game": "bot/game/{}",
