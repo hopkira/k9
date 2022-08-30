@@ -26,5 +26,5 @@ class Voice():
         return ret
 
     def on_publish(client,userdata,result):             #create function for callback
-        print("Data published:", userdata)
+        print("Data published:", client, userdata, result)
         pass
