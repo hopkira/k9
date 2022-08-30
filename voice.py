@@ -18,13 +18,14 @@ class Voice():
 
     def __init__(self) -> None:
         self.client = mqtt.Client("k9-speech-client")
-        self.client.connect("localhost")
-        self.client.on_publish = self.on_publish    
+        self.client.connect(host = "localhost", port = 1883)
+        self.client.on_publish = self.on_publish  
+        self.client.loop_start()
 
     def speak(self, speech:str) -> None:
         print("Speech:",speech)
         ret = self.client.publish(topic="k9/events/speech", payload=speech, qos = 2, retain = False)
-        return
+        return ret
 
     def on_publish(self, client, userdata, mid):             #create function for callback
         print("Data published")
