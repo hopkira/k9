@@ -171,7 +171,7 @@ class ChessGame():
                             score = result['score'].pov(chess.WHITE)
                             print("Analysis score:", score)
                             # prompt player for their move
-                            self.send_player_msg(self.random_msg(self.your_move))
+                            self.send_player_msg(self.random_msg("your_move"))
                         else:
                             self.back.on()
                             result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
