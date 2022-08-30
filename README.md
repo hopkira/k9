@@ -35,7 +35,7 @@ A complex Oak-lite sensor pipeline that is used to provide scanning functions fr
 A simple sensor pipeline that translates raw information from the back panel lidar sensor into Redis point cloud inserts (recorded as 'back') for consumption by the Motor Controller.
 
 ## k9_motor_sm.py
-Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward.
+Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward. Uses logo.py to precisely control motors and movement.
 
 ## Create and activate a virtualenv
 Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment and then use ``pip3 install -r requirements`` to install the required Python packages.
