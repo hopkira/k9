@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+# coding: utf-8
+# Author: Richard Hopkins
+# Date: 30 August 2022
+#
+# This program provides Lichess.com chess playing
+# function for K9
+#
 import chess
 import chess.engine
 import random
@@ -16,6 +24,7 @@ from tail import Tail
 INFO_SCORE = 2
 
 class ChessGame():
+    '''Provides Lichess.com chess playing function'''
 
     def __init__(self):
         # Flag in Redis that K9 is in chess mode
