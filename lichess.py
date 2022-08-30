@@ -3,7 +3,7 @@ import requests
 ENDPOINTS = {
     "stream": "bot/game/stream/{}",
     "move": "bot/game/{}/move/{}",
-    "chat": "/api/bot/game/{}/chat",
+    "chat": "bot/game/{}/chat",
     "challenge": "challenge/{}"
 }
 
