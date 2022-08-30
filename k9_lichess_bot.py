@@ -172,6 +172,7 @@ class ChessGame():
                         else:
                             self.ears.think()
                             result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=self.INFO_SCORE)
+                            print(result)
                             move = result.move
                             score = result.info.score.pov(chess.WHITE)
                             self.ears.stop()
