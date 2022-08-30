@@ -1,5 +1,5 @@
 from cgitb import text
-from lichess import Lichess
+from lichess import LichessAPI
 import os
 import json
 import time
