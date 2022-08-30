@@ -23,6 +23,7 @@ class Ears():
         self.following = False
 
     def __write(self,text:string) -> None:
+        print("Ears:",text)
         self.ser.write(str.encode(text+"()\n"))
 
     def stop(self) -> None:
