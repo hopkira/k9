@@ -30,7 +30,7 @@ class ChessGame():
         self.INFO_SCORE = 2
         self.pieces = ("Pawn","Knight","Bishop","Rook","Queen","King")
         #bot = self.li.get_profile()
-        board = chess.Board()
+        self.board = chess.Board()
         self.game_id = None
         self.game_state = None
         self.context = {}
@@ -75,16 +75,16 @@ class ChessGame():
         self.play_game(game_id=self.game_id)
         # Game finished
         self.engine.quit()
-        print(board)
-        if board.is_checkmate():
-            if board.turn == self.player:
+        print(self.board)
+        if self.board.is_checkmate():
+            if self.board.turn == self.player:
                 self.send_player_msg("Checkmate - I have won")
             else:
                 self.send_player_msg("Congratulations - you have won")
-        if board.is_stalemate(): message = "We have drawn through stalemate"
-        if board.is_insufficient_material(): message = "A draw is now inevitable due to insufficient material."
-        if board.is_seventyfive_moves(): message = "I am really bored.  We have drawn through repetition." 
-        if board.is_fivefold_repetition(): message= "The game is over, it has been drawn through repetition." 
+        if self.board.is_stalemate(): message = "We have drawn through stalemate"
+        if self.board.is_insufficient_material(): message = "A draw is now inevitable due to insufficient material."
+        if self.board.is_seventyfive_moves(): message = "I am really bored.  We have drawn through repetition." 
+        if self.board.is_fivefold_repetition(): message= "The game is over, it has been drawn through repetition." 
         self.send_player_msg(message)
         self.send_player_msg("Thank you for a lovely game")
         mem.storeState("chess",False)
@@ -107,10 +107,10 @@ class ChessGame():
         '''Update the UCI/Stockfish board in line with the Lichess board state'''
         uci_move = chess.Move.from_uci(move)
         if board.is_legal(uci_move):
-            board.push(uci_move)
+            self.board.push(uci_move)
         else:
             print('Ignoring illegal move {} on board {}'.format(move, board.fen()))
-        return board
+        return self.board
     
     def create_game(self, username, token:str, color:str):
         '''Create a Lichess game and return game_id'''
@@ -157,42 +157,43 @@ class ChessGame():
                         self.game_state = event_obj
                         moves = self.game_state["moves"].split()
                         print("Moves:",moves)
-                        board = chess.Board()
+                        self.board = chess.Board()
                         for move in moves:
-                            board = self.update_board(board, move)
-                        print(board)
-                        if board.turn == self.player:
+                            self.board = self.update_board(self.board, move)
+                        print(self.board)
+                        if self.board.turn == self.player:
                             # analyse the board
-                            if board.is_check(): self.send_player_msg(self.random_msg("check")) # announce check
-                            result = self.engine.analyse(board=board, limit=chess.engine.Limit(time=1.0),info=self.INFO_SCORE)
+                            if self.board.is_check(): self.send_player_msg(self.random_msg("check")) # announce check
+                            result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=self.INFO_SCORE)
+                            print(result)
                             score = result.score.pov(chess.WHITE)
                             # prompt player for their move
                             self.send_player_msg(self.random_msg(self.your_move))
                         else:
                             self.ears.think()
-                            result = self.engine.play(board=board, limit=chess.engine.Limit(time=20.0),info=self.INFO_SCORE)
+                            result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=self.INFO_SCORE)
                             move = result.move
                             score = result.info.score.pov(chess.WHITE)
                             self.ears.stop()
                             self.li.make_move(game_id=game_id,move=move)
-                            move_piece = self.pieces[board.piece_type_at(move.from_square)-1] 
-                            move_color = board.turn
+                            move_piece = self.pieces[self.board.piece_type_at(move.from_square)-1] 
+                            move_color = self.board.turn
                             move_from = chess.SQUARE_NAMES[move.from_square]
                             move_to = chess.SQUARE_NAMES[move.to_square]  
                             if 'score' in self.context:
                                 old_score = self.context["score"]
                                 self.context.update(old_score = old_score)
                             # Announce if piece is taken
-                            taken = board.piece_type_at(move.to_square)
+                            taken = self.board.piece_type_at(move.to_square)
                             if taken is not None:
-                                if (board.turn == self.player):
+                                if (self.board.turn == self.player):
                                     if (random.random() < (taken*0.2)):
                                         self.send_player_msg("You have taken my " + self.pieces[taken-1])
                                 else:
                                     self.send_player_msg("My " + move_piece + " " + self.random_msg("takes") + " your " + self.pieces[taken-1])
                             # if no piece is taken, announce K9's move
                             else:
-                                if (board.turn != self.player):
+                                if (self.board.turn != self.player):
                                     self.send_player_msg(self.random_msg("instruction") + move_piece + " from " + move_from + " to " + move_to)
                             self.context.update(player = self.player,
                                         mv_color = move_color,
@@ -201,7 +202,7 @@ class ChessGame():
                                         score = score,
                                         piece = move_piece)
                             # number = 3 and random 0.8
-                            if ((board.fullmove_number > 3) and (random.random()>0.7)): self.send_player_msg(self.get_phrase())
+                            if ((self.board.fullmove_number > 3) and (random.random()>0.7)): self.send_player_msg(self.get_phrase())
         except requests.exceptions.StreamConsumedError:
             print("Game aborted by player")
             return
