@@ -3,7 +3,6 @@ import chess.engine
 import random
 import os
 import json
-import time
 import requests
 from lichess import LichessAPI
 from listen import Listen
@@ -138,10 +137,12 @@ class ChessGame():
         '''Play a created Lichess game'''
         stream = self.li.get_stream(game_id)
         lines = stream.iter_lines()
-        print("Lines:",str(lines))
         initial_state = json.loads(next(lines).decode('utf-8'))
         self.game_state = initial_state.get("state")
+        print("Initial state:",str(self.game_state))
         moves = self.game_state["moves"].split()
+        print("Moves:",moves)
+        print("Status:",self.game_state["status"])
         try:
             while self.game_state["status"] == "started":
                 try:
