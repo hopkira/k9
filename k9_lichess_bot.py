@@ -11,6 +11,7 @@ from back_lights import BackLights
 from ears import Ears
 from voice import Voice
 from memory import Memory
+from tail import Tail
 
 INFO_SCORE = 2
 
@@ -49,7 +50,7 @@ class ChessGame():
             "mate_win": ("You should prepare for your end", "It's almost over for you", "The end is near for you", "I will mate soon","We are near the end of the game"),
             "mate_lose": ("this is not possible","how can I be losing?","you are the better player","this is not logical - I am losing"),
             "draw":  ("We are heading for a draw","The game is looking very even", "This is a well-balanced game", "We are drawing, who will make the winning move?"),
-            "instruction": ("Please move my","I will move","I will move my","My move is")
+            "instruction": ("I have moved my","I will move","I've moved my","My move is")
         }
         # Create K9 interfaces
         self.eyes = Eyes()
@@ -57,6 +58,7 @@ class ChessGame():
         self.listen = Listen()
         self.ears = Ears()
         self.voice = Voice()
+        self.tail = Tail()
         # Initialize K9 interfaces
         print("Turning lights off...")
         self.eyes.off()
@@ -80,12 +82,22 @@ class ChessGame():
         if self.board.is_checkmate():
             if self.board.turn == self.player:
                 self.send_player_msg("Checkmate - I have won")
+                self.tail.wag_h()
             else:
                 self.send_player_msg("Congratulations - you have won")
-        if self.board.is_stalemate(): self.message = "We have drawn through stalemate"
-        if self.board.is_insufficient_material(): self.message = "A draw is now inevitable due to insufficient material."
-        if self.board.is_seventyfive_moves(): self.message = "I am really bored.  We have drawn through repetition." 
-        if self.board.is_fivefold_repetition(): self.message= "The game is over, it has been drawn through repetition." 
+                self.tail.down()
+        if self.board.is_stalemate():
+            self.message = "We have drawn through stalemate"
+            self.tail.center()
+        if self.board.is_insufficient_material(): 
+            self.message = "A draw is now inevitable due to insufficient material."
+            self.tail.center()
+        if self.board.is_seventyfive_moves(): 
+            self.message = "I am really bored.  We have drawn through repetition." 
+            self.tail.center()
+        if self.board.is_fivefold_repetition():
+            self.message= "The game is over, it has been drawn through repetition." 
+            self.tail.center()
         self.send_player_msg(self.message)
         self.send_player_msg("Thank you for a lovely game")
         mem.storeState("chess",False)
@@ -164,7 +176,9 @@ class ChessGame():
                         print(self.board)
                         if self.board.turn == self.player:
                             # analyse the board
-                            if self.board.is_check(): self.send_player_msg(self.random_msg("check")) # announce check
+                            if self.board.is_check(): 
+                                self.tail.up()
+                                self.send_player_msg(self.random_msg("check")) # announce check
                             result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                             print(result)
                             #score = result.score.pov(chess.WHITE)
@@ -194,12 +208,14 @@ class ChessGame():
                                 if (self.board.turn == self.player):
                                     if (random.random() < (taken*0.2)):
                                         self.send_player_msg("You have taken my " + self.pieces[taken-1])
+                                        self.tail.down()
                                 else:
                                     self.send_player_msg("My " + move_piece + " " + self.random_msg("takes") + " your " + self.pieces[taken-1])
+                                    self.tail.up()
                             # if no piece is taken, announce K9's move
                             else:
                                 if (self.board.turn != self.player):
-                                    self.send_player_msg(self.random_msg("instruction") + move_piece + " from " + move_from + " to " + move_to)
+                                    self.send_player_msg(self.random_msg("instruction") + " " + move_piece + " from " + move_from + " to " + move_to)
                             self.context.update(player = self.player,
                                         mv_color = move_color,
                                         mv_from = move_from,
@@ -226,11 +242,19 @@ class ChessGame():
             self.context.update(to_mate = self.context['score'].mate())
             if self.context['player']:
                 # human player is white
-                if self.context['to_mate'] >= 0: return self.random_msg("mate_lose")
-                if self.context['to_mate'] < 0: return self.random_msg("mate_win")
+                if self.context['to_mate'] >= 0:
+                    self.tail.down()
+                    return self.random_msg("mate_lose")
+                if self.context['to_mate'] < 0: 
+                    self.tail.wag_v()
+                    return self.random_msg("mate_win")
             else:
-                if self.context['to_mate'] >= 0: return self.random_msg("mate_win")
-                if self.context['to_mate'] < 0: return self.random_msg("mate_lose")
+                if self.context['to_mate'] >= 0:
+                    self.tail.wag_v()
+                    return self.random_msg("mate_win")
+                if self.context['to_mate'] < 0:
+                    self.tail.down()
+                    return self.random_msg("mate_lose")
         else:
             self.context.pop('to_mate', None)
             return self.interpret_score(self.context['score'].score())
@@ -238,11 +262,20 @@ class ChessGame():
     def interpret_score(self, score):
         '''React to how well (or poorly) the opponent is playing'''
         if self.context['player']:
-            if score > 60: return self.random_msg("losing")
-            if score < -60: return self.random_msg("winning")
+            if score > 60:
+                self.tail.down()
+                return self.random_msg("losing")
+            if score < -60:
+                self.tail.up()
+                return self.random_msg("winning")
         else:
-            if score > 60: return self.random_msg("winning")
-            if score < -60: return self.random_msg("losing")
+            if score > 60:
+                self.tail.up()
+                return self.random_msg("winning")
+            if score < -60:
+                self.tail.down()
+                return self.random_msg("losing")
+        self.tail.center()
         return self.random_msg("draw")
 
     def get_color(self, bool):
