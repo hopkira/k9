@@ -12,6 +12,8 @@ from ears import Ears
 from voice import Voice
 from memory import Memory
 
+INFO_SCORE = 2
+
 class ChessGame():
 
     def __init__(self):
@@ -27,7 +29,6 @@ class ChessGame():
         lichess_url = "https://lichess.org/api/"
         self.li = LichessAPI(token=bot_token, url=lichess_url)
         self.engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
-        self.INFO_SCORE = 2
         self.pieces = ("Pawn","Knight","Bishop","Rook","Queen","King")
         #bot = self.li.get_profile()
         self.board = chess.Board()
@@ -164,14 +165,14 @@ class ChessGame():
                         if self.board.turn == self.player:
                             # analyse the board
                             if self.board.is_check(): self.send_player_msg(self.random_msg("check")) # announce check
-                            result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=self.INFO_SCORE)
+                            result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                             print(result)
                             score = result.score.pov(chess.WHITE)
                             # prompt player for their move
                             self.send_player_msg(self.random_msg(self.your_move))
                         else:
                             self.ears.think()
-                            result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=self.INFO_SCORE)
+                            result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
                             print(result)
                             move = result.move
                             score = result.info.score.pov(chess.WHITE)
