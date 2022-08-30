@@ -11,6 +11,7 @@ pca = adafruit_pca9685.PCA9685(i2c)
 pca.frequency = 60
 
 class Tail():
+    
     def __init__(self) -> None:
         pca.channels[4].duty_cycle = 5121 # centre tail vertically
         pca.channels[5].duty_cycle = 5601	# tail centre
