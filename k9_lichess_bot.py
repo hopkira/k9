@@ -64,7 +64,7 @@ class ChessGame():
         self.ears.stop()
         print("Lights turned off...")
         # Ask what sise player wants to be
-        self.player = self.ask_colour()
+        self.player = self.ask_color()
         if self.player == chess.WHITE:
             bot_side = "black"
         else:
