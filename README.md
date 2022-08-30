@@ -16,7 +16,7 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 |eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level = listening for hotword; mid level = listening for audio command; high level = speaking, unable to listen)|
 |ears.py|Controls the LIDAR ears - supports various speeds and LIDAR modes to help avoid collisions|
 |state.py|Simple finite state machine class to simplify the core program|
-|listen.py|Enables offline speech to text recognition via Mozilla Deepspeech|
+|listen.py|Enables offline speech to text recognition via Mozilla Deepspeech. Uses the audio_tools.py file to capture voice.|
 |memory.py|Provides a high level interface to Redis to act as K9's short term memory, primarily used to share state and information between modules|
 |k9gpt3conv.py|Interface to OpenAI's GPT3 to determine K9's audio responses and the intent of user commands|
 |voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
