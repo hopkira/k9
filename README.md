@@ -1,11 +1,11 @@
 # k9localstt
 
-Core repository for the 2022 version of K9 robot dog software.
+Core repository for the 2022 version of the K9 robot dog software.
 
 Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
 
 ## k9_audio_sm.py
-Audio controller with voice recognition, finite state machine and offline wakeword.  Hotword detection is via Porcupine as State within the k9_audio_sm.py program. Can issue MQTT messages that indicate state changes for the motor state machine.  The controller integrates the following Python modules:
+Main behaviour controller for voice interactions. Audio controller with voice recognition, finite state machine and offline wakeword.  Hotword detection is via Porcupine as the Hotword State within the program. Can issue MQTT messages that indicate state changes for the motor state machine.  The controller integrates the following Python modules:
 
 | Program | Description |
 |---|---|
