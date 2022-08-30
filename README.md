@@ -20,6 +20,4 @@ Major update to K9 in preparation for moving to ROS2.  Splits major programs dow
 * **k9_motor_sm.py** - Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward.
 
 # Create and activate a virtualenv
-Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment and then use
-    pip3 install -r requirements
-to install the required Python packages.
+Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment and then use ``pip3 install -r requirements`` to install the required Python packages.
