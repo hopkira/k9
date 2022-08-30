@@ -22,9 +22,9 @@ class Voice():
         self.client.on_publish = self.on_publish    
 
     def speak(self, speech:str) -> None:
-        ret= self.client.publish("k9/events/speech", payload = speech, qos = 2, retain = False)
+        ret = self.client.publish("k9/events/speech", payload = speech, qos = 2, retain = False)
         return ret
 
-    def on_publish(client,userdata,result):             #create function for callback
-        print("Data published:", client, userdata, result)
+    def on_publish(self,client,userdata,result):             #create function for callback
+        print("Data published:", userdata)
         pass
