@@ -82,11 +82,11 @@ class ChessGame():
                 self.send_player_msg("Checkmate - I have won")
             else:
                 self.send_player_msg("Congratulations - you have won")
-        if self.board.is_stalemate(): message = "We have drawn through stalemate"
-        if self.board.is_insufficient_material(): message = "A draw is now inevitable due to insufficient material."
-        if self.board.is_seventyfive_moves(): message = "I am really bored.  We have drawn through repetition." 
-        if self.board.is_fivefold_repetition(): message= "The game is over, it has been drawn through repetition." 
-        self.send_player_msg(message)
+        if self.board.is_stalemate(): self.message = "We have drawn through stalemate"
+        if self.board.is_insufficient_material(): self.message = "A draw is now inevitable due to insufficient material."
+        if self.board.is_seventyfive_moves(): self.message = "I am really bored.  We have drawn through repetition." 
+        if self.board.is_fivefold_repetition(): self.message= "The game is over, it has been drawn through repetition." 
+        self.send_player_msg(self.message)
         self.send_player_msg("Thank you for a lovely game")
         mem.storeState("chess",False)
 

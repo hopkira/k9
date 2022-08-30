@@ -1,3 +1,4 @@
+from cgitb import text
 from lichess import Lichess
 import os
 import json
@@ -96,6 +97,10 @@ lines = stream.iter_lines()
 print("Lines:",str(lines))
 initial_state = json.loads(next(lines).decode('utf-8'))
 print("Initial state:",str(initial_state))
+li.chat(game_id,"player","This is a test message")
+
+
+'''
 game = Game(initial_state, username, li.baseUrl, 20)
 moves = game.state["moves"].split()
 print("Moves:",moves)
@@ -125,3 +130,4 @@ except requests.exceptions.StreamConsumedError:
     print("Game aborted by player")
     sys.exit(0)
 print("Game finished")
+'''

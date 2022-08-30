@@ -29,7 +29,7 @@ class LichessAPI():
     def chat(self, game_id, room, text):
         payload = {"room": room, "text": text}
         url = self.baseUrl + ENDPOINTS["chat"].format(game_id)
-        r = requests.post(url,headers = self.header, params=payload)
+        r = requests.post(url, headers = self.header, data = payload)
 
         if r.status_code != 200:
             print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
