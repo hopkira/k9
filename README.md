@@ -1,4 +1,5 @@
-# k9localstt
+# K9 Robot Dog Software
+## Featuring come, heel, chess playing and real time in character conversation.
 
 Core repository for the 2022 version of the K9 robot dog software.
 
@@ -10,7 +11,7 @@ Main behaviour controller for voice interactions. Audio controller with voice re
 | Program | Description |
 |---|---|
 |back_lights.py|Controls back panel flashing lights; used to indicate when K9 is thinking|
-|eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level=listening for hotword; mid level=listening for audio command; high level=speaking, unable to listen|
+|eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level=listening for hotword; mid level=listening for audio command; high level=speaking, unable to listen)|
 |ears.py|Controls the LIDAR ears - supports various speeds and LIDAR modes to help avoid collisions|
 |state.py|Simple finite state machine class to simplify the core program|
 |listen.py|Enables offline speech to text recognition via Mozilla Deepspeech|
