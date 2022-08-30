@@ -33,8 +33,6 @@ print("Know it all mode active...")
 #print("Speech initiated...")
 import paho.mqtt.client as mqtt
 print("MQTT found...")
-from audio_tools import VADAudio # Voice activity detection
-print("Audio tools working...")
 from tail import Tail
 print("Tail activated!")
 from  voice import Voice
