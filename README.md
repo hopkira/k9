@@ -6,7 +6,7 @@ Core repository for the 2022 version of the K9 robot dog software.
 Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
 
 ### Class diagram
-The following picture describes the Python modules that make up K9 and the key relationships between the modules.
+The following picture describes the Python modules that make up K9 and the key relationships between the modules. Most calls between modules are local, direct Python calls, except those shown in green that are performed by MQTT.
 <img
   src="K9 class diagram.drawio.png"
   alt="K9 Class Diagram"
