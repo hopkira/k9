@@ -2,8 +2,10 @@ import sys
 from subprocess import Popen
 
 from memory import Memory
+from eyes import Eyes
 
 mem = Memory()
+eyes = Eyes()   
 
 import paho.mqtt.client as mqtt
 print("MQTT found...")
@@ -34,6 +36,8 @@ def speak(speech:str) -> None:
     < will lower it
     '''
     mem.storeState("speaking",True)
+    store_eyes = eyes.get_level()
+    eyes.on()
     print('Speech server:', speech)
     speaking = None
     clauses = speech.split("|")
@@ -63,6 +67,7 @@ def speak(speech:str) -> None:
             cmd = ['espeak','-v','en-rp',str(clause),'-p',str(pitch),'-s',str(speed),'-a',str(amplitude)]
             speaking = Popen(cmd)
             Popen.wait(speaking)
+    eyes.set_level(store_eyes)
     mem.storeState("speaking",False)
 
 def mqtt_callback(client, userdata, message):
