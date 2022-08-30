@@ -168,18 +168,18 @@ class ChessGame():
                             result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                             print(result)
                             #score = result.score.pov(chess.WHITE)
-                            score = result.info["score"].pov(chess.WHITE)
-                            print(score)
+                            score = result['score'].pov(chess.WHITE)
+                            print("Analysis score:", score)
                             # prompt player for their move
                             self.send_player_msg(self.random_msg(self.your_move))
                         else:
-                            self.ears.think()
+                            self.back.on()
                             result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
                             print(result)
                             move = result.move
                             score = result.info["score"].pov(chess.WHITE)
-                            print(score)
-                            self.ears.stop()
+                            print("Play score:", score)
+                            self.back.off()
                             self.li.make_move(game_id=game_id,move=move)
                             move_piece = self.pieces[self.board.piece_type_at(move.from_square)-1] 
                             move_color = self.board.turn
