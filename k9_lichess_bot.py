@@ -217,7 +217,7 @@ class ChessGame():
     def send_player_msg(self, command:str):
         '''Send a player a message via chat and verbally via the robot'''
         if self.game_id is not None:
-            self.li.chat(game_id=self.game_id, room="K9", text=command)
+            self.li.chat(game_id=self.game_id, room="player", text=command)
         self.voice.speak(command)
 
     def get_phrase(self):
