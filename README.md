@@ -9,15 +9,15 @@ Main behaviour controller for voice interactions. Audio controller with voice re
 
 | Program | Description |
 |---|---|
-|back_lights.py|Back panel flashing lights|
-|eyes.py|Eye lights to indicate K9's activity (low=listening for hotword; mid=listening for command; high=speaking|
-|ears.py|Ear control - various speeds and LIDAR modes to avoid collisions|
-|state.py|Finite state machine to simplify the core program|
-|listen.py|K9 audio module incorporating offline speech to text via Mozilla Deepspeech|
-|memory.py|Redis Short term memory, primarily used to share state and information between modules|
-|k9gpt3conv.py|Wolfram QA or GPT3 to determine K9's response and the intent of user commands|
-|voice.py|K9's speech client which sends MQTT messagess tot he speechserver|
-|k9_lichess_bot.py|Chess module that enables him to play chess via Lichess.com|
+|back_lights.py|Controls back panel flashing lights; used to indicate when K9 is thinking|
+|eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening, low level=listening for hotword; mid level=listening for audio command; high level=speaking, unable to listen|
+|ears.py|Controls the LIDAR ears - supports various speeds and LIDAR modes to help avoid collisions|
+|state.py|Simple finite state machine class to simplify the core program|
+|listen.py|Enables offline speech to text recognition via Mozilla Deepspeech|
+|memory.py|Provides a high level interface to Redis to act as K9's short term memory, primarily used to share state and information between modules|
+|k9gpt3conv.py|Interface to OpenAI's GPT3 to determine K9's audio responses and the intent of user commands|
+|voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
+|k9_lichess_bot.py|Chess module that enables him to create Lichess.com games and play chess|
 
 ## k9_speechserver.py
 Provides speech to text capability that can be used by multiple modules on a FIFO basis via MQTT
