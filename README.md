@@ -16,7 +16,7 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 |eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level = listening for hotword; mid level = listening for audio command; high level = speaking, unable to listen)|
 |ears.py|Controls the LIDAR ears - supports various speeds and LIDAR modes to help avoid collisions|
 |state.py|Simple finite state machine class to simplify the core program|
-|listen.py|Enables offline speech to text recognition via Mozilla Deepspeech|
+|listen.py|Enables offline speech to text recognition via Mozilla Deepspeech. Uses the audio_tools.py file to capture voice.|
 |memory.py|Provides a high level interface to Redis to act as K9's short term memory, primarily used to share state and information between modules|
 |k9gpt3conv.py|Interface to OpenAI's GPT3 to determine K9's audio responses and the intent of user commands|
 |voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
@@ -35,7 +35,7 @@ A complex Oak-lite sensor pipeline that is used to provide scanning functions fr
 A simple sensor pipeline that translates raw information from the back panel lidar sensor into Redis point cloud inserts (recorded as 'back') for consumption by the Motor Controller.
 
 ## k9_motor_sm.py
-Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward.
+Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward. Uses logo.py to precisely control motors and movement.
 
 ## Create and activate a virtualenv
 Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment and then use ``pip3 install -r requirements`` to install the required Python packages.
