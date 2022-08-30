@@ -8,7 +8,7 @@ Major update to K9 in preparation for moving to ROS2.  Splits major programs dow
 ## k9_audio_sm.py
 Main behaviour controller for voice interactions. Impressive, in character, conversations using OpenAI GPT and local speech understanding using Mozilla DeepSpeech. Intent of conversations also determined using GPT3.  When the internet is unavailable, the robot will fall back to simple interactions based on simple commands.
 
-![Class Diagram](mK9 class diagram.drawio.png)
+![Class Diagram](K9 class diagram.drawio.png)
 
 Audio controller with voice recognition, finite state machine and offline wakeword.  Hotword detection is via Porcupine as the Hotword State within the program. Can issue MQTT messages that indicate state changes for the motor state machine.  The controller integrates the following Python modules:
 
