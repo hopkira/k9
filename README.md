@@ -10,7 +10,7 @@ Main behaviour controller for voice interactions. Impressive, in character, conv
 
 Audio controller with voice recognition, finite state machine and offline wakeword.  Hotword detection is via Porcupine as the Hotword State within the program. Can issue MQTT messages that indicate state changes for the motor state machine.  The controller integrates the following Python modules:
 
-| Program | Description |
+| Python module | Description |
 |---|---|
 |back_lights.py|Controls back panel flashing lights; used to indicate when K9 is thinking|
 |eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level = listening for hotword; mid level = listening for audio command; high level = speaking, unable to listen)|
