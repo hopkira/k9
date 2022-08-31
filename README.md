@@ -40,7 +40,7 @@ A complex Oak-lite sensor pipeline that is used to provide scanning functions fr
   * Oak-d-lite based point cloud (multiple points recorded as 'oak')
 
 ## lidar360.py
-A simple sensor pipeline that translates raw information from the back panel lidar sensor into Redis point cloud inserts (recorded as 'back') for consumption by the Motor Controller.
+A simple sensor pipeline that translates raw information from the back panel 360 LIDAR sensor into information about whether the robot can safely rotate and how far it can safely reverse.  This information is stored in Redis for other programs to use.  It uses CalcLidarData.py as the low level interface to the device.
 
 ## k9_motor_sm.py
 Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward. Uses logo.py to precisely control motors and movement.
