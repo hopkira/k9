@@ -5,6 +5,10 @@ __pycache__/
 
 secrets.py
 
+# Temp/backup files
+*.bkp
+*.dtmp
+
 # C extensions
 *.so
 
