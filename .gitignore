@@ -8,6 +8,7 @@ secrets.py
 # Temp/backup files
 *.bkp
 *.dtmp
+.DS_Store
 
 # C extensions
 *.so
