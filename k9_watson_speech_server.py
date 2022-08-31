@@ -59,7 +59,7 @@ def speak(speech:str) -> None:
 
 def speak_watson(speech:str) -> None:
     # speech = speech.translate(None, "|<>")
-    speech = "<speak><prosody pitch='+12st' rate='-20%'>" + speech + "</prosody></speak>"
+    speech = "<speak><prosody pitch='+14st' rate='-20%'>" + speech + "</prosody></speak>"
     with open(speech_file, 'wb') as audio_file:
         audio_file.write(
             text_to_speech.synthesize(
