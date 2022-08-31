@@ -54,7 +54,7 @@ class Memory():
         old_value = self.r.get(str(key) + ":time:now")
         if not old_value:
             old_value = 0.0
-        elapsed_time = str(time.time() - old_value)
+        elapsed_time = str(time.time() - float(old_value))
         print("Old value set", elapsed_time,"seconds ago.")
         self.r.set(str(key) + ":time:old", old_value)
         self.r.set(str(key) + ":now",str(value))
