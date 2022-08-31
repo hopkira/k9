@@ -45,7 +45,7 @@ class Memory():
             key (str): Name of the key
             value (float): New value for the key 
         '''
-        print("Key:", key.decode('utf-8'),", new value:", value.decode('utf-8'))
+        print("Key:", key,", new value:", value)
         old_value = self.r.get(str(key) + ":now")
         if not old_value:
             old_value = 0.0
