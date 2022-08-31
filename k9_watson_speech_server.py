@@ -50,7 +50,7 @@ def speak(speech:str) -> None:
     store_eyes = eyes.get_level()
     eyes.on()
     print('Speech server:', speech)
-    if connected:
+    if connected():
         speak_local(speech)
     else:
         speak_watson(speech)
