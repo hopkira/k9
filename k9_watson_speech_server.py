@@ -1,9 +1,22 @@
+#!/usr/bin/env python
+# coding: utf-8
+# Author: Richard Hopkins
+# Date: 31 August 2022
+#
+# This program runs a server to generate audio
+# from text.
+#
+# Socket element based on:
+# https://github.com/watson-developer-cloud/python-sdk/blob/master/examples/speaker_text_to_speech.py
+#
 import sys
 import requests
 import os
+import pyaudio
 from subprocess import Popen
 
 from ibm_watson import TextToSpeechV1
+from ibm_watson.websocket import SynthesizeCallback
 from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
 
 from memory import Memory
@@ -11,6 +24,8 @@ from eyes import Eyes
 
 mem = Memory()
 eyes = Eyes()
+
+eye_level = None
 
 import paho.mqtt.client as mqtt
 print("MQTT found...")
@@ -22,6 +37,30 @@ authenticator = IAMAuthenticator(os.getenv("WATSON_STT_APIKEY"))
 text_to_speech = TextToSpeechV1(authenticator = authenticator)
 text_to_speech.set_service_url(os.getenv("WATSON_STT_URL"))
 speech_file = os.getenv("PATH_TO_SPEECH_WAV")
+
+class MySynthesizeCallback(SynthesizeCallback):
+    def __init__(self):
+        SynthesizeCallback.__init__(self)
+        self.play = Play()
+
+    def on_connected(self):
+        print('Opening stream to play')
+        self.play.start_streaming()
+
+    def on_error(self, error):
+        print('Error received: {}'.format(error))
+
+    def on_timing_information(self, timing_information):
+        print(timing_information)
+
+    def on_audio_stream(self, audio_stream):
+        self.play.write_stream(audio_stream)
+
+    def on_close(self):
+        print('Completed synthesizing')
+        self.play.complete_playing()
+
+tts_callback = MySynthesizeCallback()
 
 # These values control K9s voice
 SPEED_DEFAULT = 150
@@ -38,6 +77,48 @@ SOX_PITCH_UP = 100
 SOX_PITCH_DEFAULT = 0
 SOX_PITCH_DOWN = -100
 
+class Play(object):
+    """
+    Wrapper to play the audio in a blocking mode
+    """
+    def __init__(self):
+        self.format = pyaudio.paInt16
+        self.channels = 1
+        self.rate = 22050
+        self.chunk = 1024
+        self.pyaudio = None
+        self.stream = None
+
+    def start_streaming(self):
+        self.pyaudio = pyaudio.PyAudio()
+        self.stream = self._open_stream()
+        self._start_stream()
+
+    def _open_stream(self):
+        stream = self.pyaudio.open(
+            format=self.format,
+            channels=self.channels,
+            rate=self.rate,
+            output=True,
+            frames_per_buffer=self.chunk,
+            start=False
+        )
+        return stream
+
+    def _start_stream(self):
+        self.stream.start_stream()
+
+    def write_stream(self, audio_stream):
+        self.stream.write(audio_stream)
+
+    def complete_playing(self):
+        self.stream.stop_stream()
+        self.stream.close()
+        self.pyaudio.terminate()
+        eyes_level = float(mem.retrieveState("eye_level"))
+        eyes.set_level(eyes_level)
+        mem.storeState("speaking",False)
+
 def connected(timeout: float = 1.0) -> bool:
     try:
         requests.head("http://www.ibm.com/", timeout=timeout)
@@ -47,15 +128,21 @@ def connected(timeout: float = 1.0) -> bool:
 
 def speak(speech:str) -> None:
     mem.storeState("speaking",True)
-    store_eyes = eyes.get_level()
+    mem.storeState("eye_level",eyes.get_level())
     eyes.on()
     print('Speech server:', speech)
     if not connected():
         speak_local(speech)
     else:
-        speak_watson(speech)
-    eyes.set_level(store_eyes)
-    mem.storeState("speaking",False)
+        speak_socket(speech)
+
+def speak_socket(speech:str) -> None:
+    speech = "<speak><prosody pitch='+14st' rate='-20%'>" + speech + "</prosody></speak>"
+    text_to_speech.synthesize_using_websocket(speech,
+                                    tts_callback,
+                                    accept='audio/wav',
+                                    voice='en-GB_JamesV3Voice'
+                                    )
 
 def speak_watson(speech:str) -> None:
     # speech = speech.translate(None, "|<>")
