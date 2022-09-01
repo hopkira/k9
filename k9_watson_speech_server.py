@@ -38,45 +38,6 @@ text_to_speech = TextToSpeechV1(authenticator = authenticator)
 text_to_speech.set_service_url(os.getenv("WATSON_STT_URL"))
 speech_file = os.getenv("PATH_TO_SPEECH_WAV")
 
-class MySynthesizeCallback(SynthesizeCallback):
-    def __init__(self):
-        SynthesizeCallback.__init__(self)
-        self.play = Play()
-
-    def on_connected(self):
-        print('Opening stream to play')
-        self.play.start_streaming()
-
-    def on_error(self, error):
-        print('Error received: {}'.format(error))
-
-    def on_timing_information(self, timing_information):
-        print(timing_information)
-
-    def on_audio_stream(self, audio_stream):
-        self.play.write_stream(audio_stream)
-
-    def on_close(self):
-        print('Completed synthesizing')
-        self.play.complete_playing()
-
-tts_callback = MySynthesizeCallback()
-
-# These values control K9s voice
-SPEED_DEFAULT = 150
-SPEED_DOWN = 125
-AMP_UP = 100
-AMP_DEFAULT = 50
-AMP_DOWN = 25
-PITCH_DEFAULT = 99
-PITCH_DOWN = 89
-SOX_VOL_UP = 25
-SOX_VOL_DEFAULT = 20
-SOX_VOL_DOWN = 15
-SOX_PITCH_UP = 100
-SOX_PITCH_DEFAULT = 0
-SOX_PITCH_DOWN = -100
-
 class Play(object):
     """
     Wrapper to play the audio in a blocking mode
@@ -118,6 +79,45 @@ class Play(object):
         eyes_level = float(mem.retrieveState("eye_level"))
         eyes.set_level(eyes_level)
         mem.storeState("speaking",False)
+
+class MySynthesizeCallback(SynthesizeCallback):
+    def __init__(self):
+        SynthesizeCallback.__init__(self)
+        self.play = Play()
+
+    def on_connected(self):
+        print('Opening stream to play')
+        self.play.start_streaming()
+
+    def on_error(self, error):
+        print('Error received: {}'.format(error))
+
+    def on_timing_information(self, timing_information):
+        print(timing_information)
+
+    def on_audio_stream(self, audio_stream):
+        self.play.write_stream(audio_stream)
+
+    def on_close(self):
+        print('Completed synthesizing')
+        self.play.complete_playing()
+
+tts_callback = MySynthesizeCallback()
+
+# These values control K9s voice
+SPEED_DEFAULT = 150
+SPEED_DOWN = 125
+AMP_UP = 100
+AMP_DEFAULT = 50
+AMP_DOWN = 25
+PITCH_DEFAULT = 99
+PITCH_DOWN = 89
+SOX_VOL_UP = 25
+SOX_VOL_DEFAULT = 20
+SOX_VOL_DOWN = 15
+SOX_PITCH_UP = 100
+SOX_PITCH_DEFAULT = 0
+SOX_PITCH_DOWN = -100
 
 def connected(timeout: float = 1.0) -> bool:
     try:
