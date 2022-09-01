@@ -54,6 +54,7 @@ class Play(object):
         self.pyaudio = pyaudio.PyAudio()
         self.stream = self._open_stream()
         self._start_stream()
+        print("End of start stream")
 
     def _open_stream(self):
         stream = self.pyaudio.open(
@@ -73,6 +74,7 @@ class Play(object):
         self.stream.write(audio_stream)
 
     def complete_playing(self):
+        print("Complete Playing reached")
         self.stream.stop_stream()
         self.stream.close()
         self.pyaudio.terminate()
@@ -84,6 +86,7 @@ class MySynthesizeCallback(SynthesizeCallback):
     def __init__(self):
         SynthesizeCallback.__init__(self)
         self.play = Play()
+        print("End of play callback init")
 
     def on_connected(self):
         print('Opening stream to play')
