@@ -54,7 +54,6 @@ class Play(object):
         self.pyaudio = pyaudio.PyAudio()
         self.stream = self._open_stream()
         self._start_stream()
-        print("End of start streaming")
 
     def _open_stream(self):
         stream = self.pyaudio.open(
@@ -69,20 +68,15 @@ class Play(object):
 
     def _start_stream(self):
         self.stream.start_stream()
-        print("End of _start_stream")
 
     def write_stream(self, audio_stream):
         self.stream.write(audio_stream)
-        print("End of write_stream")
 
     def complete_playing(self):
-        print("Complete Playing reached")
         self.stream.stop_stream()
         self.stream.close()
         self.pyaudio.terminate()
-        eyes_level = float(mem.retrieveState("eye_level"))
-        eyes.set_level(eyes_level)
-        mem.storeState("speaking",False)
+
 
 class MySynthesizeCallback(SynthesizeCallback):
     def __init__(self):
@@ -134,7 +128,7 @@ def connected(timeout: float = 1.0) -> bool:
 
 def speak(speech:str) -> None:
     mem.storeState("speaking",True)
-    mem.storeState("eye_level",eyes.get_level())
+    eyes_level = eyes.get_level()
     eyes.on()
     print('Speech server:', speech)
     if not connected():
@@ -142,6 +136,8 @@ def speak(speech:str) -> None:
     else:
         speak_socket(speech)
     print("Main speak function finished")
+    eyes.set_level(eyes_level)
+    mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
     speech = "<speak><prosody pitch='+14st' rate='-20%'>" + speech + "</prosody></speak>"
@@ -150,7 +146,6 @@ def speak_socket(speech:str) -> None:
                                     accept='audio/wav',
                                     voice='en-GB_JamesV3Voice'
                                     )
-    print("Speak socket finished")
 
 def speak_watson(speech:str) -> None:
     # speech = speech.translate(None, "|<>")
@@ -165,7 +160,6 @@ def speak_watson(speech:str) -> None:
     cmd = ['aplay', speech_file]
     speaking = Popen(cmd)
     Popen.wait(speaking)
-    print("Speak watson finished")
     return
 
 def speak_local(speech:str) -> None:
