@@ -141,6 +141,7 @@ def speak(speech:str) -> None:
         speak_local(speech)
     else:
         speak_socket(speech)
+    print("Main speak function finished")
 
 def speak_socket(speech:str) -> None:
     speech = "<speak><prosody pitch='+14st' rate='-20%'>" + speech + "</prosody></speak>"
