@@ -82,10 +82,8 @@ class MySynthesizeCallback(SynthesizeCallback):
     def __init__(self):
         SynthesizeCallback.__init__(self)
         self.play = Play()
-        print("End of play callback init")
 
     def on_connected(self):
-        print('Opening stream to play')
         self.play.start_streaming()
 
     def on_error(self, error):
@@ -96,7 +94,6 @@ class MySynthesizeCallback(SynthesizeCallback):
 
     def on_audio_stream(self, audio_stream):
         self.play.write_stream(audio_stream)
-        print("End of on_audio_stream")
 
     def on_close(self):
         print('Completed synthesizing')
@@ -135,12 +132,11 @@ def speak(speech:str) -> None:
         speak_local(speech)
     else:
         speak_socket(speech)
-    print("Main speak function finished")
     eyes.set_level(eyes_level)
     mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
-    speech = "<speak><prosody pitch='+14st' rate='-20%'>" + speech + "</prosody></speak>"
+    speech = "<speak><prosody pitch='+16st' rate='-20%'>" + speech + "</prosody></speak>"
     text_to_speech.synthesize_using_websocket(speech,
                                     tts_callback,
                                     accept='audio/wav',
@@ -206,7 +202,6 @@ def mqtt_callback(client, userdata, message):
     Enables K9 to receive an MQTT message and place it in a queue
     """
     payload = str(message.payload.decode("utf-8"))
-    print("Server payload:", payload)
     queue.put(payload)
 
 queue = Queue()
