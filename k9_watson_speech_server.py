@@ -149,6 +149,7 @@ def speak_socket(speech:str) -> None:
                                     accept='audio/wav',
                                     voice='en-GB_JamesV3Voice'
                                     )
+    print("Speak socket finished")
 
 def speak_watson(speech:str) -> None:
     # speech = speech.translate(None, "|<>")
@@ -163,6 +164,7 @@ def speak_watson(speech:str) -> None:
     cmd = ['aplay', speech_file]
     speaking = Popen(cmd)
     Popen.wait(speaking)
+    print("Speak watson finished")
     return
 
 def speak_local(speech:str) -> None:
