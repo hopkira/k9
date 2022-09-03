@@ -125,14 +125,12 @@ def connected(timeout: float = 1.0) -> bool:
 
 def speak(speech:str) -> None:
     # mem.storeState("speaking",True)
-    eyes_level = eyes.get_level()
-    eyes.on()
+
     print('Speech server:', speech)
     if not connected():
         speak_local(speech)
     else:
         speak_socket(speech)
-    eyes.set_level(eyes_level)
     # mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
@@ -217,6 +215,8 @@ try:
     while True:
         while not queue.empty():
             speaking = True
+            eyes_level = eyes.get_level()
+            eyes.set_level(0.5)
             mem.storeState("speaking",1.0)
             utterance = queue.get()
             if utterance is None:
@@ -226,6 +226,7 @@ try:
         if speaking == True:
             speaking = False
             mem.storeState("speaking",0.0)
+            eyes.set_level(eyes_level)
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
