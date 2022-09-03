@@ -83,7 +83,9 @@ class Listening(State):
     '''
     def __init__(self):
         super(Listening, self).__init__()
+        k9eyes.set_level(0.01)
         self.command = k9stt.listen_for_command()
+        print("Listening state heard:",self.command)
         self.on_event('command_received')
 
     def on_event(self, event):
@@ -165,7 +167,7 @@ class Responding(State):
         if event == 'PraiseMe':
             k9tail.wag_h()
             return Listening()
-        return self
+        return Listening()
 
 
 class K9AudioSM:
