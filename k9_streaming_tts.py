@@ -124,7 +124,7 @@ def connected(timeout: float = 1.0) -> bool:
         return False
 
 def speak(speech:str) -> None:
-    mem.storeState("speaking",True)
+    # mem.storeState("speaking",True)
     eyes_level = eyes.get_level()
     eyes.on()
     print('Speech server:', speech)
@@ -133,7 +133,7 @@ def speak(speech:str) -> None:
     else:
         speak_socket(speech)
     eyes.set_level(eyes_level)
-    mem.storeState("speaking",False)
+    # mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
     speech = "<speak><prosody pitch='+16st' rate='-20%'>" + speech + "</prosody></speak>"
@@ -215,11 +215,13 @@ print("Speech MQTT interface active")
 try:
     while True:
         while not queue.empty():
+            mem.storeState("speaking",True)
             utterance = queue.get()
             if utterance is None:
                 continue
             print("Voice server:", utterance)
             speak(utterance)
+        mem.storeState("speaking",True)
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
