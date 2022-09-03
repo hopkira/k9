@@ -83,6 +83,7 @@ class Listening(State):
     '''
     def __init__(self):
         super(Listening, self).__init__()
+        self.command = None
         k9eyes.set_level(0.01)
         self.command = k9stt.listen_for_command()
         print("Listening state heard:",self.command)
