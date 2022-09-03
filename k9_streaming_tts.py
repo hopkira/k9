@@ -212,16 +212,20 @@ client.subscribe("k9/events/speech", qos=2)
 # self.client.subscribe("/ble/advertise/watch/m")
 client.loop_start()
 print("Speech MQTT interface active")
+speaking = False
 try:
     while True:
         while not queue.empty():
+            speaking = True
             mem.storeState("speaking",True)
             utterance = queue.get()
             if utterance is None:
                 continue
             print("Voice server:", utterance)
             speak(utterance)
-        mem.storeState("speaking",True)
+        if speaking == True:
+            speaking = False
+            mem.storeState("speaking",False)
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
