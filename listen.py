@@ -33,7 +33,7 @@ class Listen():
                         command = stream_context.finishStream()
                         del stream_context
                         if command != "":
-                            stream_context.finishStream()
+                            del stream_context
                             self.vad_audio.destroy()
                             return command
                         else:
