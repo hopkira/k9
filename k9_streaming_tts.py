@@ -127,10 +127,10 @@ def speak(speech:str) -> None:
     # mem.storeState("speaking",True)
 
     print('Speech server:', speech)
-    if not connected():
-        speak_local(speech)
-    else:
-        speak_socket(speech)
+    #if not connected():
+    speak_local(speech)
+    #else:
+    #    speak_socket(speech)
     # mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
