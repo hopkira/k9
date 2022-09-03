@@ -99,7 +99,7 @@ class MySynthesizeCallback(SynthesizeCallback):
         print('Completed synthesizing')
         self.play.complete_playing()
 
-tts_callback = MySynthesizeCallback()
+
 
 # These values control K9s voice
 SPEED_DEFAULT = 150
@@ -214,8 +214,8 @@ speaking = False
 try:
     while True:
         while not queue.empty():
+            tts_callback = MySynthesizeCallback()
             speaking = True
-            eyes_level = eyes.get_level()
             eyes.set_level(0.5)
             mem.storeState("speaking",1.0)
             utterance = queue.get()
@@ -226,7 +226,8 @@ try:
         if speaking == True:
             speaking = False
             mem.storeState("speaking",0.0)
-            eyes.set_level(eyes_level)
+            eyes.set_level(0.0)
+            del tts_callback
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
