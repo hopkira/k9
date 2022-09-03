@@ -134,8 +134,9 @@ class Responding(State):
         print("Intent:",intent)
         mem.storeState("speaking",True)
         k9voice.speak(answer)
-        #speak(answer)
-        self.on_event(intent)            
+        while mem.retrieveState("speaking"):
+            pass
+        self.on_event(intent)           
         self.on_event('responded')
 
     def notify_motors(self, event:str):
