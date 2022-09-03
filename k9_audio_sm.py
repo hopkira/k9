@@ -52,6 +52,7 @@ class Waitforhotword(State):
         super(Waitforhotword, self).__init__()
         k9lights.off()
         k9tail.center()
+        k9eyes.set_level(0.001)
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_1_0.ppn']
@@ -59,7 +60,6 @@ class Waitforhotword(State):
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
         # print(f'Using device: {self.recorder.selected_device}')
-        k9eyes.set_level(0.001)
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
@@ -87,6 +87,7 @@ class Listening(State):
         k9eyes.set_level(0.01)
         self.command = k9stt.listen_for_command()
         print("Listening state heard:",self.command)
+        k9eyes.set_level(0.0)
         self.on_event('command_received')
 
     def on_event(self, event):
