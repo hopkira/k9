@@ -132,9 +132,9 @@ class Responding(State):
                 pass
         k9ears.stop()
         print("Intent:",intent)
-        mem.storeState("speaking",True)
+        mem.storeState("speaking",1.0)
         k9voice.speak(answer)
-        while mem.retrieveState("speaking"):
+        while (mem.retrieveState("speaking") == 1.0):
             pass
         self.on_event(intent)           
         self.on_event('responded')

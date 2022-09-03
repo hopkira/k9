@@ -217,7 +217,7 @@ try:
     while True:
         while not queue.empty():
             speaking = True
-            mem.storeState("speaking",True)
+            mem.storeState("speaking",1.0)
             utterance = queue.get()
             if utterance is None:
                 continue
@@ -225,7 +225,7 @@ try:
             speak(utterance)
         if speaking == True:
             speaking = False
-            mem.storeState("speaking",False)
+            mem.storeState("speaking",0.0)
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
