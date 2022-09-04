@@ -11,6 +11,7 @@ class State(object):
         Incoming events processing is delegated to the child State
         to define and enable the valid state transitions.
         '''
+        pass
 
     def __repr__(self):
         '''

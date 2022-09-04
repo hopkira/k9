@@ -9,10 +9,11 @@
 # motor state machine.
 #
 import sys
+import time
 #from tkinter.messagebox import NO
 import requests
 import pvporcupine  # Porcupine hotword
-import deepspeech  # Mozilla STT
+#import deepspeech  # Mozilla STT
 import numpy as np
 print("Numpy active...")
 from state import State # Base FSM State class
@@ -53,6 +54,7 @@ class Waitforhotword(State):
         k9lights.off()
         k9tail.center()
         k9eyes.set_level(0.001)
+        print("Eyes set in hotword state")
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
             keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_1_0.ppn']
@@ -85,6 +87,7 @@ class Listening(State):
         super(Listening, self).__init__()
         self.command = None
         k9eyes.set_level(0.01)
+        print("Eyes set in Listening state")
         self.command = k9stt.listen_for_command()
         print("Listening state heard:",self.command)
         k9eyes.set_level(0.0)
@@ -108,7 +111,9 @@ class Responding(State):
         # print("Responding.init() - started")
         # print(self.command)
         k9eyes.set_level(0.5)
+        print("Eyes set in Responding state")
         k9ears.think()
+        k9lights.on()
         if connected():
             intent, answer = k9qa.robot_response(self.command)
         else:
@@ -135,44 +140,43 @@ class Responding(State):
                 intent = 'QuestionMe'
                 pass
         k9ears.stop()
+        k9lights.off()
         print("Intent:",intent)
         mem.storeState("speaking",1.0)
         k9voice.speak(answer)
         while (mem.retrieveState("speaking") == 1.0):
-            pass
-        self.on_event(intent)           
-        self.on_event('responded')
+            time.sleep(0.2)
+        self.on_event(intent)
 
     def notify_motors(self, event:str):
         client.publish(topic="k9/events/motor", payload = event, qos = 2, retain = False)
 
     def on_event(self, event:str) -> State:
-        if event == 'responded':
-            return Listening()
         if event == 'StopListening':
             return Waitforhotword()
-        if event == 'ComeHere':
+        elif event == 'ComeHere':
             k9tail.center()
             self.notify_motors(event)
             return Listening()
-        if event == 'FollowMe':
+        elif event == 'FollowMe':
             k9tail.up()
             self.notify_motors(event)
             return Listening()
-        if event == 'StayThere':
+        elif event == 'StayThere':
             k9tail.down()
             self.notify_motors(event)
             return Listening()
-        if event == 'TurnAbout':
+        elif event == 'TurnAbout':
             self.notify_motors(event)
             return Listening()
-        if event == 'PraiseMe':
+        elif event == 'PraiseMe':
             k9tail.wag_h()
             return Listening()
-        return Listening()
+        else:
+            return Listening()
 
 
-class K9AudioSM:
+class K9AudioSM(object):
     '''
     A K9 finite state machine that starts in waiting state and
     will transition to a new state on when a transition event occurs.
@@ -187,7 +191,9 @@ class K9AudioSM:
         k9ears.scan()
         k9tail.center()
         k9voice.speak("Waiting for hotword")
-        # speak("K9 is active")
+        mem.storeState("speaking",1.0)
+        while (mem.retrieveState("speaking") == 1.0):
+            time.sleep(1.0)
         k9lights.off()
         k9eyes.set_level(0)
         k9ears.stop()
@@ -241,9 +247,9 @@ client.loop_start()
 print("MQTT active...")
 
 # Create Mozilla deepspeech STT capablity
-model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
-print("Deepspeech active...")
+#model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
+#model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
+#print("Deepspeech active...")
 
 k9eyes = Eyes()
 k9lights = BackLights()
