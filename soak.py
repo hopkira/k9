@@ -36,6 +36,7 @@ v = Voice()
 incr =  0
 
 while True:
-    v.speak("This is a soak test",incr)
+    v.speak("This is a soak test")
     incr+=1
+    print(incr)
     time.sleep(5.0)
