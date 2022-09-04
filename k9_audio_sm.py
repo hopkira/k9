@@ -51,6 +51,8 @@ class Waitforhotword(State):
     '''
     def __init__(self):
         super(Waitforhotword, self).__init__()
+        while (mem.retrieveState("speaking") == 1.0):
+            time.sleep(0.2)
         k9lights.off()
         k9tail.center()
         k9eyes.set_level(0.001)
@@ -85,6 +87,8 @@ class Listening(State):
     '''
     def __init__(self):
         super(Listening, self).__init__()
+        while (mem.retrieveState("speaking") == 1.0):
+            time.sleep(0.2)
         self.command = None
         k9eyes.set_level(0.01)
         print("Eyes set in Listening state")
@@ -138,14 +142,11 @@ class Responding(State):
             else:
                 answer = 'Apologies I did not understand'
                 intent = 'QuestionMe'
-                pass
         k9ears.stop()
         k9lights.off()
         print("Intent:",intent)
         mem.storeState("speaking",1.0)
         k9voice.speak(answer)
-        while (mem.retrieveState("speaking") == 1.0):
-            time.sleep(0.2)
         self.on_event(intent)
 
     def notify_motors(self, event:str):
