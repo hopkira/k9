@@ -223,11 +223,13 @@ try:
                 continue
             print("Voice server:", utterance)
             speak(utterance)
+            tts_callback.on_close()
+            del tts_callback
         if speaking == True:
             speaking = False
             mem.storeState("speaking",0.0)
             eyes.set_level(0.0)
-            del tts_callback
+            
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"
