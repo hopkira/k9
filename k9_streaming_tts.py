@@ -134,12 +134,17 @@ def speak(speech:str) -> None:
     mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
+    tts_callback = MySynthesizeCallback()
     speech = "<speak><prosody pitch='+16st' rate='-20%'>" + speech + "</prosody></speak>"
     text_to_speech.synthesize_using_websocket(speech,
                                     tts_callback,
                                     accept='audio/wav',
                                     voice='en-GB_JamesV3Voice'
                                     )
+    print("Got here")
+    tts_callback.on_close()
+    del tts_callback
+
 
 def speak_watson(speech:str) -> None:
     # speech = speech.translate(None, "|<>")
@@ -223,8 +228,6 @@ try:
                 continue
             print("Voice server:", utterance)
             speak(utterance)
-            tts_callback.on_close()
-            del tts_callback
         if speaking == True:
             speaking = False
             mem.storeState("speaking",0.0)
