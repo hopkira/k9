@@ -96,7 +96,6 @@ class MySynthesizeCallback(SynthesizeCallback):
         self.play.write_stream(audio_stream)
 
     def on_close(self):
-        print('Completed synthesizing')
         self.play.complete_playing()
 
 
@@ -141,7 +140,6 @@ def speak_socket(speech:str) -> None:
                                     accept='audio/wav',
                                     voice='en-GB_JamesV3Voice'
                                     )
-    print("Got here")
     tts_callback.on_close()
     del tts_callback
 
