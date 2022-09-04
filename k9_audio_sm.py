@@ -40,6 +40,8 @@ from  voice import Voice
 print("Cleared voice...")
 from listen import Listen
 print("Able to listen...")
+from k9_lichess_bot import ChessGame
+print("Able to play chess!")
 from memory import Memory
 print("All imports done!")
 
@@ -103,6 +105,21 @@ class Listening(State):
         return self
 
 
+class PlayChess(State):
+    '''
+    The child state where K9 is now listening for an utterance
+    '''
+    def __init__(self):
+        super(PlayChess, self).__init__()
+        chess_game = ChessGame()
+        self.on_event('game_over')
+
+    def on_event(self, event):
+        if event == 'game_over':
+            return Listening()
+        return self
+
+
 class Responding(State):
     '''
     The child state where K9 processes a response to the text
@@ -137,8 +154,11 @@ class Responding(State):
                 answer = 'Turning around'
                 intent = 'TurnAbout'
             elif 'thank' in self.command:
-                answer = 'Thanks are not necessary, master'
+                answer = 'Thanks are not necessary. Master!'
                 intent = 'PraiseMe'
+            elif 'play chess' in self.command:
+                answer = 'Playing chess.  Master!'
+                intent = 'PlayChess'
             else:
                 answer = 'Apologies I did not understand'
                 intent = 'QuestionMe'
@@ -173,6 +193,8 @@ class Responding(State):
         elif event == 'PraiseMe':
             k9tail.wag_h()
             return Listening()
+        elif event == 'PlayChess':
+            return PlayChess()
         else:
             return Listening()
 

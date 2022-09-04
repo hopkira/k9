@@ -29,7 +29,7 @@ class ChessGame():
     def __init__(self):
         # Flag in Redis that K9 is in chess mode
         mem = Memory()
-        mem.storeState("chess",True)
+        mem.storeState("chess",1.0)
         # Initialize secrets from bashrc .profile
         bot_token = os.getenv("LICHESS_BOT_TOKEN")
         player_token = os.getenv("LICHESS_PLAYER_TOKEN")
@@ -109,7 +109,7 @@ class ChessGame():
             self.tail.center()
         self.send_player_msg(self.message)
         self.send_player_msg("Thank you for a lovely game")
-        mem.storeState("chess",False)
+        mem.storeState("chess",0.0)
 
     def ask_color(self):
         '''Ask player what color they would like to play'''
