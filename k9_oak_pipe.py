@@ -266,15 +266,16 @@ class Fwd_Collision_Detect():
             min_dist = np.nanmin(totals)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
-        if not np.isnan(min_dist):
-            mem.storeState("forward", float(min_dist))
         # point_cloud = point_cloud[16:24]
         # min_dist = np.amin(point_cloud)
         # mem.storeState("forward", min_dist)
-        plt.scatter(x2,-y2,c=z2,cmap='afmhot',s=10)
-        plt.xlim(-350,350)
-        plt.ylim(-200,1600)
-        plt.show()
+        #plt.scatter(x2,-y2,c=z2,cmap='afmhot',s=10)
+        #plt.xlim(-350,350)
+        #plt.ylim(-200,1600)
+        #plt.show()
+        if not np.isnan(min_dist):
+            mem.storeState("forward", float(min_dist))
+        pass
         
 
 class Legs_Detector():
@@ -290,7 +291,6 @@ class Legs_Detector():
         # func = np.mean # averages cells during decimation
         self.keep_top = 0.85 # bottom 15% of image tends to include floor
         self.certainty = 0.7 # likelihood that a person in in the column
-        # Heeling distanc
 
     def record_legs_vector(self,depth_image):
         '''
