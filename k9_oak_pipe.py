@@ -23,10 +23,12 @@ import numpy as np
 print("Numpy is running...")
 import pandas as pd
 print("Pandas are frolicking...")
-from memory import Memory as mem
+from memory import Memory
 print("All imports done!")
 from matplotlib import pyplot as plt
 print("Picture drawing loaded...")
+
+mem = Memory()
 
 # Oak-Lite Horizontal FoV
 cam_h_fov = 73.0
