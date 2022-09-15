@@ -420,6 +420,7 @@ with dai.Device(pipeline) as device:
     f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
     # counter =  0
+    last_reading = time.time()
     while True:
         start_time = time.time() # start time of the loop
         inDepth = qDep.get()
@@ -435,4 +436,10 @@ with dai.Device(pipeline) as device:
         f_pd.record_person_vector(trackletsData=trackletsData)
         # print out the FPS achieved
         # counter += 1
-        print("FPS: ", 1.0 / (time.time() - start_time))
+        now_time = time.time()
+        if (now_time - last_reading) > 10:
+            print("FPS: ", 1.0 / (now_time - start_time))
+            last_reading = now_time
+            print("Person at:",mem.retrieveLastSensorReading("person"))
+            print("Follow:",mem.retrieveLastSensorReading("follow"))
+            print("Min dist:",mem.retrieveState("forward"))
