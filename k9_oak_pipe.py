@@ -23,6 +23,7 @@ import numpy as np
 print("Numpy is running...")
 import pandas as pd
 print("Pandas are frolicking...")
+import warnings
 from memory import Memory
 print("All imports done!")
 from matplotlib import pyplot as plt
@@ -260,7 +261,9 @@ class Fwd_Collision_Detect():
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
-        min_dist = np.nanmin(totals)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            min_dist = np.nanmin(totals)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         if not np.isnan(min_dist):
