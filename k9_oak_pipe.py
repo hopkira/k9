@@ -258,10 +258,11 @@ class Fwd_Collision_Detect():
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
-        min_dist = np.nanmin(totals)
+        min_dist = float(np.nanmin(totals))
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
-        mem.storeState("forward", min_dist)
+        if min_dist:
+            mem.storeState("forward", min_dist)
         # point_cloud = point_cloud[16:24]
         # min_dist = np.amin(point_cloud)
         # mem.storeState("forward", min_dist)
