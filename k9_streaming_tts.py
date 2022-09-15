@@ -76,9 +76,7 @@ class Play(object):
         self.stream.stop_stream()
         self.stream.close()
         self.pyaudio.terminate()
-        eyes_level = float(mem.retrieveState("eye_level"))
-        eyes.set_level(eyes_level)
-        mem.storeState("speaking",False)
+
 
 class MySynthesizeCallback(SynthesizeCallback):
     def __init__(self):
@@ -86,7 +84,6 @@ class MySynthesizeCallback(SynthesizeCallback):
         self.play = Play()
 
     def on_connected(self):
-        print('Opening stream to play')
         self.play.start_streaming()
 
     def on_error(self, error):
@@ -99,10 +96,9 @@ class MySynthesizeCallback(SynthesizeCallback):
         self.play.write_stream(audio_stream)
 
     def on_close(self):
-        print('Completed synthesizing')
         self.play.complete_playing()
 
-tts_callback = MySynthesizeCallback()
+
 
 # These values control K9s voice
 SPEED_DEFAULT = 150
@@ -127,22 +123,26 @@ def connected(timeout: float = 1.0) -> bool:
         return False
 
 def speak(speech:str) -> None:
-    mem.storeState("speaking",True)
-    mem.storeState("eye_level",eyes.get_level())
-    eyes.on()
+    # mem.storeState("speaking",True)
+
     print('Speech server:', speech)
     if not connected():
         speak_local(speech)
     else:
         speak_socket(speech)
+    mem.storeState("speaking",False)
 
 def speak_socket(speech:str) -> None:
-    speech = "<speak><prosody pitch='+14st' rate='-20%'>" + speech + "</prosody></speak>"
+    tts_callback = MySynthesizeCallback()
+    speech = "<speak><prosody pitch='+16st' rate='-20%'>" + speech + "</prosody></speak>"
     text_to_speech.synthesize_using_websocket(speech,
                                     tts_callback,
                                     accept='audio/wav',
                                     voice='en-GB_JamesV3Voice'
                                     )
+    tts_callback.on_close()
+    del tts_callback
+
 
 def speak_watson(speech:str) -> None:
     # speech = speech.translate(None, "|<>")
@@ -203,7 +203,6 @@ def mqtt_callback(client, userdata, message):
     Enables K9 to receive an MQTT message and place it in a queue
     """
     payload = str(message.payload.decode("utf-8"))
-    print("Server payload:", payload)
     queue.put(payload)
 
 queue = Queue()
@@ -214,14 +213,24 @@ client.subscribe("k9/events/speech", qos=2)
 # self.client.subscribe("/ble/advertise/watch/m")
 client.loop_start()
 print("Speech MQTT interface active")
+speaking = False
 try:
     while True:
         while not queue.empty():
+            tts_callback = MySynthesizeCallback()
+            speaking = True
+            eyes.set_level(0.5)
+            mem.storeState("speaking",1.0)
             utterance = queue.get()
             if utterance is None:
                 continue
             print("Voice server:", utterance)
             speak(utterance)
+        if speaking == True:
+            speaking = False
+            mem.storeState("speaking",0.0)
+            eyes.set_level(0.0)
+            
 except KeyboardInterrupt:
     client.loop_stop()
     "K9 silenced and MQTT client stopped"

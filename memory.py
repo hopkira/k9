@@ -37,6 +37,8 @@ class Memory():
             print("Recording data permanently") # let the user know they are in sim mode
         self.storeState("left:speed",0.0)
         self.storeState("right:speed",0.0)
+
+    
             
     def storeState(self, key:str, value:float) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
@@ -60,14 +62,14 @@ class Memory():
         self.r.set(str(key) + ":now",str(value))
         self.r.set(str(key) + ":time:now",str(time.time()))
 
-    def retrieveState(self, key:str) -> str:
+    def retrieveState(self, key:str) -> float:
         '''Retrieves the last version of a desired key
 
         Args:
             key (str): Name of the key
         '''
 
-        return self.r.get(str(key) + ":now")
+        return float(self.r.get(str(key) + ":now"))
 
     def getMsgKey(self):
         '''Uses redis to create a unique message key by incrementing message_num

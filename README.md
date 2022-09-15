@@ -30,14 +30,16 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 |voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
 |k9_lichess_bot.py|Chess module that enables him to create Lichess.com games and play chess|
 
-## k9_speechserver.py
-Provides speech to text capability that can be used by multiple modules on a FIFO basis via MQTT
+## k9_streaming_tts.py
+Provides speech to text capability that can be used by multiple modules on a FIFO basis via MQTT.  Uses IBM Cloud TTS functionality over websockets when connected to the Internet.
 
 ## k9_oak_pipe
 A complex Oak-lite sensor pipeline that is used to provide scanning functions from the Oak stereoscopic camea.  This includes the scanning functionality to support heeling, following and collision avoidance.  All data is simplified and stored in Redis for other modules to use:
   * Detect person at a distance (for heeling; recorded in Redis as 'person')
   * Follow a nearby obstacle (recorded in Redis as 'follow')
   * Oak-d-lite based point cloud (multiple points recorded as 'oak')
+
+Requires a virtual environment to run, follow the DepthAI installation instructions (workon depthAI).
 
 ## lidar360.py
 A simple sensor pipeline that translates raw information from the back panel 360 LIDAR sensor into information about whether the robot can safely rotate and how far it can safely reverse.  This information is stored in Redis for other programs to use.  It uses CalcLidarData.py as the low level interface to the device.
