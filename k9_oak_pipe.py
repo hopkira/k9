@@ -443,3 +443,4 @@ with dai.Device(pipeline) as device:
             print("Person at:",str(mem.retrieveLastSensorReading("person")))
             print("Follow:",str(mem.retrieveLastSensorReading("follow")))
             print("Min dist:",str(mem.retrieveState("forward")))
+            print("*** OAK PIPE OUTPUT ENDS ***")
