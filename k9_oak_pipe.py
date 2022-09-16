@@ -305,18 +305,18 @@ class Legs_Detector():
         # pix_height = int(keep_top * height / decimate_level)
         # depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
         # just use the depth data within valid ranges
-        valid_frame = (depth_image >= self.min_range) & (depth_image <= self.max_range)
-        valid_image = np.where(valid_frame, depth_image, self.max_range)
+        valid_frame = (depth_image >= min_range) & (depth_image <= max_range)
+        valid_image = np.where(valid_frame, depth_image, max_range)
         valid_image = valid_image[0:pix_height,:]
         # work out which columns are likely to contain a vertical object
-        columns = np.sum(valid_image < self.max_range, axis = 0) >= (self.certainty*pix_height)
+        columns = np.sum(valid_image < max_range, axis = 0) >= (self.certainty*pix_height)
         columns = columns.reshape(1,-1)
         # work out the average distance per column for valid readings
         distance = np.average(valid_image, axis = 0)
         # eliminate any readings not in a column with a consistent vertical object
         useful_distances = distance * columns
         # narrow down the array to just those 'vertical' columns
-        subset = useful_distances[np.where((useful_distances < self.max_range) & (useful_distances > 0.0))]
+        subset = useful_distances[np.where((useful_distances < max_range) & (useful_distances > 0.0))]
         # determine the average distance to all valid columns
         if len(subset) > 0:
             final_distance = np.average(subset)
@@ -329,7 +329,7 @@ class Legs_Detector():
         if len(indices) > 0 :
             direction = (np.average(indices) - mid_point) / pix_width
             angle = direction * math.radians(cam_h_fov)
-            move = (final_distance - self.sweet_spot)
+            move = (final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
             mem.storeSensorReading("follow", move, angle)
 
