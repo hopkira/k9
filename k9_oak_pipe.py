@@ -200,11 +200,10 @@ class Point_Cloud():
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
         point_cloud = np.nanmin(totals, axis = 0)
-        print(str(point_cloud))
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         for index,point in enumerate(point_cloud):
-            print(str(index),str(point))
+            # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
 
 
@@ -418,12 +417,12 @@ with dai.Device(pipeline) as device:
     # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
     print("Oak pipeline running...")
-    # f_pc = Point_Cloud()
+    f_pc = Point_Cloud()
     f_ld = Legs_Detector()
     f_pd = Person_Detector()
     f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
-    # counter =  0
+    counter =  0
     last_reading = time.time()
     while True:
         start_time = time.time() # start time of the loop
@@ -432,14 +431,14 @@ with dai.Device(pipeline) as device:
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
-        #if counter == 10:
-        #    f_pc.record_point_cloud(depth_image)
-        #    counter = 0
+        if counter == 10:
+            f_pc.record_point_cloud(depth_image)
+            counter = 0
         f_cd.record_min_dist(depth_image=depth_image)
         f_ld.record_legs_vector(depth_image=depth_image)
         f_pd.record_person_vector(trackletsData=trackletsData)
         # print out the FPS achieved
-        # counter += 1
+        counter += 1
         now_time = time.time()
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
