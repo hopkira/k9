@@ -32,7 +32,7 @@ class Memory():
     def __init__(self, record = False):
         self.rec = record
         print("Connecting to local redis host")
-        self.r = redis.Redis(host='127.0.0.1',port=6379)
+        self.r = redis.Redis(host='127.0.0.1',port=6379,decode_responses=True)
         if self.rec:
             print("Recording data permanently") # let the user know they are in sim mode
         self.storeState("left:speed",0.0)
@@ -142,7 +142,8 @@ class Memory():
         ''' 
         
         msg_key=self.r.lrange(sensor, 0, 0)
-        msg = self.r.hmget(msg_key)
+        # msg = self.r.hmget(msg_key)
+        msg = self.r.hgetall(msg_key)
         return msg
 
     def retrieveSensorReadings(self, sensor:str) -> list:
