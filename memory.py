@@ -141,7 +141,7 @@ class Memory():
             sensor (str): Name of the sensor
         ''' 
         
-        msg_key=self.r.lrange(sensor, 0, 0)
+        msg_key=str(self.r.lrange(sensor, 0, 0))
         # msg = self.r.hmget(msg_key)
         msg = str(self.r.hgetall(msg_key))
         return msg
