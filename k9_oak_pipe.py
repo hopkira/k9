@@ -200,6 +200,7 @@ class Point_Cloud():
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
         point_cloud = np.nanmin(totals, axis = 0)
+        print(str(point_cloud))
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         for index,point in enumerate(point_cloud):
