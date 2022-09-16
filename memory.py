@@ -154,7 +154,11 @@ class Memory():
         ''' 
         dict_key=self.r.lrange(self.getSensorKey(sensor), 0, 0)
         # msg = self.r.hmget(msg_key)
-        dict = self.r.hgetall(dict_key[0])
+        dict = {}
+        try:
+            dict = self.r.hgetall(dict_key[0])
+        except IndexError:
+            return dict
         dict = self.floatDict(dict)
         return dict
 
