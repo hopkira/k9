@@ -442,8 +442,19 @@ with dai.Device(pipeline) as device:
         if (now_time - last_reading) > 10:
             print("FPS: ", 1.0 / (now_time - start_time))
             last_reading = now_time
-            print("Person at:",str(mem.retrieveLastSensorReading("person")))
-            print("Follow:",str(mem.retrieveLastSensorReading("follow")))
-            print("Min dist:",str(mem.retrieveState("forward")))
-            print("Point cloud:",str(mem.retrieveSensorReadings("oak")))
+            person = mem.retrieveLastSensorReading("person")
+            try: 
+                print("Person at:",str(person['distance']),"m and at",str(person['angle']),"radians.")
+            except IndexError:
+                print("No Person currently detected")
+            follow = mem.retrieveLastSensorReading("follow")
+            try: 
+                print("Move towards:",str(follow['distance']),"m and at",str(follow['angle']),"radians.")
+            except IndexError:
+                print("Nothing to follow")
+            min_dist = mem.retrieveState("forward")
+            print("Can't move more than",str(min_dist/1000),"m forward.")
+            point_cloud = mem.retrieveSensorReadings("oak")
+            for point in point_cloud:
+                print(str(point))
             print("*** OAK PIPE OUTPUT ENDS ***")
