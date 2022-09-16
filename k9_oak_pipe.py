@@ -438,10 +438,12 @@ with dai.Device(pipeline) as device:
         # print out the FPS achieved
         # counter += 1
         now_time = time.time()
+        # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
             print("FPS: ", 1.0 / (now_time - start_time))
             last_reading = now_time
             print("Person at:",str(mem.retrieveLastSensorReading("person")))
             print("Follow:",str(mem.retrieveLastSensorReading("follow")))
             print("Min dist:",str(mem.retrieveState("forward")))
+            print("Point cloud:",str(mem.retrieveSensorReadings("oak")))
             print("*** OAK PIPE OUTPUT ENDS ***")
