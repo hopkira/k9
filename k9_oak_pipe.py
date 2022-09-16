@@ -199,12 +199,14 @@ class Point_Cloud():
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
-        point_cloud = np.nanmin(totals, axis = 0)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            point_cloud = np.nanmin(totals, axis = 0)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         for index,point in enumerate(point_cloud):
             # print(str(index),str(point))
-            mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
+            mem.storeSensorReading("oak",float(point/1000.0),float(self.angles_array[index]))
 
 
 class Fwd_Collision_Detect():
@@ -457,6 +459,5 @@ with dai.Device(pipeline) as device:
             min_dist = mem.retrieveState("forward")
             print("Can't move more than","{:.1f}".format(min_dist),"m forward.")
             point_cloud = mem.retrieveSensorReadings("oak")
-            for point in point_cloud:
-                print(str(point))
+            print(str(point_cloud))
             print("*** OAK PIPE OUTPUT ENDS ***")
