@@ -56,7 +56,7 @@ class Memory():
         old_value = self.r.get(str(key) + ":time:now")
         if not old_value:
             old_value = 0.0
-        elapsed_time = str(time.time() - float(old_value))
+        elapsed_time = int(time.time() - float(old_value))
         if elapsed_time >= 86400:
             print("Old value set", round(elapsed_time/86400),"days ago.")
         elif elapsed_time >= 3600:
