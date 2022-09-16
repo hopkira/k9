@@ -331,6 +331,7 @@ class Legs_Detector():
             angle = direction * math.radians(cam_h_fov)
             move = (final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
+            print("Follow:", move, angle)
             mem.storeSensorReading("follow", move, angle)
 
 
@@ -379,7 +380,7 @@ class Person_Detector():
             else:
                 # drop the target otherwise
                 self.target["id"] =  None
-                # print("Target lost and forgotten")
+                print("Target lost and forgotten")
         else:
             # look for any new or tracked tracklets
             candidates = [tracklet for tracklet in trackletsData
@@ -387,7 +388,7 @@ class Person_Detector():
                             or tracklet.status.name == "TRACKED")]
             for candidate in candidates:
                 # identify the closest tracklet
-                # print("New or tracked candidate: " + str(candidate.id))
+                print("New or tracked candidate: " + str(candidate.id))
                 if candidate.spatialCoordinates.z < heel_range:
                     # print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
