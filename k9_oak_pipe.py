@@ -440,6 +440,6 @@ with dai.Device(pipeline) as device:
         if (now_time - last_reading) > 10:
             print("FPS: ", 1.0 / (now_time - start_time))
             last_reading = now_time
-            print("Person at:",mem.retrieveLastSensorReading("person"))
-            print("Follow:",mem.retrieveLastSensorReading("follow"))
-            print("Min dist:",mem.retrieveState("forward"))
+            print("Person at:",str(mem.retrieveLastSensorReading("person")))
+            print("Follow:",str(mem.retrieveLastSensorReading("follow")))
+            print("Min dist:",str(mem.retrieveState("forward")))
