@@ -445,12 +445,12 @@ with dai.Device(pipeline) as device:
             person = mem.retrieveLastSensorReading("person")
             try: 
                 print("Person at:",str(person['distance']),"m and at",str(person['angle']),"radians.")
-            except IndexError:
+            except KeyError:
                 print("No Person currently detected")
             follow = mem.retrieveLastSensorReading("follow")
             try: 
                 print("Move towards:",str(follow['distance']),"m and at",str(follow['angle']),"radians.")
-            except IndexError:
+            except KeyError:
                 print("Nothing to follow")
             min_dist = mem.retrieveState("forward")
             print("Can't move more than",str(min_dist/1000),"m forward.")
