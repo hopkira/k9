@@ -361,7 +361,7 @@ class Person_Detector():
         target.  Record the tracklet vector in robot dog's memory
         '''
 
-        heel_range = self.heel_upper # reset range to max
+        heel_range = heel_upper # reset range to max
         if self.target["id"] is not None:
             # extract the tracklet id that matches the existing id
             candidate = [tracklet for tracklet in trackletsData
