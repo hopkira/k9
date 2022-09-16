@@ -32,13 +32,12 @@ class Memory():
     def __init__(self, record = False):
         self.rec = record
         print("Connecting to local redis host")
-        self.r = redis.Redis(host='127.0.0.1',port=6379)
+        self.r = redis.Redis(host='127.0.0.1',port=6379, decode_responses=True, charset="utf-8")
         if self.rec:
             print("Recording data permanently") # let the user know they are in sim mode
         self.storeState("left:speed",0.0)
         self.storeState("right:speed",0.0)
 
-    
             
     def storeState(self, key:str, value:float) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
@@ -135,36 +134,51 @@ class Memory():
         # Redis server
         pipe.execute()
 
-    def retrieveSensorMessage(self, sensor):
+    def getSensorKey(self,sensor):
+        return "sensor:" + sensor
+
+    def floatDict(self, dict, list=['distance','angle']):
+        for index in list:
+            try:
+                dict[index] = float(dict[index])
+            except KeyError:
+                print("Key error detected in Redis")
+        return dict
+ 
+    def retrieveSensorReading(self, sensor:str) -> dict:
         '''Retrieves the last message stored for a sensor
+           as a dictionary
 
         Arg:
             sensor (str): Name of the sensor
         ''' 
-        
-        msg_key=str(self.r.lrange(sensor, 0, 0))
+        dict_key=self.r.lrange(self.getSensorKey(sensor), 0, 0)
         # msg = self.r.hmget(msg_key)
-        msg = str(self.r.hgetall(msg_key))
-        return msg
+        dict = self.r.hgetall(dict_key[0])
+        dict = self.floatDict(dict)
+        return dict
 
     def retrieveSensorReadings(self, sensor:str) -> list:
         '''Retrieves all the values stored for a sensor
+           as a list of dictionaries
         
         Arg:
             sensor (str): Name of sensor
         '''
-        msgs = []
-        msg_key_list = self.r.lrange(sensor, 0, -1)
+        dict_list = []
+        msg_key_list = self.r.lrange(self.getSensorKey(sensor), 0, -1)
         for key in msg_key_list:
-            msgs.append(json.loads(self.r.hmget(key)))
-        return msgs
+            item = self.r.hgetall(key)
+            item = self.floatDict(item)
+            dict_list.append(item)
+        return dict_list
 
-    def retrieveLastSensorReading(self, sensor:str) -> str:
+    def retrieveLastSensorReading(self, sensor:str) -> dict:
         '''Retrieves the last value stored for a sensor
+           as a dictionary
 
         Arg:
             sensor (str): Name of the sensor
         '''
         
-        message = json.loads(self.retrieveSensorMessage(sensor))
-        return message
+        return self.retrieveSensorReading(sensor)
