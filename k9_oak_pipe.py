@@ -441,7 +441,7 @@ with dai.Device(pipeline) as device:
         now_time = time.time()
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
-            print("FPS: ","{:/1f}".format(1.0 / (now_time - start_time)))
+            print("FPS: ","{:.1f}".format(1.0 / (now_time - start_time)))
             last_reading = now_time
             person = mem.retrieveLastSensorReading("person")
             try: 
