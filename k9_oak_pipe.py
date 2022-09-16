@@ -203,6 +203,7 @@ class Point_Cloud():
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         for index,point in enumerate(point_cloud):
+            print(str(index),str(point))
             mem.storeSensorReading("oak",float(point),float(self.angles_array[index]))
 
 
