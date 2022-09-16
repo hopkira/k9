@@ -142,7 +142,8 @@ class Memory():
             try:
                 dict[index] = float(dict[index])
             except KeyError:
-                print("Key error detected in Redis")
+                # print("Key error detected in Redis")
+                pass
         return dict
  
     def retrieveSensorReading(self, sensor:str) -> dict:
