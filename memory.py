@@ -47,11 +47,11 @@ class Memory():
             key (str): Name of the key
             value (float): New value for the key 
         '''
-        print("Key:", key,", new value:", value)
+        #print("Key:", key,", new value:", value)
         old_value = self.r.get(str(key) + ":now")
         if not old_value:
             old_value = 0.0
-        print("Old value:", old_value)
+        #print("Old value:", old_value)
         self.r.set(str(key) + ":old", old_value )
         old_value = self.r.get(str(key) + ":time:now")
         if not old_value:
@@ -64,7 +64,8 @@ class Memory():
         elif elapsed_time >= 60:
             print("Old value set", round(elapsed_time/60),"minutes ago.")
         else:
-            print("Old value set", round(elapsed_time),"seconds ago.")
+            pass
+            #print("Old value set", round(elapsed_time),"seconds ago.")
         self.r.set(str(key) + ":time:old", old_value)
         self.r.set(str(key) + ":now",str(value))
         self.r.set(str(key) + ":time:now",str(time.time()))
