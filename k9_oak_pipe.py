@@ -12,6 +12,7 @@
 #   4. generate a focussed point cloud to avoid forward collisions
 
 import time
+from turtle import distance
 print("Time started...")
 import math
 print("Counting on fingers... yep")
@@ -274,7 +275,7 @@ class Fwd_Collision_Detect():
         #plt.ylim(-200,1600)
         #plt.show()
         if not np.isnan(min_dist):
-            mem.storeState("forward", float(min_dist))
+            mem.storeState("forward", float(min_dist/1000.0))
         pass
         
 
@@ -404,7 +405,7 @@ class Person_Detector():
             x = float(self.target["x"])
             angle = ( math.pi / 2 ) - math.atan2(z, x)
             distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
-            mem.storeSensorReading("person",distance,angle)
+            mem.storeSensorReading("person",distance/1000.0,angle)
 
 
 # Declare the device
@@ -440,20 +441,20 @@ with dai.Device(pipeline) as device:
         now_time = time.time()
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
-            print("FPS: ", 1.0 / (now_time - start_time))
+            print("FPS: ","{:/1f}".format(1.0 / (now_time - start_time)))
             last_reading = now_time
             person = mem.retrieveLastSensorReading("person")
             try: 
-                print("Person at:",str(person['distance']),"m and at",str(person['angle']),"radians.")
+                print("Person at:","{:.2f}".format(person['distance']),"m and at","{:.2f}".format(person['angle']),"radians.")
             except KeyError:
                 print("No Person currently detected")
             follow = mem.retrieveLastSensorReading("follow")
             try: 
-                print("Move towards:",str(follow['distance']),"m and at",str(follow['angle']),"radians.")
+                print("Move towards:","{:.2f}".format(follow['distance']),"m and at","{:.2f}".format(follow['angle']),"radians.")
             except KeyError:
                 print("Nothing to follow")
             min_dist = mem.retrieveState("forward")
-            print("Can't move more than",str(min_dist/1000),"m forward.")
+            print("Can't move more than","{:.1f}".format(min_dist),"m forward.")
             point_cloud = mem.retrieveSensorReadings("oak")
             for point in point_cloud:
                 print(str(point))
