@@ -97,7 +97,8 @@ class Memory():
             "type":"sensor",
             "sensor": str(name),
             "distance": reading,
-            "angle": angle
+            "angle": angle,
+            "time": time.time()
         }
         json_data = json.dumps(reading)
         # json_data = '{"type":"sensor","sensor":"'+str(name)+'","distance":"'+str(reading)+'","angle":"'+str(angle)+'"}'
@@ -137,7 +138,7 @@ class Memory():
     def getSensorKey(self,sensor):
         return "sensor:" + sensor
 
-    def floatDict(self, dict, list=['distance','angle']):
+    def floatDict(self, dict, list=['distance','angle','time']):
         for index in list:
             try:
                 dict[index] = float(dict[index])
