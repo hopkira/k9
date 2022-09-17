@@ -116,7 +116,7 @@ try:
             if (now_time - last_reading) > 10:
                 last_reading = now_time
                 min_dist = mem.retrieveState("reverse")
-                print("Can't move more than","{:.1f}".format(min_dist),"m backward.")
+                print("Can't move more than","{:.1f}".format(abs(min_dist)),"m backward.")
                 rotate = mem.retrieveState("rotate")
                 if rotate > 0:
                     print("Safe to rotate")

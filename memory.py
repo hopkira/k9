@@ -57,11 +57,11 @@ class Memory():
             old_value = 0.0
         elapsed_time = int(time.time() - float(old_value))
         if elapsed_time >= 86400:
-            print("Old value set", round(elapsed_time/86400),"days ago.")
+            print("Old value of",str(key),"set",round(elapsed_time/86400),"days ago.")
         elif elapsed_time >= 3600:
-            print("Old value set", round(elapsed_time/3600),"hours ago.")
+            print("Old value of",str(key),"set",round(elapsed_time/3600),"hours ago.")
         elif elapsed_time >= 60:
-            print("Old value set", round(elapsed_time/60),"minutes ago.")
+            print("Old value of",str(key),"set",round(elapsed_time/60),"minutes ago.")
         else:
             pass
             #print("Old value set", round(elapsed_time),"seconds ago.")
