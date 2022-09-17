@@ -1,6 +1,7 @@
 import serial
 from CalcLidarData import CalcLidarData
 import math
+import time
 import pandas as pd
 import numpy as np
 from matplotlib import pyplot as plt
@@ -43,12 +44,7 @@ bx2, by2 = [-1.5,3]
 ll = np.array([bx1, by1])  # lower-left
 ur = np.array([bx2, by2])  # upper-right
 
-# TODO need a routine to calculate blockers behind the dog
-# https://stackoverflow.com/questions/33051244/numpy-filter-points-within-bounding-box
-# https://stackoverflow.com/questions/42352622/finding-points-within-a-bounding-box-with-numpy
-
-
-#last = time.time()
+last_reading = time.time()
 try:
     i = 0
     while True:
@@ -80,13 +76,17 @@ try:
             x = min_dists * np.cos(mid_points)
             y = min_dists * np.sin(mid_points)
             points = np.column_stack((x,y))
+            # find points inside the rectangle behind the dog
             inidx = np.all(np.logical_and(ll <= points, points <= ur), axis=1)
             inbox = points[inidx]
             try:
-                min_x = np.nanmax(inbox[:,0]) # nearest point to dog
+                # find nearest point to dog, max because dog is in centre
+                # and we are finding things behind him in the x-axis
+                min_x = np.nanmax(inbox[:,0])
             except ValueError:
                 min_x = -25.0 # default is 2.5m away
-            mem.storeState("reverse",min_x)
+            mem.storeState("reverse",min_x/10.0)
+            '''
             # The following is for display only; not needed when running for real
             if minimum_distance > 0.0 :
                 colour = 'g-'
@@ -107,10 +107,22 @@ try:
             #now = time.time()
             #print(now-last)
             #last = now
+            '''
             # Now get next set of readings
             angles.clear()
             distances.clear()
             i = 0
+            now_time = time.time()
+            if (now_time - last_reading) > 10:
+                last_reading = now_time
+                min_dist = mem.retrieveState("reverse")
+                print("Can't move more than","{:.1f}".format(min_dist),"m backward.")
+                rotate = mem.retrieveState("rotate")
+                if rotate > 0:
+                    print("Safe to rotate")
+                else:
+                    print("Unsafe to rotate")
+                print("======== END OF READINGS ========")
 
 
         while loopFlag:
