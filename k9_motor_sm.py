@@ -16,8 +16,12 @@ from state import State # Base FSM State class
 import paho.mqtt.client as mqtt
 print("MQTT found...")
 from queue import Queue
-from memory import Memory as mem
+from memory import Memory
+from voice import Voice
 print("All imports done!")
+
+mem = Memory()
+voice = Voice()
 
 # Define K9 Motor States
 
@@ -54,11 +58,15 @@ class Scanning(State):
         while True:
             self.target = None
             self.target = mem.retrieveLastSensorReading("person")
-            if self.target is not None :
-                self.on_event('person_found')
+            try:
+                if self.target['distance'] != 0.0 and self.target['angle'] != 0.0 :
+                    self.on_event('person_found')
+            except KeyError:
+                pass
 
     def on_event(self, event):
         if event == 'person_found':
+            k9.voice("Coming master")
             return Turning(self.target)
         return self
 
@@ -69,9 +77,8 @@ class Turning(State):
     '''
     def __init__(self, target):
         super(Turning, self).__init__()
-        target_dict = json.loads(target)
-        self.angle = target_dict["angle"]
-        self.distance = target_dict["distance"]
+        self.angle = target["angle"]
+        self.distance = target["distance"]
         if abs(self.angle) > 0.2 :
             print("Turning: Moving ",self.angle," radians towards target")
             # logo.right(self.angle)
@@ -88,9 +95,10 @@ class Turning(State):
         if event == 'turn_finished':
             return Moving_Forward(self.distance)
         if event == 'turn_blocked':
-            print("Turn blocked")
+            voice.speak("Turn blocked")
             return ManualControl()
         if event == 'StayHere':
+            voice.speak("Staying put")
             return  ManualControl()
         return self
 
@@ -106,8 +114,9 @@ class Turn_Around(State):
             if logo.finished_move():
                 self.on_event('turn_finished')
             # check to see if rotation is safe
-            # if mem.retrieveState("rotate") < 0.0:
-            #    self.on_event('turn_blocked')
+            if mem.retrieveState("rotate") < 0.0:
+                voice.speak("Turn blocked")
+                self.on_event('turn_blocked')
 
     def on_event(self, event):
         if event == 'turn_blocked':
@@ -141,8 +150,10 @@ class Moving_Forward(State):
 
     def on_event(self, event):
         if event == 'target_reached':
+            voice.speak("Master!")
             return ManualControl()
         if event == 'StayHere':
+            voice.speak("Staying put")
             return  ManualControl()
         return self
 
@@ -159,9 +170,8 @@ class Following(State):
             # ADD: Listen for 'stay' commands from MQTT
             # 
             # retrieve direction and distance from Redis
-            follow = mem.retrieveLastSensorReading("follow")
-            if follow is not None:
-                target_dict = json.loads(follow)
+            target_dict = mem.retrieveLastSensorReading("follow")
+            if target_dict["angle"] != 0 and target_dict["distance"] != 0 :
                 self.angle = target_dict["angle"]
                 self.move = target_dict["distance"]
                 print("Following: direction:", self.angle, "distance:", self.move)
@@ -187,8 +197,10 @@ class Following(State):
 
     def on_event(self, event):
         if event == 'StayHere':
+            voice.speak("Staying here")
             return ManualControl()
         if event == 'turn_blocked':
+            voice.speak("Turn blocked")
             return ManualControl()
         return self
 

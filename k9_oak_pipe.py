@@ -337,6 +337,8 @@ class Legs_Detector():
             move = move / 1000.0 # convert to m
             # print("Follow:", move, angle)
             mem.storeSensorReading("follow", move, angle)
+        else:
+            mem.storeSensorReading("follow",0,0)
 
 
 class Person_Detector():
@@ -409,6 +411,8 @@ class Person_Detector():
             angle = ( math.pi / 2 ) - math.atan2(z, x)
             distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
             mem.storeSensorReading("person",distance/1000.0,angle)
+        else:
+            mem.storeSensorReading("person",0,0)
 
 
 # Declare the device
