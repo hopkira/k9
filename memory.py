@@ -135,10 +135,23 @@ class Memory():
         # Redis server
         pipe.execute()
 
-    def getSensorKey(self,sensor):
+    def getSensorKey(self,sensor:str) -> str:
+        '''Returns name of sensor key
+
+        Args:
+            sensor (str): Name of the sensor
+        '''
+
         return "sensor:" + sensor
 
-    def floatDict(self, dict, list=['distance','angle','time']):
+    def floatDict(self, dict:dict, list:list=['distance','angle','time']) -> dict:
+        '''Returns a dictionary with floats rather than strings
+
+        Args:
+            dict (dict): Dictionary to modify
+            list (list): List of dictionary indices to modify 
+        '''
+        
         for index in list:
             try:
                 dict[index] = float(dict[index])
