@@ -78,6 +78,32 @@ class Memory():
 
         return float(self.r.get(str(key) + ":now"))
 
+    def retrieveStateMetadata(self, key:str) -> dict:
+        '''
+        Returns a dictionary for a state that includes
+        its current value, rate of change and age
+
+        Args:
+            key (str): Name of state
+        '''
+        
+        now = float(self.r.get(key + ":now"))
+        now_time = float(self.r.get(key + ":time:now"))
+        old = float(self.r.get(key + ":old"))
+        old_time = float(self.r.get(key + "time:old"))
+        try:
+            delta = (now - old) / (now_time - old_time)
+        except ZeroDivisionError:
+            delta = None
+        age = now_time - time.time()
+        dict = {
+            "key": key,
+            "value": now,
+            "delta": delta,
+            "age": age
+        }
+        return dict
+
     def getMsgKey(self):
         '''Uses redis to create a unique message key by incrementing message_num
         '''
