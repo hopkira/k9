@@ -82,7 +82,8 @@ try:
             # find points inside the rectangle behind the dog
             inidx = np.all(np.logical_and(ll <= points, points <= ur), axis=1)
             inbox = points[inidx]
-            print(str(inbox))
+            for my_p in inbox:
+                print(str(my_p))
             try:
                 # find nearest point to dog, max because dog is in centre
                 # and we are finding things behind him in the x-axis
