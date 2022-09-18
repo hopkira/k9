@@ -85,7 +85,8 @@ class Memory():
     def retrieveStateMetadata(self, key:str) -> dict:
         '''
         Returns a dictionary for a state that includes
-        its current value, rate of change and age
+        its current value, rate of change and age, will
+        return None if state not found
 
         Args:
             key (str): Name of state
@@ -195,7 +196,7 @@ class Memory():
  
     def retrieveSensorReading(self, sensor:str) -> dict:
         '''Retrieves the last message stored for a sensor
-           as a dictionary
+           as a dictionary, will return None if none found
 
         Arg:
             sensor (str): Name of the sensor
@@ -211,7 +212,8 @@ class Memory():
 
     def retrieveSensorReadings(self, sensor:str) -> list:
         '''Retrieves all the values stored for a sensor
-           as a list of dictionaries
+           as a list of dictionaries, will return empty
+           list if none found
         
         Arg:
             sensor (str): Name of sensor
@@ -226,7 +228,8 @@ class Memory():
 
     def retrieveLastSensorReading(self, sensor:str) -> dict:
         '''Retrieves the last value stored for a sensor
-           as a dictionary
+           as a dictionary, will return None if none
+           recorded
 
         Arg:
             sensor (str): Name of the sensor
