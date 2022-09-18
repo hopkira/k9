@@ -79,6 +79,8 @@ try:
             x = min_dists * np.cos(mid_points)
             y = min_dists * np.sin(mid_points)
             points = np.column_stack((x,y))
+            for my_p in points:
+                print(str(my_p))
             # find points inside the rectangle behind the dog
             inidx = np.all(np.logical_and(ll <= points, points <= ur), axis=1)
             inbox = points[inidx]
