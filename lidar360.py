@@ -65,12 +65,14 @@ try:
             min_dists = min_dists.values.reshape(segments)
             # narrow the min distances to the angles that can be seen
             min_dists = min_dists[lidar_start:lidar_end]
+            print(min_dists)
+            print("================================")
             # Check if it is safe to turn
             # A negative figure means it isn't; a positive one means it is
             # the scale of the value gives an indication of how safe it is 
             # to rotate
             minimum_distance = np.nanmin(min_dists - boundary)
-            print("Min dist:",minimum_distance)
+            # print("Min dist:",minimum_distance)
             mem.storeState("rotate",minimum_distance)
             #  Determine how far the robot can move backwards
             # convert the polar co-ordinates into x and y arrrays
@@ -117,7 +119,7 @@ try:
             distances.clear()
             i = 0
             now_time = time.time()
-            if (now_time - last_reading) > 1:
+            if (now_time - last_reading) > 10:
                 last_reading = now_time
                 min_dist = mem.retrieveState("reverse")
                 print("Can't move more than","{:.1f}".format(abs(min_dist)),"m backward.")
