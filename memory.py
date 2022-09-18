@@ -86,11 +86,13 @@ class Memory():
         Args:
             key (str): Name of state
         '''
-        
-        now = float(self.r.get(key + ":now"))
-        now_time = float(self.r.get(key + ":time:now"))
-        old = float(self.r.get(key + ":old"))
-        old_time = float(self.r.get(key + ":time:old"))
+        try:
+            now = float(self.r.get(key + ":now"))
+            now_time = float(self.r.get(key + ":time:now"))
+            old = float(self.r.get(key + ":old"))
+            old_time = float(self.r.get(key + ":time:old"))
+        except TypeError:
+            return None
         try:
             delta_v = (now - old) / (now_time - old_time)
         except ZeroDivisionError:
