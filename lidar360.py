@@ -121,12 +121,11 @@ try:
             now_time = time.time()
             if (now_time - last_reading) > 1:
                 last_reading = now_time
-                min_dist = mem.retrieveState("reverse")
-
-                print("Can't move more than","{:.1f}".format(abs(min_dist)),"m backward.")
+                reverse = mem.retrieveStateMetadata("reverse")
+                print(reverse)
+                print("Can't move more than","{:.1f}".format(abs(reverse['value'])),"m backward.")
                 # rotate = mem.retrieveState("rotate")
                 rotate = (mem.retrieveStateMetadata("rotate"))
-                print(rotate)
                 if rotate['value'] < 0 and abs(rotate['delta_v']) < 10:
                     print("Unsafe to rotate")
                 else:
