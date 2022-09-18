@@ -124,12 +124,13 @@ try:
                 min_dist = mem.retrieveState("reverse")
 
                 print("Can't move more than","{:.1f}".format(abs(min_dist)),"m backward.")
-                rotate = mem.retrieveState("rotate")
-                print(mem.retrieveStateMetadata("rotate"))
-                if rotate > 0:
-                    print("Safe to rotate")
-                else:
+                # rotate = mem.retrieveState("rotate")
+                rotate = (mem.retrieveStateMetadata("rotate"))
+                print(rotate)
+                if rotate < 0 and abs(rotate['delta_v'] < 100.0):
                     print("Unsafe to rotate")
+                else:
+                    print("Safe to rotate")
                 print("======== END OF READINGS ========")
 
 
