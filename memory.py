@@ -86,7 +86,7 @@ class Memory():
         '''
         Returns a dictionary for a state that includes
         its current value, rate of change and age, will
-        return None if state not found
+        return None if state is not known
 
         Args:
             key (str): Name of state

@@ -71,7 +71,7 @@ try:
             # to rotate
             minimum_distance = np.nanmin(min_dists - boundary)
             mem.storeState("rotate",minimum_distance)
-            # Visualize
+            #  Determine how far the robot can move backwards
             # convert the polar co-ordinates into x and y arrrays
             x = min_dists * np.cos(mid_points)
             y = min_dists * np.sin(mid_points)
@@ -83,9 +83,12 @@ try:
                 # find nearest point to dog, max because dog is in centre
                 # and we are finding things behind him in the x-axis
                 min_x = np.nanmax(inbox[:,0])
+                # lidar is 40 cms in front of rear of the dog, so substract
+                # that distance
+                min_x = max(0, min_x - 40)
             except ValueError:
-                min_x = -25.0 # default is 2.5m away
-            mem.storeState("reverse",min_x/10.0)
+                min_x = 0 # default is zero i.e. unsafe to move
+            mem.storeState("reverse",min_x/10.0) # store in Redis in m
             '''
             # The following is for display only; not needed when running for real
             if minimum_distance > 0.0 :
@@ -113,7 +116,7 @@ try:
             distances.clear()
             i = 0
             now_time = time.time()
-            if (now_time - last_reading) > 10:
+            if (now_time - last_reading) > 1:
                 last_reading = now_time
                 min_dist = mem.retrieveState("reverse")
                 print("Can't move more than","{:.1f}".format(abs(min_dist)),"m backward.")
