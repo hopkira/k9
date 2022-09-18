@@ -92,14 +92,15 @@ class Memory():
         old = float(self.r.get(key + ":old"))
         old_time = float(self.r.get(key + ":time:old"))
         try:
-            delta = (now - old) / (now_time - old_time)
+            delta_v = (now - old) / (now_time - old_time)
         except ZeroDivisionError:
-            delta = None
+            delta_v = None
         age = now_time - time.time()
         dict = {
             "key": key,
             "value": now,
-            "delta": delta,
+            "old_value": old,
+            "delta_v": delta_v,
             "age": age
         }
         return dict
