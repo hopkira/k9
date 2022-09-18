@@ -40,7 +40,7 @@ mid_points = mid_points[lidar_start:lidar_end] # narrow list to angles that the 
 # create cartesian bounding box for straight reverse
 # collision detection
 bx1, by1 = [-25,-3]
-bx2, by2 = [-1.5,3]
+bx2, by2 = [0,3]
 ll = np.array([bx1, by1])  # lower-left
 ur = np.array([bx2, by2])  # upper-right
 
@@ -80,7 +80,8 @@ try:
             y = min_dists * np.sin(mid_points)
             points = np.column_stack((x,y))
             for my_p in points:
-                print(str(my_p))
+                if my_p[0] > -25 and my_p[0] < 0 and my_p[1] > -3 and my_p[1] < 3:
+                    print(str(my_p))
             # find points inside the rectangle behind the dog
             inidx = np.all(np.logical_and(ll <= points, points <= ur), axis=1)
             inbox = points[inidx]
