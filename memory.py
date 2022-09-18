@@ -90,7 +90,7 @@ class Memory():
         now = float(self.r.get(key + ":now"))
         now_time = float(self.r.get(key + ":time:now"))
         old = float(self.r.get(key + ":old"))
-        old_time = float(self.r.get(key + "time:old"))
+        old_time = float(self.r.get(key + ":time:old"))
         try:
             delta = (now - old) / (now_time - old_time)
         except ZeroDivisionError:
