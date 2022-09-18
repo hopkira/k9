@@ -70,6 +70,7 @@ try:
             # the scale of the value gives an indication of how safe it is 
             # to rotate
             minimum_distance = np.nanmin(min_dists - boundary)
+            print("Min dist:",minimum_distance)
             mem.storeState("rotate",minimum_distance)
             #  Determine how far the robot can move backwards
             # convert the polar co-ordinates into x and y arrrays
