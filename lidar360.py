@@ -87,7 +87,7 @@ try:
                 # that distance
                 min_x = min(0, min_x + 40)
             except ValueError:
-                pass
+                min_x = 0
             mem.storeState("reverse",min_x/10.0) # store in Redis in m
             '''
             # The following is for display only; not needed when running for real
