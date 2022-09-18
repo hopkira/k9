@@ -65,13 +65,13 @@ try:
             min_dists = min_dists.values.reshape(segments)
             # narrow the min distances to the angles that can be seen
             min_dists = min_dists[lidar_start:lidar_end]
-            print(min_dists)
-            print("================================")
             # Check if it is safe to turn
             # A negative figure means it isn't; a positive one means it is
             # the scale of the value gives an indication of how safe it is 
             # to rotate
-            minimum_distance = np.nanmin(min_dists - boundary)
+            minimum_distances = min_dists - boundary
+            print(minimum_distances)
+            minimum_distance = np.nanmin(minimum_distances)
             # print("Min dist:",minimum_distance)
             mem.storeState("rotate",minimum_distance)
             #  Determine how far the robot can move backwards
