@@ -80,15 +80,20 @@ try:
             x = min_dists * np.cos(mid_points)
             y = min_dists * np.sin(mid_points)
             points = np.column_stack((x,y))
-            print("=== start pointss ===")
+            print("+++++ START +++++")
+            print("=== start logic points ===")
             for my_p in points:
                 if my_p[0] > -25 and my_p[0] < 0 and my_p[1] > -3 and my_p[1] < 3:
                     print(str(my_p))
-            print("=== end points ===")
+            print("=== end logic points ===")
             # find points inside the rectangle behind the dog
             inidx = np.all(np.logical_and(ll <= points, points <= ur), axis=1)
             inbox = points[inidx]
-            print("Points:",len(inbox))
+            print("=== start np points ===")
+            for my_p in inbox:
+                print(str(my_p))
+            print("=== end np points ===")
+            print("+++++ END +++++")
             try:
                 # find nearest point to dog, max because dog is in centre
                 # and we are finding things behind him in the x-axis
