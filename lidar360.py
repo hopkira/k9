@@ -85,7 +85,7 @@ try:
                 min_x = np.nanmax(inbox[:,0])
                 # lidar is 40 cms in front of rear of the dog, so substract
                 # that distance
-                min_x = min(0, min_x + 40)
+                # min_x = min(0, min_x + 40)
             except ValueError:
                 min_x = 0
             mem.storeState("reverse",min_x/10.0) # store in Redis in m
