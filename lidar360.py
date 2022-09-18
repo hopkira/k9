@@ -127,7 +127,7 @@ try:
                 # rotate = mem.retrieveState("rotate")
                 rotate = (mem.retrieveStateMetadata("rotate"))
                 print(rotate)
-                if rotate < 0 and abs(rotate['delta_v'] < 100.0):
+                if rotate['value'] < 0 and abs(rotate['delta_v'] < 10):
                     print("Unsafe to rotate")
                 else:
                     print("Safe to rotate")
