@@ -76,7 +76,11 @@ class Memory():
             key (str): Name of the key
         '''
 
-        return float(self.r.get(str(key) + ":now"))
+        try:
+            state_value = float(self.r.get(str(key) + ":now"))
+        except TypeError:
+            return None
+        return state_value
 
     def retrieveStateMetadata(self, key:str) -> dict:
         '''
@@ -97,7 +101,7 @@ class Memory():
             delta_v = (now - old) / (now_time - old_time)
         except ZeroDivisionError:
             delta_v = None
-        age = now_time - time.time()
+        age = time.time() - now_time
         dict = {
             "key": key,
             "value": now,
@@ -198,11 +202,10 @@ class Memory():
         ''' 
         dict_key=self.r.lrange(self.getSensorKey(sensor), 0, 0)
         # msg = self.r.hmget(msg_key)
-        dict = {}
         try:
             dict = self.r.hgetall(dict_key[0])
         except IndexError:
-            return dict
+            return None
         dict = self.floatDict(dict)
         return dict
 
