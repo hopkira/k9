@@ -35,7 +35,7 @@ def speak(speech:str) -> None:
     > will raise the pitch and amplitude
     < will lower it
     '''
-    mem.storeState("speaking",True)
+    mem.storeState("speaking",1.0)
     store_eyes = eyes.get_level()
     eyes.on()
     print('Speech server:', speech)
@@ -68,7 +68,7 @@ def speak(speech:str) -> None:
             speaking = Popen(cmd)
             Popen.wait(speaking)
     eyes.set_level(store_eyes)
-    mem.storeState("speaking",False)
+    mem.storeState("speaking",0.0)
 
 def mqtt_callback(client, userdata, message):
     """
