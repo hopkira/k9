@@ -126,6 +126,7 @@ try:
                 else:
                     print("Safe to rotate")
                 print("======== END OF READINGS ========")
+            time.sleep(0.05)
 
 
         while loopFlag:
