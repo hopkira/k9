@@ -114,7 +114,9 @@ try:
             distances.clear()
             i = 0
             now_time = time.time()
-            if (now_time - last_reading) > 1:
+            elapsed = now_time - last_reading
+            print("FFS:",1/elapsed)
+            if elapsed > 1:
                 last_reading = now_time
                 reverse = mem.retrieveStateMetadata("reverse")
                 print(reverse)
@@ -126,7 +128,7 @@ try:
                 else:
                     print("Safe to rotate")
                 print("======== END OF READINGS ========")
-            time.sleep(0.05)
+            # time.sleep(0.05)
 
 
         while loopFlag:
