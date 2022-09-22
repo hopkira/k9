@@ -1,4 +1,6 @@
 import sys
+import time
+
 from subprocess import Popen
 
 from memory import Memory
@@ -88,6 +90,7 @@ client.loop_start()
 print("Speech MQTT interface active")
 try:
     while True:
+        time.sleep(0.2)
         while not queue.empty():
             utterance = queue.get()
             if utterance is None:
