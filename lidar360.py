@@ -86,7 +86,7 @@ try:
             min_x = 25.0
             if len(inbox) > 2: # more then two points means probably not sensor noise
                 min_x = np.nanmax(inbox[:,0])
-            mem.storeState("reverse",(min_x/10.0) - 0.3) # store in Redis in m
+            mem.storeState("reverse",(min_x/10.0) + 0.3) # store in Redis in m
             '''
             # The following is for display only; not needed when running for real
             if minimum_distance > 0.0 :
