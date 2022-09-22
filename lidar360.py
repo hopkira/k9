@@ -117,7 +117,7 @@ try:
             elapsed = now_time - last_reading
             # print("FFS:",1/elapsed)
             # last_reading = now_time
-            if elapsed > 1:
+            if elapsed > 10:
                 last_reading = now_time
                 reverse = mem.retrieveStateMetadata("reverse")
                 print(reverse)
