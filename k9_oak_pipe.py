@@ -446,6 +446,7 @@ with dai.Device(pipeline) as device:
         # print out the FPS achieved
         counter += 1
         now_time = time.time()
+        time.sleep(0.1)
         print("FPS: ","{:.1f}".format(1.0 / (now_time - start_time)))
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
