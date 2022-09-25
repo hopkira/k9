@@ -33,7 +33,7 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 ## k9_streaming_tts.py
 Provides speech to text capability that can be used by multiple modules on a FIFO basis via MQTT.  Uses IBM Cloud TTS functionality over websockets when connected to the Internet.
 
-## k9_oak_pipe
+## k9_oak_pipe.py
 A complex Oak-lite sensor pipeline that is used to provide scanning functions from the Oak stereoscopic camea.  This includes the scanning functionality to support heeling, following and collision avoidance.  All data is simplified and stored in Redis for other modules to use:
   * Detect person at a distance (for heeling; recorded in Redis as 'person')
   * Follow a nearby obstacle (recorded in Redis as 'follow')
