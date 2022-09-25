@@ -1,16 +1,16 @@
 # K9 Robot Dog Software
 ## Featuring come, heel, chess playing and real time in character conversation.
 
-Core repository for the 2022 version of the K9 robot dog software.  Designed to run on a 2GB Raspberry Pi 4.
+Core repository for the 2022 version of the K9 robot dog software.  Designed to run on a 2GB or larger Raspberry Pi 4.
 
-Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
+This repository contains a major update to K9 in preparation for moving the code base to ROS2.  It has split major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
 
 ## Starting and stopping
 The various python programs that make up K9's run time can be started with
 ```console
 ./k9.sh
 ```
-The script assumes you have Python virtual environments installed.
+The script assumes you have Python virtual environments installed and have created a virtual environment called depthAI in line with the OAK-D installation instructions.
 
 These programs can be stopped using: 
 ```console
@@ -20,16 +20,18 @@ pkill -f k9_
 ## Hardware Pre-requsites
 This software is designed to work with the following hardware:
 * Adafruit I2C PCA9685 Servo controller (for controlling lights and tail)
-* Epsruino Pico for LIDAR ears connected via USB
+* Epsruino Pico connected via US for LIDAR ears
 * USB microphone
-* RoboClaw motor controller controlling two motors with encoders
+* RoboClaw PID motor controller controlling two motors with encoders
 * OAK-D camera (either original or lite)
 Most of the hardware access is via abstraction modules that can easily be repurposed leaving the core of the program intact.
 
-## Subscriptions
+ Details on the hardware design of K9 are provided [here](https://k9-build.blogspot.com/p/this-post-provides-quick-tour-of-the.html).
+
+## Cloud subscriptions
 For full conversational capability, the software requires:
-an IBM Cloud id under the Lite (free) plan for speech generation
-a GPT-3 account with OpenAI for responses and intents
+* an IBM Cloud id under the Lite (free) plan for speech generation and
+* a GPT-3 account with OpenAI for responses and intents
 
 ### Class diagram
 The following picture describes the Python modules that make up K9 and the key relationships between the modules. Most calls between modules are local, direct Python calls, except those shown in green that are performed by MQTT.  Red arrows show persistent data sharing through Redis. Classes with a dark blue border are separate executable programs.
@@ -75,4 +77,4 @@ Python Motor Controller with a finite state machine that listens for state chang
 
 
 ## Create and activate a virtualenv
-Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment and then use ``pip3 install -r requirements`` to install the required Python packages.
+Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment called ```depthAI``` following the OAK-D instructions and then use ``pip3 install -r requirements`` to install the required Python packages.
