@@ -13,6 +13,7 @@ import sys
 import requests
 import os
 import pyaudio
+import time
 from subprocess import Popen
 
 from ibm_watson import TextToSpeechV1
@@ -216,6 +217,7 @@ print("Speech MQTT interface active")
 speaking = False
 try:
     while True:
+        time.sleep(0.2)
         while not queue.empty():
             tts_callback = MySynthesizeCallback()
             speaking = True
