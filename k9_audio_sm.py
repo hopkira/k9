@@ -61,7 +61,7 @@ class Waitforhotword(State):
         print("Eyes set in hotword state")
         self.porcupine = pvporcupine.create(
             access_key = ACCESS_KEY,
-            keyword_paths=['/home/pi/k9localstt/canine_en_raspberry-pi_v2_1_0.ppn']
+            keyword_paths=['/home/pi/k9/canine_en_raspberry-pi_v2_1_0.ppn' ]
         )   
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
