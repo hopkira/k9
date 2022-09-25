@@ -269,11 +269,6 @@ client.subscribe("k9/events/audio", qos=2)
 client.loop_start()
 print("MQTT active...")
 
-# Create Mozilla deepspeech STT capablity
-#model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-#model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
-#print("Deepspeech active...")
-
 k9eyes = Eyes()
 k9lights = BackLights()
 k9ears = Ears()

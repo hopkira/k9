@@ -13,8 +13,8 @@ class Listen():
 
     def __init__(self):
         # load deepspeech models for STT
-        self.model = deepspeech.Model("/home/pi/k9localstt/deepspeech-0.9.3-models.tflite")
-        self.model.enableExternalScorer("/home/pi/k9localstt/deepspeech-0.9.3-models.scorer")
+        self.model = deepspeech.Model("/home/pi/k9/deepspeech-0.9.3-models.tflite")
+        self.model.enableExternalScorer("/home/pi/k9/deepspeech-0.9.3-models.scorer")
 
     def listen_for_command(self) -> str:
         # load voice activiity detection capability
