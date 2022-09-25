@@ -14,8 +14,8 @@ import time
 import requests
 import pvporcupine  # Porcupine hotword
 #import deepspeech  # Mozilla STT
-import numpy as np
-print("Numpy active...")
+#import numpy as np
+#print("Numpy active...")
 from state import State # Base FSM State class
 print("State machine with state...")
 from pvrecorder import PvRecorder # Porcupine hotword

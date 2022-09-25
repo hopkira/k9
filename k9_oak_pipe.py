@@ -12,7 +12,7 @@
 #   4. generate a focussed point cloud to avoid forward collisions
 
 import time
-from turtle import distance
+#from turtle import distance
 print("Time started...")
 import math
 print("Counting on fingers... yep")
@@ -27,8 +27,8 @@ print("Pandas are frolicking...")
 import warnings
 from memory import Memory
 print("All imports done!")
-from matplotlib import pyplot as plt
-print("Picture drawing loaded...")
+#from matplotlib import pyplot as plt
+#print("Picture drawing loaded...")
 
 mem = Memory()
 

@@ -1,12 +1,11 @@
-import time, os, logging, contextlib, sys
-from datetime import datetime
-import threading, collections, queue, os, os.path
+import os, logging, contextlib, sys
+import collections, queue, os, os.path
 
 import numpy as np
 import pyaudio
 import wave
 import webrtcvad
-from halo import Halo
+#from halo import Halo
 from scipy import signal
 
 #

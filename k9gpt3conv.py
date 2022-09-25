@@ -1,5 +1,5 @@
 import os
-from tkinter import N
+#from tkinter import N
 import openai
 from typing import Tuple
 

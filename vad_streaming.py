@@ -1,6 +1,6 @@
-import time, logging
+import logging
 from datetime import datetime
-import threading, collections, queue, os, os.path
+import collections, queue, os, os.path
 import deepspeech
 import numpy as np
 import pyaudio

@@ -8,7 +8,7 @@
 # by MQTT/Bluetooth.
 #
 import sys
-import json
+#import json
 import math
 #from tkinter.messagebox import NO
 import logo # k9 movement library

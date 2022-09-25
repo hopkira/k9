@@ -5,7 +5,7 @@ import math
 import time
 import pandas as pd
 import numpy as np
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from memory import Memory
 
 mem = Memory()

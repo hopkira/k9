@@ -4,7 +4,7 @@ This program listens converts speech into text.
 
 """
 
-import paho.mqtt.client as mqtt
+#import paho.mqtt.client as mqtt
 from audio_tools import VADAudio # Voice activity detection
 import deepspeech  # Mozilla STT
 import numpy as np

@@ -1,7 +1,7 @@
 # K9 Robot Dog Software
 ## Featuring come, heel, chess playing and real time in character conversation.
 
-Core repository for the 2022 version of the K9 robot dog software.
+Core repository for the 2022 version of the K9 robot dog software.  Designed to run on a 2GB Raspberry Pi 4.
 
 Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
 
@@ -16,6 +16,20 @@ These programs can be stopped using:
 ```console
 pkill -f k9_
 ```
+
+## Hardware Pre-requsites
+This software is designed to work with the following hardware:
+* Adafruit I2C PCA9685 Servo controller (for controlling lights and tail)
+* Epsruino Pico for LIDAR ears connected via USB
+* USB microphone
+* RoboClaw motor controller controlling two motors with encoders
+* OAK-D camera (either original or lite)
+Most of the hardware access is via abstraction modules that can easily be repurposed leaving the core of the program intact.
+
+## Subscriptions
+For full conversational capability, the software requires:
+an IBM Cloud id under the Lite (free) plan for speech generation
+a GPT-3 account with OpenAI for responses and intents
 
 ### Class diagram
 The following picture describes the Python modules that make up K9 and the key relationships between the modules. Most calls between modules are local, direct Python calls, except those shown in green that are performed by MQTT.  Red arrows show persistent data sharing through Redis. Classes with a dark blue border are separate executable programs.
