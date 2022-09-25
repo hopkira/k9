@@ -5,6 +5,18 @@ Core repository for the 2022 version of the K9 robot dog software.
 
 Major update to K9 in preparation for moving to ROS2.  Splits major programs down into smaller modules with Redis and MQTT acting as the integration point of the robot state (Redis acting as a shared black board and MQTT being used to provide pub/sub between modules).
 
+## Starting and stopping
+The various python programs that make up K9's run time can be started with
+```console
+./k9.sh
+```
+The script assumes you have Python virtual environments installed.
+
+These programs can be stopped using: 
+```console
+pkill -f k9_
+```
+
 ### Class diagram
 The following picture describes the Python modules that make up K9 and the key relationships between the modules. Most calls between modules are local, direct Python calls, except those shown in green that are performed by MQTT.  Red arrows show persistent data sharing through Redis. Classes with a dark blue border are separate executable programs.
 <img
@@ -41,11 +53,12 @@ A complex Oak-lite sensor pipeline that is used to provide scanning functions fr
 
 Requires a virtual environment to run, follow the DepthAI installation instructions (workon depthAI).
 
-## lidar360.py
+## k9_lidar360.py
 A simple sensor pipeline that translates raw information from the back panel 360 LIDAR sensor into information about whether the robot can safely rotate and how far it can safely reverse.  This information is stored in Redis for other programs to use.  It uses CalcLidarData.py as the low level interface to the device.
 
 ## k9_motor_sm.py
 Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward. Uses logo.py to precisely control motors and movement.
+
 
 ## Create and activate a virtualenv
 Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment and then use ``pip3 install -r requirements`` to install the required Python packages.
