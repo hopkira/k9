@@ -30,8 +30,9 @@ Most of the hardware access is via abstraction modules that can easily be repurp
 
 ## Cloud subscriptions
 For full conversational capability, the software requires:
-* an IBM Cloud id under the Lite (free) plan for speech generation and
-* a GPT-3 account with OpenAI for responses and intents
+* an [IBM Cloud id](https://www.ibm.com/cloud) under the Lite (free) plan for speech generation;
+* a free account with [PicoVoice](https://picovoice.ai/platform/porcupine/) to use the Porcupine hotword
+* a GPT-3 account with [OpenAI](https://openai.com/api/) for responses and intents (this is not free once the initial credits have been used)
 
 ### Class diagram
 The following picture describes the Python modules that make up K9 and the key relationships between the modules. Most calls between modules are local, direct Python calls, except those shown in green that are performed by MQTT.  Red arrows show persistent data sharing through Redis. Classes with a dark blue border are separate executable programs.
