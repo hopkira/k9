@@ -20,7 +20,7 @@ pkill -f k9_
 ## Hardware Pre-requsites
 This software is designed to work with the following hardware:
 * Adafruit I2C PCA9685 Servo controller (for controlling lights and tail)
-* Epsruino Pico connected via US for LIDAR ears
+* Epsruino Pico connected via USB for LIDAR ears
 * USB microphone
 * RoboClaw PID motor controller controlling two motors with encoders
 * OAK-D camera (either original or lite)
