@@ -7,6 +7,7 @@
 # the K9 robot and responds to commands received
 # by MQTT/Bluetooth.
 #
+import time
 import sys
 #import json
 import math
@@ -182,7 +183,8 @@ class Following(State):
                         logo.rt(self.angle / damp_angle, fast = True)
                         print("Turning: ",str(self.angle / damp_angle))
                     else:
-                        self.on_event('turn_blocked')
+                        voice.speak("Turn blocked")
+                        time.sleep(3.0)
                 else:
                     if abs(self.move) >= (0.05 * damp_distance) :
                         distance = self.move / damp_distance
