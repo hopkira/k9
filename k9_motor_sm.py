@@ -81,7 +81,7 @@ class Turning(State):
         self.distance = target["distance"]
         if abs(self.angle) > 0.2 :
             print("Turning: Moving ",self.angle," radians towards target")
-            # logo.right(self.angle)
+            logo.right(self.angle)
         else:
             self.on_event('turn_finished')
         while True:
@@ -179,7 +179,7 @@ class Following(State):
                 damp_distance = 2.0
                 if abs(self.angle) >= (0.1 * damp_angle) :
                     if mem.retrieveState("rotate") > 0.0:
-                        # logo.rt(self.angle / damp_angle, fast = True)
+                        logo.rt(self.angle / damp_angle, fast = True)
                         print("Turning: ",str(self.angle / damp_angle))
                     else:
                         self.on_event('turn_blocked')
