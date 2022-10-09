@@ -139,29 +139,36 @@ class Responding(State):
             intent, answer = k9qa.robot_response(self.command)
         else:
             if 'listen' in self.command:
-                answer = "No longer listening"
                 intent = 'StopListening'
             elif 'here' in self.command or 'over' in self.command:
-                answer = 'Coming master'
                 intent = 'ComeHere'
             elif 'follow' in self.command:
-                answer = 'Folllowing master'
                 intent = 'FollowMe'
             elif 'stop' in self.command or 'stay' in self.command:
-                answer = 'Staying master'
                 intent = 'StayThere'
             elif 'turn around' or 'about turn' in self.command:
-                answer = 'Turning around'
                 intent = 'TurnAbout'
             elif 'thank' in self.command:
-                answer = 'Thanks are not necessary. Master!'
                 intent = 'PraiseMe'
             elif 'play chess' in self.command:
-                answer = 'Playing chess.  Master!'
                 intent = 'PlayChess'
             else:
                 answer = 'Apologies I did not understand'
                 intent = 'QuestionMe'
+        if intent == 'StopListening':
+            answer = 'No longer listening'
+        elif intent == 'ComeHere':
+            answer = 'Coming master'
+        elif intent == 'FollowMe':
+            answer = 'Following master'
+        elif intent == 'StayThere':
+            answer = 'Staying master'
+        elif intent == 'TurnAbout':
+            answer = 'Turning Around'
+        elif intent == 'PraiseMe':
+            answer = 'Thanks are not necessary. Master!'
+        elif intent == 'PlayChess':
+            answer = 'Playing chess. Master!'
         k9ears.stop()
         k9lights.off()
         print("Intent:",intent)
