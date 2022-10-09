@@ -46,8 +46,8 @@ class Respond:
             top_p = 1,
             frequency_penalty = 0.0,
             presence_penalty = 0.0,
-            stop=["Human:"],
-            logit_bias = {35191:5, 2533:5, 876:5, 32863:5, 18254:5, 9866:5}
+            stop=["Human:"]
+            # logit_bias = {35191:5, 2533:5, 876:5, 32863:5, 18254:5, 9866:5}
         )
         response = response_obj['choices'][0]['text']
         response =  response.strip('\n')
