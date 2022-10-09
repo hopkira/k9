@@ -185,18 +185,18 @@ class Responding(State):
         elif event == 'ComeHere':
             k9tail.center()
             self.notify_motors(event)
-            return Listening()
+            return Waitforhotword()
         elif event == 'FollowMe':
             k9tail.up()
             self.notify_motors(event)
-            return Listening()
+            return Waitforhotword()
         elif event == 'StayThere':
             k9tail.down()
             self.notify_motors(event)
-            return Listening()
+            return Waitforhotword()
         elif event == 'TurnAbout':
             self.notify_motors(event)
-            return Listening()
+            return Waitforhotword()
         elif event == 'PraiseMe':
             k9tail.wag_h()
             return Listening()
