@@ -176,7 +176,7 @@ class Following(State):
                 self.angle = target_dict["angle"]
                 self.move = target_dict["distance"]
                 print("Following: direction:", self.angle, "distance:", self.move)
-                damp_angle = 3.0
+                damp_angle = 2.0
                 damp_distance = 2.0
                 if abs(self.angle) >= (0.1 * damp_angle) :
                     if mem.retrieveState("rotate") > 0.0:
