@@ -119,7 +119,7 @@ SOX_PITCH_DOWN = -100
 def connected(timeout: float = 1.0) -> bool:
     try:
         requests.head("http://www.ibm.com/", timeout=timeout)
-        return True
+        return False # temporary change for testing (use local voice)
     except requests.ConnectionError:
         return False
 
