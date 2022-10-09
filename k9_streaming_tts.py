@@ -131,7 +131,7 @@ def speak(speech:str) -> None:
         speak_local(speech)
     else:
         speak_socket(speech)
-    mem.storeState("speaking",False)
+    mem.storeState("speaking",0.0)
 
 def speak_socket(speech:str) -> None:
     tts_callback = MySynthesizeCallback()
