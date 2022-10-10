@@ -8,7 +8,6 @@
 # by voice and sends MQTT messsages to the 
 # motor state machine.
 #
-from lib2to3.pygram import python_grammar_no_print_statement
 import sys
 import time
 import random
