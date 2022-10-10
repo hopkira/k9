@@ -34,10 +34,8 @@ class ManualControl(State):
         super(ManualControl, self).__init__()
         logo.stop()
         while True:
-            while not queue.empty():
-                message = queue.get()
-                if message is None:
-                    continue
+            message = check_queue()
+            if message != "no_message":
                 self.on_event(message)
 
     def on_event(self, event):
@@ -57,6 +55,9 @@ class Scanning(State):
     def __init__(self):
         super(Scanning, self).__init__()
         while True:
+            message = check_queue()
+            if message != "no_message":
+                self.on_event(message)
             self.target = None
             self.target = mem.retrieveLastSensorReading("person")
             try:
@@ -86,6 +87,9 @@ class Turning(State):
         else:
             self.on_event('turn_finished')
         while True:
+            message = check_queue()
+            if message != "no_message":
+                self.on_event(message)
             if logo.finished_move():
                 self.on_event('turn_finished')
             # check to see if rotation is safe
@@ -112,6 +116,9 @@ class Turn_Around(State):
         super(Turn_Around, self).__init__()
         logo.right(math.pi)
         while True:
+            message = check_queue()
+            if message != "no_message":
+                self.on_event(message)
             if logo.finished_move():
                 self.on_event('turn_finished')
             # check to see if rotation is safe
@@ -124,6 +131,9 @@ class Turn_Around(State):
             return ManualControl()
         if event == 'turn_finished':
             return ManualControl()
+        if event == 'StayHere':
+            voice.speak("Staying put")
+            return  ManualControl()
         return self
 
 
@@ -144,6 +154,9 @@ class Moving_Forward(State):
             print("Moving Forward: no need to move")
             self.on_event('target_reached')
         while True:
+            message = check_queue()
+            if message != "no_message":
+                self.on_event(message)
             if not logo.finished_move():
                 pass
             else:
@@ -167,10 +180,9 @@ class Following(State):
         super(Following, self).__init__()
         logo.stop()
         while True:
-            #
-            # ADD: Listen for 'stay' commands from MQTT
-            # 
-            # retrieve direction and distance from Redis
+            message = check_queue()
+            if message != "no_message":
+                self.on_event(message)
             target_dict = mem.retrieveLastSensorReading("follow")
             if target_dict["angle"] != 0 and target_dict["distance"] != 0 :
                 self.angle = target_dict["angle"]
@@ -239,16 +251,20 @@ def mqtt_callback(client, userdata, message):
     #    self.last_message = payload
     #    event = payload[3:-1].lower()
     #    # print("Event: ",str(event))
-    '''
-    try:
-        k9
-    except NameError:
-        pass
-    else:
-        k9.state.on_event(payload)
-    '''
     queue.put(payload)
     print(str(payload),"put on queue by motor state machine")
+
+def check_queue() -> str:
+    '''
+    Checks local MQTT queue cache for messages
+    '''
+    
+    while not queue.empty():
+        message = queue.get()
+        if message is None:
+            continue
+        return(message)
+    return("no_message")
 
 try:
     queue = Queue()

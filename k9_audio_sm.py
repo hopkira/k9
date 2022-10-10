@@ -8,8 +8,10 @@
 # by voice and sends MQTT messsages to the 
 # motor state machine.
 #
+from lib2to3.pygram import python_grammar_no_print_statement
 import sys
 import time
+import random
 #from tkinter.messagebox import NO
 import requests
 import pvporcupine  # Porcupine hotword
@@ -44,6 +46,26 @@ from k9_lichess_bot import ChessGame
 print("Able to play chess!")
 from memory import Memory
 print("All imports done!")
+
+# Standard phrases for K9 to use when needed
+PraiseMe = ["Thanks are not necessary Master","Thank you Master","Happy to help Master","You are very welcome Master"]
+PlayChess = ["Playing chess, Master","Chess is my favourite game","Prepare to lose!"]
+QuestionMe = ["Apologies I do not understand","Not understood Master","I did not understand"]
+StopListening = ["Entering silent mode", "No longer listening", "I will be quiet", "Conserving battery power"]
+ComeHere = ["Coming master", "On my way", "Affirmative, coming!"]
+FollowMe = ["Following master", "Affirmative, following you!", "Heeling master!"]
+StayThere = ["Entering stationary mode", "Staying put master", "I will remain here", "Stopping"]
+TurnAbout = ["Turning", "Turning around", "Turning about", "Reverse!"]
+Blocked = ["I cannot rotate!","Warning obstruction", "Blocked", "Movement blocked", "Obstacle detected"]
+phrases = { "PraiseMe" : PraiseMe,
+            "PlayChess" : PlayChess,
+            "QuestionMe" : QuestionMe,
+            "StopListening" : StopListening,
+            "ComeHere" : ComeHere,
+            "FollowMe" : FollowMe,
+            "StayThere" : StayThere,
+            "TurnAbout" : TurnAbout,
+            "Blocked" : Blocked}
 
 # Define K9 Audio States   
 
@@ -150,25 +172,16 @@ class Responding(State):
                 intent = 'TurnAbout'
             elif 'thank' in self.command:
                 intent = 'PraiseMe'
+                answer = random_phrase(intent)
             elif 'play chess' in self.command:
                 intent = 'PlayChess'
             else:
-                answer = 'Apologies I did not understand'
                 intent = 'QuestionMe'
-        if intent == 'StopListening':
-            answer = 'No longer listening'
-        elif intent == 'ComeHere':
-            answer = 'Coming master'
-        elif intent == 'FollowMe':
-            answer = 'Following master'
-        elif intent == 'StayThere':
-            answer = 'Staying master'
-        elif intent == 'TurnAbout':
-            answer = 'Turning Around'
-        elif intent == 'PraiseMe':
-            answer = 'Thanks are not necessary. Master!'
-        elif intent == 'PlayChess':
-            answer = 'Playing chess. Master!'
+                answer = random_phrase(intent)
+        # Some phrases need a standard response
+        answer_list = ('StopListening', 'ComeHere', 'FollowMe','StayThere','TurnAbout','PlayChess')
+        if intent in answer_list:
+            answer = random_phrase(intent)
         k9ears.stop()
         k9lights.off()
         print("Intent:",intent)
@@ -266,6 +279,13 @@ def mqtt_callback(client, userdata, message):
     else:
         k9.state.on_event(payload)
 
+def random_phrase(phrase:str) -> str:
+    phrase_dict = phrases(phrase)
+    length = len(phrase_dict)
+    index = random.randint(0,length-1)
+    message = phrase_dict[index] 
+    return message
+
 # Set up mqtt client and subscribe to events
 last_message = ""
 client = mqtt.Client("k9-audio")
@@ -290,6 +310,7 @@ try:
 
 except KeyboardInterrupt:
     k9voice.speak("Inactive")
+    client.loop_stop()
     k9lights.off()
     k9eyes.off()
     k9tail.center()
