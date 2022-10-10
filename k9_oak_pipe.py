@@ -37,7 +37,7 @@ cam_h_fov = 73.0
 
 # Shared contraints 
 min_range = 300.0 # default for device is mm
-max_range = 1300.0 # default for device is mm
+max_range = 1500.0 # default for device is mm
 sweet_spot = min_range + ((max_range - min_range) / 2.0)
 
 # Heel constants
@@ -295,6 +295,7 @@ class Legs_Detector():
         # func = np.mean # averages cells during decimation
         self.keep_top = 0.85 # bottom 15% of image tends to include floor
         self.certainty = 0.6 # likelihood that a person in in the column
+        self.min_columns = 20 # number of valid columns
 
     def record_legs_vector(self,depth_image):
         '''
@@ -306,11 +307,13 @@ class Legs_Detector():
         # are valid are mostly floor
         pix_height, pix_width = depth_image.shape
         # pix_width = int(width / decimate_level)
-        # pix_height = int(keep_top * height / decimate_level)
+        pix_height = int(self.keep_top * pix_height)
         # depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
         # just use the depth data within valid ranges
         valid_frame = (depth_image >= min_range) & (depth_image <= max_range)
+        # invalid cells will be set to max_range
         valid_image = np.where(valid_frame, depth_image, max_range)
+        # remove the bottom 15% of the image
         valid_image = valid_image[0:pix_height,:]
         # work out which columns are likely to contain a vertical object
         columns = np.sum(valid_image < max_range, axis = 0) >= (self.certainty*pix_height)
@@ -321,16 +324,16 @@ class Legs_Detector():
         useful_distances = distance * columns
         # narrow down the array to just those 'vertical' columns
         subset = useful_distances[np.where((useful_distances < max_range) & (useful_distances > 0.0))]
-        # determine the average distance to all valid columns
-        if len(subset) > 0:
-            final_distance = np.average(subset)
         # determine the middle of the depth image
         mid_point = int((pix_width - 1.0 ) / 2.0)
         # collate a list of all the column numbers that have the
         # 'vertical' data in them
         indices = columns.nonzero()[1]
+        # if there are sufficient non zero columns left, then
         # determine the average angle that these columns as a multiplier for the h_fov
-        if len(indices) > 0 :
+        if len(indices) > self.min_columns :
+            # determine the average distance to all valid columns
+            final_distance = np.average(subset)
             direction = (np.average(indices) - mid_point) / pix_width
             angle = direction * math.radians(cam_h_fov)
             move = (final_distance - sweet_spot)
