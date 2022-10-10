@@ -221,6 +221,7 @@ try:
         while not queue.empty():
             tts_callback = MySynthesizeCallback()
             speaking = True
+            old_eye_level = eyes.get_level()
             eyes.set_level(0.5)
             mem.storeState("speaking",1.0)
             utterance = queue.get()
@@ -231,7 +232,7 @@ try:
         if speaking == True:
             speaking = False
             mem.storeState("speaking",0.0)
-            eyes.set_level(0.0)
+            eyes.set_level(old_eye_level)
             
 except KeyboardInterrupt:
     client.loop_stop()
