@@ -446,6 +446,7 @@ if testing:
     xOutRgb.setStreamName("rgb")
     camRgb.video.link(xOutRgb.input)
     objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
+    
 
 # Declare the device
 # device = dai.Device(pipeline)
@@ -462,7 +463,7 @@ with dai.Device(pipeline) as device:
     f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
     if testing:
-        cv2.namedWindow("Depth View")
+        cv2.namedWindow("OAK RGB Preview", cv2.WINDOW_NORMAL)
     counter =  0
     last_reading = time.time()
     while True:
@@ -471,8 +472,15 @@ with dai.Device(pipeline) as device:
         depth_image = inDepth.getFrame() # get latest information from queue
         if testing:
             in_rgb = qRgb.get()
-            rgb_image = in_rgb.getCvFrame() # get RGB frame
-            cv2.imshow("Depth View", rgb_image)
+            preview = in_rgb.getCvFrame() # get RGB frame
+            # Resize frame to fit Pi VNC viewer
+            scale = 0.5
+            width = int(preview.shape[1] * scale)
+            height = int(preview.shape[0] * scale)
+            dsize = (width, height)
+            output = cv2.resize(preview, dsize)
+            # Output image
+            cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
         # Retrieve latest tracklets
         track = qTrack.get()
