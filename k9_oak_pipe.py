@@ -41,7 +41,7 @@ cam_h_fov = 73.0
 
 # Shared contraints 
 min_range = 500.0 # default for device is mm
-max_range = 1300.0 # default for device is mm
+max_range = 1500.0 # default for device is mm
 sweet_spot = min_range + ((max_range - min_range) / 2.0)
 
 # Heel constants
