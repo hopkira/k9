@@ -356,6 +356,7 @@ class Legs_Detector():
             mean_col = float(np.average(indices))
             direction = float((mean_col - mid_point) / pix_width)
             angle = float(direction * math.radians(cam_h_fov))
+            my_angle = math.degrees(angle)
             move = float(final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
             # print("Follow:", move, angle)
@@ -363,8 +364,8 @@ class Legs_Detector():
             legs_dict = {
                 "top" : self.keep_top,
                 "columns" : indices,
-                "angle" : angle,
-                "dist" : final_distance,
+                "angle" : my_angle,
+                "dist" : final_distance/1000.0,
                 "max_col" : pix_width,
                 "mean_col" : mean_col
             }
