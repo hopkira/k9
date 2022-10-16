@@ -248,7 +248,7 @@ class Fwd_Collision_Detect():
         self.pc_min_range  = 200.0
         self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
 
-    def record_min_dist(self,depth_image):
+    def record_min_dist(self,depth_image) -> float:
         '''
         Distills the point cloud down to a single value that is the distance to the
         nearest obstacle that is directly in front of the robot
@@ -296,8 +296,11 @@ class Fwd_Collision_Detect():
         #plt.ylim(-200,1600)
         #plt.show()
         if not np.isnan(min_dist):
-            mem.storeState("forward", float(min_dist/1000.0))
-        pass
+            min_dist = float(min_dist/1000.0)
+            mem.storeState("forward", min_dist)
+            return min_dist
+        else:
+            return None
         
 
 class Legs_Detector():
@@ -517,7 +520,7 @@ with dai.Device(pipeline) as device:
         if counter == 10:
             f_pc.record_point_cloud(depth_image)
             counter = 0
-        f_cd.record_min_dist(depth_image=depth_image)
+        min_dist =  f_cd.record_min_dist(depth_image=depth_image)
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
@@ -535,6 +538,9 @@ with dai.Device(pipeline) as device:
             output = cv2.resize(preview, dsize)
             # Draw a green bounding box
             # around the nearest person
+            if min_dist:
+                dist_txt = "safe dist = " +  "{:.2f}".format(min_dist) + "m"
+                output = cv2.putText(output, dist_txt, (10, height - 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             if target_dict:
                 t = target_dict["tracklet"]             
                 bearing_txt = "t0 = " + "{:.0f}".format(target_dict['angle']) + "degrees"
@@ -545,8 +551,8 @@ with dai.Device(pipeline) as device:
                 x2 = int(roi.bottomRight().x)
                 y2 = int(roi.bottomRight().y)
                 output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour_green, thickness)
-                output = cv2.putText(output, bearing_txt, (x2 + 15, y1), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
-                output = cv2.putText(output, dist_txt, (x2 + 15, y1 + 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                output = cv2.putText(output, bearing_txt, (x1 + 10, y2 - 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
+                output = cv2.putText(output, dist_txt, (x1 + 10, y2 - 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
             #  If legs have been spotted, draw red
             #  bounding boxes
             if legs_dict:
@@ -564,9 +570,9 @@ with dai.Device(pipeline) as device:
                 bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + "degrees"
                 dist_txt = "d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
                 cols_txt = "cols: " + str(legs_dict['num_cols'])
-                output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
-                output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
-                output = cv2.putText(output, cols_txt, (x_dir + 15, int(y_max/2) + 40), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
+                output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
+                output = cv2.putText(output, cols_txt, (x_dir + 15, int(y_max/2) + 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
             cv2.imshow("OAK Perception Preview", output)
             key = cv2.waitKey(1)
         # print out the FPS achieved
