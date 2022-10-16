@@ -518,13 +518,14 @@ with dai.Device(pipeline) as device:
                     x_max = int(box_max / cols * width)
                     y_max = int(height * legs_dict['top'])
                     colour = (0, 0, 255)
+                    col_white = (255,255,255)
                     thickness = 3
                     output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour, thickness)
                         # Output image
                 x_dir = int(legs_dict['mean_col']/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour, thickness)
                 bearing_txt = str(legs_dict['angle']) + " " + str(legs_dict['dist'])
-                output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour)
+                output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
         # print out the FPS achieved
