@@ -510,6 +510,7 @@ with dai.Device(pipeline) as device:
     if testing:
         cv2.namedWindow("OAK Perception Preview", cv2.WINDOW_NORMAL)
     counter =  0
+    FPS_counter = 0
     last_reading = time.time()
     while True:
         start_time = time.time() # start time of the loop
@@ -585,10 +586,10 @@ with dai.Device(pipeline) as device:
             time.sleep(0.1)
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
-            FPS = counter / 10.0
+            FPS = FPS_counter / 10.0
             print("FPS: " + "{:.1f}".format(FPS))
             last_reading = now_time
-            counter = 0
+            FPS_counter = 0
             person = mem.retrieveLastSensorReading("person")
             try: 
                 print("Person at:","{:.2f}".format(person['distance']),"m and at","{:.2f}".format(person['angle']),"radians.")
