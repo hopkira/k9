@@ -540,7 +540,9 @@ with dai.Device(pipeline) as device:
             # around the nearest person
             if min_dist:
                 dist_txt = "safe dist = " +  "{:.2f}".format(min_dist) + "m"
-                output = cv2.putText(output, dist_txt, (10, height - 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                output = cv2.putText(output, dist_txt, (10, height - 40), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                FPS_txt = "FPS = " +  "{:.2f}".format(FPS)
+                output = cv2.putText(output, FPS_txt, (10, height - 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             if target_dict:
                 t = target_dict["tracklet"]             
                 bearing_txt = "t0 = " + "{:.0f}".format(target_dict['angle']) + "degrees"
@@ -551,8 +553,8 @@ with dai.Device(pipeline) as device:
                 x2 = int(roi.bottomRight().x)
                 y2 = int(roi.bottomRight().y)
                 output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour_green, thickness)
-                output = cv2.putText(output, bearing_txt, (x1 + 10, y2 + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
-                output = cv2.putText(output, dist_txt, (x1 + 10, y2 + 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
+                output = cv2.putText(output, bearing_txt, (x1 + 10, y2 - 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
+                output = cv2.putText(output, dist_txt, (x1 + 10, y2 - 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
             #  If legs have been spotted, draw red
             #  bounding boxes
             if legs_dict:
@@ -582,7 +584,9 @@ with dai.Device(pipeline) as device:
             time.sleep(0.1)
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
+            FPS = counter / 10.0
             last_reading = now_time
+            counter = 0
             person = mem.retrieveLastSensorReading("person")
             try: 
                 print("Person at:","{:.2f}".format(person['distance']),"m and at","{:.2f}".format(person['angle']),"radians.")
