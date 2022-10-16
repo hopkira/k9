@@ -10,7 +10,7 @@
 #      that is near K9 (that may not be recognisable as a person)
 #   3. generate a point cloud to help avoid collisions
 #   4. generate a focussed point cloud to avoid forward collisions
-
+#
 import time
 #from turtle import distance
 print("Time started...")
@@ -551,8 +551,8 @@ with dai.Device(pipeline) as device:
                 x2 = int(roi.bottomRight().x)
                 y2 = int(roi.bottomRight().y)
                 output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour_green, thickness)
-                output = cv2.putText(output, bearing_txt, (x1 + 10, y2 - 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
-                output = cv2.putText(output, dist_txt, (x1 + 10, y2 - 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
+                output = cv2.putText(output, bearing_txt, (x1 + 10, y2 + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
+                output = cv2.putText(output, dist_txt, (x1 + 10, y2 + 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
             #  If legs have been spotted, draw red
             #  bounding boxes
             if legs_dict:
