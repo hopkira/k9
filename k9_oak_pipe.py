@@ -586,6 +586,7 @@ with dai.Device(pipeline) as device:
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
             FPS = counter / 10.0
+            print("FPS: " + "{:.1f}".format(FPS))
             last_reading = now_time
             counter = 0
             person = mem.retrieveLastSensorReading("person")
