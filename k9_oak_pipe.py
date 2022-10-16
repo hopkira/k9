@@ -581,6 +581,7 @@ with dai.Device(pipeline) as device:
             key = cv2.waitKey(1)
         # print out the FPS achieved
         counter += 1
+        FPS_counter +=1
         now_time = time.time()
         if not testing:
             time.sleep(0.1)
