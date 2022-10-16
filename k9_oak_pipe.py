@@ -496,6 +496,7 @@ if testing:
 # device = dai.Device(pipeline)
 with dai.Device(pipeline) as device:
     # declare buffer queues for the streams
+    FPS =  0.0
     qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
     if testing:
         qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
