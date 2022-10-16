@@ -523,7 +523,7 @@ with dai.Device(pipeline) as device:
                         # Output image
                 x_dir = int(legs_dict['mean_col']/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour, thickness)
-                bearing_txt = str(legs_dict['angle'])+" "+ legs_dict['dist']
+                bearing_txt = str(legs_dict['angle']) + " " + str(legs_dict['dist'])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour)
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
