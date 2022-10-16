@@ -471,7 +471,7 @@ with dai.Device(pipeline) as device:
         depth_image = inDepth.getFrame() # get latest information from queue
         if testing:
             in_rgb = qRgb.get()
-            rgb_image = in_rgb.getCvframe() # get RGB frame
+            rgb_image = in_rgb.getCvFrame() # get RGB frame
             cv2.imshow("Depth View", rgb_image)
             key = cv2.waitKey(1)
         # Retrieve latest tracklets
