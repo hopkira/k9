@@ -312,7 +312,7 @@ class Legs_Detector():
         # decimate_level = 7 # reduces size of depth image
         # func = np.mean # averages cells during decimation
         self.keep_top = 0.7 # bottom 15% of image tends to include floor
-        self.certainty = 0.8 # likelihood that a person in in the column
+        self.certainty = 0.6 # likelihood that a person in in the column
         self.min_columns = 15 # min number of valid columns
 
     def record_legs_vector(self,depth_image) -> dict:
