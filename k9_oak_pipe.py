@@ -40,8 +40,8 @@ mem = Memory()
 cam_h_fov = 73.0
 
 # Shared contraints 
-min_range = 500.0 # default for device is mm
-max_range = 1500.0 # default for device is mm
+min_range = 750.0 # default for device is mm
+max_range = 1750.0 # default for device is mm
 sweet_spot = min_range + ((max_range - min_range) / 2.0)
 
 # Heel constants
@@ -312,7 +312,7 @@ class Legs_Detector():
         # decimate_level = 7 # reduces size of depth image
         # func = np.mean # averages cells during decimation
         self.keep_top = 0.7 # bottom 15% of image tends to include floor
-        self.certainty = 0.6 # likelihood that a person in in the column
+        self.certainty = 0.5 # likelihood that a person in in the column
         self.min_columns = 10 # min number of valid columns (single leg)
 
     def record_legs_vector(self,depth_image) -> dict:
