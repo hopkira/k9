@@ -511,8 +511,8 @@ with dai.Device(pipeline) as device:
                 leg_col_grps = consecutive(legs_dict['columns'])
                 for col_grp in leg_col_grps:
                     min, max = minmax(col_grp)
-                    x_min = min /cols * width
-                    x_max = max / cols * width
+                    x_min = int(min /cols * width)
+                    x_max = int(max / cols * width)
                     colour = (255, 0, 0)
                     thickness = 1
                     output = cv2.rectangle(output, (x_min, 0), (x_max, height), colour, thickness)
