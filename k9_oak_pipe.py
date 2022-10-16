@@ -312,7 +312,7 @@ class Legs_Detector():
         # decimate_level = 7 # reduces size of depth image
         # func = np.mean # averages cells during decimation
         self.keep_top = 0.85 # bottom 15% of image tends to include floor
-        self.certainty = 0.6 # likelihood that a person in in the column
+        self.certainty = 0.7 # likelihood that a person in in the column
         self.min_columns = 20 # number of valid columns
 
     def record_legs_vector(self,depth_image) -> dict:
@@ -353,17 +353,20 @@ class Legs_Detector():
         if len(indices) > self.min_columns :
             # determine the average distance to all valid columns
             final_distance = np.average(subset)
-            direction = (np.average(indices) - mid_point) / pix_width
+            mean_col = np.average(indices)
+            direction = (mean_col - mid_point) / pix_width
             angle = direction * math.radians(cam_h_fov)
             move = (final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
             # print("Follow:", move, angle)
             mem.storeSensorReading("follow", move, angle)
             legs_dict = {
+                "top" : self.keep_top,
                 "columns" : indices,
                 "angle" : angle,
                 "dist" : distance,
-                "max_col" : pix_width
+                "max_col" : pix_width,
+                "mean_col" : mean_col
             }
             return legs_dict
         else:
@@ -513,9 +516,10 @@ with dai.Device(pipeline) as device:
                     box_min, box_max = minmax(col_grp)
                     x_min = int(box_min /cols * width)
                     x_max = int(box_max / cols * width)
+                    y_max = int(height * legs_dict["top]"])
                     colour = (0, 0, 255)
                     thickness = 3
-                    output = cv2.rectangle(output, (x_min, 0), (x_max, height), colour, thickness)
+                    output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour, thickness)
                         # Output image
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
