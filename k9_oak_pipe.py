@@ -511,12 +511,11 @@ with dai.Device(pipeline) as device:
                 leg_col_grps = consecutive(legs_dict['columns'])
                 for col_grp in leg_col_grps:
                     min, max = minmax(col_grp)
-                    x = min /cols * width
-                    w = (max / cols * width) - x
-                    y = 0
-                    h = height
-                    x,y,w,h = cv2.boundingRect()
-                    cv2.rectangle(output, (x, y), (x + w, y + h), (255,0,0), 4)
+                    x_min = min /cols * width
+                    x_max = max / cols * width
+                    colour = (255, 0, 0)
+                    thickness = 1
+                    output = cv2.rectangle(output, (x_min, 0), (x_max, height), colour, thickness)
                         # Output image
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
