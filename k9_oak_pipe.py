@@ -513,8 +513,8 @@ with dai.Device(pipeline) as device:
                     min, max = minmax(col_grp)
                     x_min = int(min /cols * width)
                     x_max = int(max / cols * width)
-                    colour = (255, 0, 0)
-                    thickness = 1
+                    colour = (0, 0, 255)
+                    thickness = 3
                     output = cv2.rectangle(output, (x_min, 0), (x_max, height), colour, thickness)
                         # Output image
             cv2.imshow("OAK RGB Preview", output)
