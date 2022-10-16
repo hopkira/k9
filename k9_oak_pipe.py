@@ -545,8 +545,8 @@ with dai.Device(pipeline) as device:
                 x2 = int(roi.bottomRight().x)
                 y2 = int(roi.bottomRight().y)
                 output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour_green, thickness)
-                output = cv2.putText(output, bearing_txt, (x_2 + 15, y1), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
-                output = cv2.putText(output, dist_txt, (x_2 + 15, y1 + 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                output = cv2.putText(output, bearing_txt, (x2 + 15, y1), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                output = cv2.putText(output, dist_txt, (x2 + 15, y1 + 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             #  If legs have been spotted, draw red
             #  bounding boxes
             if legs_dict:
