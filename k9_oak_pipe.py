@@ -449,9 +449,9 @@ def consecutive(columns):
     return column_set
 
 def minmax(column_set):
-    max = np.amax(column_set)
-    min = np.amin(column_set)
-    return min,max
+    col_max = np.amax(column_set)
+    col_min = np.amin(column_set)
+    return col_min,col_max
 
 # if executed from the command line then execute arguments as functions
 if __name__ == '__main__':
@@ -510,9 +510,9 @@ with dai.Device(pipeline) as device:
                 cols = legs_dict['max_col']
                 leg_col_grps = consecutive(legs_dict['columns'])
                 for col_grp in leg_col_grps:
-                    min, max = minmax(col_grp)
-                    x_min = int(min /cols * width)
-                    x_max = int(max / cols * width)
+                    box_min, box_max = minmax(col_grp)
+                    x_min = int(box_min /cols * width)
+                    x_max = int(box_max / cols * width)
                     colour = (0, 0, 255)
                     thickness = 3
                     output = cv2.rectangle(output, (x_min, 0), (x_max, height), colour, thickness)
