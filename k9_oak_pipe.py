@@ -521,6 +521,8 @@ with dai.Device(pipeline) as device:
                     thickness = 3
                     output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour, thickness)
                         # Output image
+                x_dir = int(legs_dict['mean_col']/cols * width)
+                output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour, thickness)
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
         # print out the FPS achieved
