@@ -350,7 +350,8 @@ class Legs_Detector():
         indices = columns.nonzero()[1]
         # if there are sufficient non zero columns left, then
         # determine the average angle that these columns as a multiplier for the h_fov
-        if len(indices) > self.min_columns :
+        num_cols = int(len(indices))
+        if num_cols > self.min_columns :
             # determine the average distance to all valid columns
             final_distance = float(np.average(subset))
             mean_col = float(np.average(indices))
@@ -367,7 +368,8 @@ class Legs_Detector():
                 "angle" : my_angle,
                 "dist" : final_distance/1000.0,
                 "max_col" : pix_width,
-                "mean_col" : mean_col
+                "mean_col" : mean_col,
+                "num_cols" : num_cols
             }
             return legs_dict
         else:
@@ -525,7 +527,7 @@ with dai.Device(pipeline) as device:
                         # Output image
                 x_dir = int(legs_dict['mean_col']/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour, thickness)
-                bearing_txt = "0 = " + "{:.2f}".format(legs_dict['angle']) + ", d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
+                bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + " degrees, d = " +  "{:.2f}".format(legs_dict['dist']) + "m, cols: " + str(legs_dict['num_cols'])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
