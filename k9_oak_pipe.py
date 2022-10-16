@@ -364,7 +364,7 @@ class Legs_Detector():
                 "top" : self.keep_top,
                 "columns" : indices,
                 "angle" : angle,
-                "dist" : distance,
+                "dist" : final_distance,
                 "max_col" : pix_width,
                 "mean_col" : mean_col
             }
