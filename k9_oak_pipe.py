@@ -528,8 +528,9 @@ with dai.Device(pipeline) as device:
             width = int(preview.shape[1] * scale)
             height = int(preview.shape[0] * scale)
             dsize = (width, height)
-            colour = (0, 0, 255)
+            colour_red = (0, 0, 255)
             col_white = (255,255,255)
+            colour_green = (0, 255, 0)
             thickness = 3
             output = cv2.resize(preview, dsize)
             if target_dict:
@@ -539,7 +540,7 @@ with dai.Device(pipeline) as device:
                 y1 = int(roi.topLeft().y)
                 x2 = int(roi.bottomRight().x)
                 y2 = int(roi.bottomRight().y)
-                output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour, thickness)
+                output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour_green, thickness)
             if legs_dict:
                 cols = legs_dict['max_col']
                 leg_col_grps = consecutive(legs_dict['columns'])
@@ -548,10 +549,10 @@ with dai.Device(pipeline) as device:
                     x_min = int(box_min /cols * width)
                     x_max = int(box_max / cols * width)
                     y_max = int(height * legs_dict['top'])
-                    output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour, thickness)
+                    output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour_red, thickness)
                         # Output image
                 x_dir = int(legs_dict['mean_col']/cols * width)
-                output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour, thickness)
+                output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour_red, thickness)
                 bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + "degrees"
                 dist_txt = "d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
                 cols_txt = "cols: " + str(legs_dict['num_cols'])
