@@ -124,16 +124,9 @@ xOut = pipeline.create(dai.node.XLinkOut)
 xOut.setStreamName("depth")
 stereo.depth.link(xOut.input)
 
-# Create rgb output stream
-if testing:
-    xOutRgb = pipeline.create(dai.node.XLinkOut)
-    xOutRgb.setStreamName("rgb")
-    camRgb.video.link(xOutRgb.input)
-
 # Create tracker output stream
 trackerOut = pipeline.create(dai.node.XLinkOut)
 trackerOut.setStreamName("tracklets")
-#objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
 objectTracker.out.link(trackerOut.input)
 
 # Decimate the depth image by a factor of 4
@@ -449,6 +442,10 @@ if __name__ == '__main__':
 if testing:
     import cv2
     print("Windows are open...")
+    xOutRgb = pipeline.create(dai.node.XLinkOut)
+    xOutRgb.setStreamName("rgb")
+    camRgb.video.link(xOutRgb.input)
+    objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
 
 # Declare the device
 # device = dai.Device(pipeline)
