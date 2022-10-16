@@ -516,7 +516,7 @@ with dai.Device(pipeline) as device:
                     box_min, box_max = minmax(col_grp)
                     x_min = int(box_min /cols * width)
                     x_max = int(box_max / cols * width)
-                    y_max = int(height * legs_dict["top]"])
+                    y_max = int(height * legs_dict['top'])
                     colour = (0, 0, 255)
                     thickness = 3
                     output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour, thickness)
