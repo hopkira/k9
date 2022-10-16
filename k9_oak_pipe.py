@@ -352,11 +352,11 @@ class Legs_Detector():
         # determine the average angle that these columns as a multiplier for the h_fov
         if len(indices) > self.min_columns :
             # determine the average distance to all valid columns
-            final_distance = np.average(subset)
-            mean_col = np.average(indices)
-            direction = (mean_col - mid_point) / pix_width
-            angle = direction * math.radians(cam_h_fov)
-            move = (final_distance - sweet_spot)
+            final_distance = float(np.average(subset))
+            mean_col = float(np.average(indices))
+            direction = float((mean_col - mid_point) / pix_width)
+            angle = float(direction * math.radians(cam_h_fov))
+            move = float(final_distance - sweet_spot)
             move = move / 1000.0 # convert to m
             # print("Follow:", move, angle)
             mem.storeSensorReading("follow", move, angle)
