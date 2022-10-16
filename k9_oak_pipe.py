@@ -14,6 +14,8 @@
 import time
 #from turtle import distance
 print("Time started...")
+import argparse
+print("Ready for arguments...")
 import math
 print("Counting on fingers... yep")
 # import skimage.measure as skim
@@ -29,6 +31,8 @@ from memory import Memory
 print("All imports done!")
 #from matplotlib import pyplot as plt
 #print("Picture drawing loaded...")
+
+testing = False
 
 mem = Memory()
 
@@ -136,6 +140,26 @@ config = stereo.initialConfig.get()
 config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
 config.postProcessing.decimationFilter.decimationFactor = 4
 stereo.initialConfig.set(config)
+
+def main():
+    global testing
+    parser = argparse.ArgumentParser(description='Runs OAK pipe to find people in view.')
+    '''parser.add_argument('command',
+                        choices=['arc','fd','bk','lt','rt','stop'],
+                        help='movement command')
+    parser.add_argument('parameter',
+                        type=float,
+                        default=0.0,
+                        nargs='?',
+                        help='distance in metres or angle in radians')
+    '''
+    parser.add_argument('-t', '--test',
+                        action='store_true',
+                        help='execute in visual testing mode')
+    args = parser.parse_args()
+    testing = args.test
+    if testing:
+        print("Visual test mode active")
 
 
 class Point_Cloud():
@@ -417,6 +441,13 @@ class Person_Detector():
         else:
             mem.storeSensorReading("person",0,0)
 
+# if executed from the command line then execute arguments as functions
+if __name__ == '__main__':
+    main()
+
+if testing:
+    import cv2
+    print("Windows are open...")
 
 # Declare the device
 # device = dai.Device(pipeline)
@@ -431,12 +462,17 @@ with dai.Device(pipeline) as device:
     f_pd = Person_Detector()
     f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
+    if testing:
+        cv2.namedWindow("Depth View")
     counter =  0
     last_reading = time.time()
     while True:
         start_time = time.time() # start time of the loop
         inDepth = qDep.get()
         depth_image = inDepth.getFrame() # get latest information from queue
+        if testing:
+            image_win  = inDepth.getCvFrame() # get a cv2 image frame from queue
+            cv2.imshow("Depth View", image_win)
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
