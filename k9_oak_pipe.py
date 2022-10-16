@@ -125,9 +125,10 @@ xOut.setStreamName("depth")
 stereo.depth.link(xOut.input)
 
 # Create rgb output stream
-#xOutRgb = pipeline.create(dai.node.XLinkOut)
-#xOutRgb.setStreamName("rgb")
-#camRgb.video.link(xOutRgb.input)
+if testing:
+    xOutRgb = pipeline.create(dai.node.XLinkOut)
+    xOutRgb.setStreamName("rgb")
+    camRgb.video.link(xOutRgb.input)
 
 # Create tracker output stream
 trackerOut = pipeline.create(dai.node.XLinkOut)
@@ -454,7 +455,8 @@ if testing:
 with dai.Device(pipeline) as device:
     # declare buffer queues for the streams
     qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
-    # qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
+    if testing:
+        qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
     print("Oak pipeline running...")
     f_pc = Point_Cloud()
@@ -471,8 +473,10 @@ with dai.Device(pipeline) as device:
         inDepth = qDep.get()
         depth_image = inDepth.getFrame() # get latest information from queue
         if testing:
-            cv2.imshow("Depth View", depth_image)
-            key = cv2.waitKey(10)
+            in_rgb = qRgb.get()
+            rgb_image = in_rgb.getCvframe() # get RGB frame
+            cv2.imshow("Depth View", rgb_image)
+            key = cv2.waitKey(1)
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
