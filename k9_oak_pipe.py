@@ -527,7 +527,7 @@ with dai.Device(pipeline) as device:
                         # Output image
                 x_dir = int(legs_dict['mean_col']/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour, thickness)
-                bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + " degrees, d = " +  "{:.2f}".format(legs_dict['dist']) + "m, cols: " + str(legs_dict['num_cols'])
+                bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + " degrees\n d = " +  "{:.2f}".format(legs_dict['dist']) + "m\n cols: " + str(legs_dict['num_cols'])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
