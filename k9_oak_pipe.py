@@ -504,7 +504,7 @@ with dai.Device(pipeline) as device:
     f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
     if testing:
-        cv2.namedWindow("OAK RGB Preview", cv2.WINDOW_NORMAL)
+        cv2.namedWindow("OAK Perception Preview", cv2.WINDOW_NORMAL)
     counter =  0
     last_reading = time.time()
     while True:
@@ -533,14 +533,22 @@ with dai.Device(pipeline) as device:
             colour_green = (0, 255, 0)
             thickness = 3
             output = cv2.resize(preview, dsize)
+            # Draw a green bounding box
+            # around the nearest person
             if target_dict:
-                t = target_dict["tracklet"]
+                t = target_dict["tracklet"]             
+                bearing_txt = "t0 = " + "{:.0f}".format(target_dict['angle']) + "degrees"
+                dist_txt = "td = " +  "{:.2f}".format(target_dict['dist']) + "m"
                 roi = t.roi.denormalize(width, height)
                 x1 = int(roi.topLeft().x)
                 y1 = int(roi.topLeft().y)
                 x2 = int(roi.bottomRight().x)
                 y2 = int(roi.bottomRight().y)
                 output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour_green, thickness)
+                output = cv2.putText(output, bearing_txt, (x_2 + 15, y1), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+                output = cv2.putText(output, dist_txt, (x_2 + 15, y1 + 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+            #  If legs have been spotted, draw red
+            #  bounding boxes
             if legs_dict:
                 cols = legs_dict['max_col']
                 leg_col_grps = consecutive(legs_dict['columns'])
@@ -559,12 +567,13 @@ with dai.Device(pipeline) as device:
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
                 output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
                 output = cv2.putText(output, cols_txt, (x_dir + 15, int(y_max/2) + 40), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
-            cv2.imshow("OAK RGB Preview", output)
+            cv2.imshow("OAK Perception Preview", output)
             key = cv2.waitKey(1)
         # print out the FPS achieved
         counter += 1
         now_time = time.time()
-        time.sleep(0.1)
+        if not testing:
+            time.sleep(0.1)
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
             last_reading = now_time
