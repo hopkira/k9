@@ -315,9 +315,10 @@ class Legs_Detector():
         self.certainty = 0.6 # likelihood that a person in in the column
         self.min_columns = 20 # number of valid columns
 
-    def record_legs_vector(self,depth_image):
+    def record_legs_vector(self,depth_image) -> dict:
         '''
-        Analysse image and record vector to legs
+        Analyse image and record vector to legs, returns a dict of
+        columns that contain legs and target data
         '''
         # reduce the size of the depth image by decimating it by
         # a factor (numbers between 3 and 20 seem to work best)
@@ -358,8 +359,16 @@ class Legs_Detector():
             move = move / 1000.0 # convert to m
             # print("Follow:", move, angle)
             mem.storeSensorReading("follow", move, angle)
+            legs_dict = {
+                "columns" : indices,
+                "angle" : angle,
+                "dist" : distance,
+                "max_col" : pix_width
+            }
+            return legs_dict
         else:
             mem.storeSensorReading("follow",0,0)
+            return None
 
 
 class Person_Detector():
@@ -435,6 +444,15 @@ class Person_Detector():
         else:
             mem.storeSensorReading("person",0,0)
 
+def consecutive(columns):
+    column_set = np.split(columns, np.where(np.diff(columns) != 1)[0]+1)
+    return column_set
+
+def minmax(column_set):
+    max = np.amax(column_set)
+    min = np.amin(column_set)
+    return min,max
+
 # if executed from the command line then execute arguments as functions
 if __name__ == '__main__':
     main()
@@ -470,6 +488,15 @@ with dai.Device(pipeline) as device:
         start_time = time.time() # start time of the loop
         inDepth = qDep.get()
         depth_image = inDepth.getFrame() # get latest information from queue
+        # Retrieve latest tracklets
+        track = qTrack.get()
+        trackletsData = track.tracklets
+        if counter == 10:
+            f_pc.record_point_cloud(depth_image)
+            counter = 0
+        f_cd.record_min_dist(depth_image=depth_image)
+        legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
+        f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
             in_rgb = qRgb.get()
             preview = in_rgb.getCvFrame() # get RGB frame
@@ -479,18 +506,20 @@ with dai.Device(pipeline) as device:
             height = int(preview.shape[0] * scale)
             dsize = (width, height)
             output = cv2.resize(preview, dsize)
-            # Output image
+            if legs_dict:
+                cols = legs_dict['max_col']
+                leg_col_grps = consecutive(legs_dict['columns'])
+                for col_grp in leg_col_grps:
+                    min, max = minmax(col_grp)
+                    x = min /cols * width
+                    w = (max / cols * width) - x
+                    y = 0
+                    h = height
+                    x,y,w,h = cv2.boundingRect()
+                    cv2.rectangle(output, (x, y), (x + w, y + h), (255,0,0), 4)
+                        # Output image
             cv2.imshow("OAK RGB Preview", output)
             key = cv2.waitKey(1)
-        # Retrieve latest tracklets
-        track = qTrack.get()
-        trackletsData = track.tracklets
-        if counter == 10:
-            f_pc.record_point_cloud(depth_image)
-            counter = 0
-        f_cd.record_min_dist(depth_image=depth_image)
-        f_ld.record_legs_vector(depth_image=depth_image)
-        f_pd.record_person_vector(trackletsData=trackletsData)
         # print out the FPS achieved
         counter += 1
         now_time = time.time()
