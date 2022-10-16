@@ -439,8 +439,8 @@ class Person_Detector():
             z = float(self.target["z"])
             x = float(self.target["x"])
             angle = ( math.pi / 2 ) - math.atan2(z, x)
-            distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
-            mem.storeSensorReading("person",distance/1000.0,angle)
+            trk_distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
+            mem.storeSensorReading("person",trk_distance/1000.0,angle)
         else:
             mem.storeSensorReading("person",0,0)
 
@@ -463,7 +463,7 @@ if testing:
     xOutRgb = pipeline.create(dai.node.XLinkOut)
     xOutRgb.setStreamName("rgb")
     camRgb.video.link(xOutRgb.input)
-    objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
+    # objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
     
 
 # Declare the device
