@@ -471,8 +471,7 @@ with dai.Device(pipeline) as device:
         inDepth = qDep.get()
         depth_image = inDepth.getFrame() # get latest information from queue
         if testing:
-            image_win  = inDepth.getCvFrame() # get a cv2 image frame from queue
-            cv2.imshow("Depth View", image_win)
+            cv2.imshow("Depth View", depth_image)
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
