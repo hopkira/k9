@@ -306,6 +306,13 @@ class Legs_Detector():
     detecting vertical slices of the image that include an object
     and then averaging the distance for each slice. Te valid slices
     are averaged to detemine the likely centre of the legs
+
+    TODO:
+    Only use contiguous slides with at least five columns in the column.
+
+    If the gap bettween the nearest two contiguous slices is less than
+    x columns AND their average depth is within 20% then use the center of the
+    two nearest columns, otherwise use just the centre of the nearest. 
     '''
 
     def __init__ (self):
@@ -393,7 +400,7 @@ class Person_Detector():
             "z"     :   None
             }
 
-    def record_person_vector (self, trackletsData):
+    def record_person_vector (self, trackletsData) -> dict:
         '''
         If a target has been identified than look through the trackletData
         and retrieve the latest information tracklet for that id
@@ -438,6 +445,7 @@ class Person_Detector():
                     self.target["status"] = candidate.status.name
                     self.target["x"] = candidate.spatialCoordinates.x
                     self.target["z"] = candidate.spatialCoordinates.z
+                    self.target["tracklet"] = candidate
                     # print("Closest target id:",str(target["id"]))
         # store the nearest tracket (if there is one) in
         # the short term memory
@@ -446,9 +454,18 @@ class Person_Detector():
             x = float(self.target["x"])
             angle = ( math.pi / 2 ) - math.atan2(z, x)
             trk_distance = max((math.sqrt(z ** 2 + x ** 2 )) - sweet_spot, 0)
-            mem.storeSensorReading("person",trk_distance/1000.0,angle)
+            trk_distance = trk_distance / 1000.0
+            mem.storeSensorReading("person",trk_distance,angle)
+            my_angle = math.degrees(angle)
+            target_dict = {
+                "angle" : my_angle,
+                "dist" : trk_distance,
+                "tracklet" : self.target["tracklet"]
+            }
+            return target_dict
         else:
             mem.storeSensorReading("person",0,0)
+            return {}
 
 def consecutive(columns):
     column_set = np.split(columns, np.where(np.diff(columns) != 1)[0]+1)
@@ -502,7 +519,7 @@ with dai.Device(pipeline) as device:
             counter = 0
         f_cd.record_min_dist(depth_image=depth_image)
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
-        f_pd.record_person_vector(trackletsData=trackletsData)
+        target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
             in_rgb = qRgb.get()
             preview = in_rgb.getCvFrame() # get RGB frame
@@ -511,7 +528,18 @@ with dai.Device(pipeline) as device:
             width = int(preview.shape[1] * scale)
             height = int(preview.shape[0] * scale)
             dsize = (width, height)
+            colour = (0, 0, 255)
+            col_white = (255,255,255)
+            thickness = 3
             output = cv2.resize(preview, dsize)
+            if target_dict:
+                t = target_dict["tracklet"]
+                roi = t.roi.denormalize(width, height)
+                x1 = int(roi.topLeft().x)
+                y1 = int(roi.topLeft().y)
+                x2 = int(roi.bottomRight().x)
+                y2 = int(roi.bottomRight().y)
+                output =  cv2.rectangle(output, (x1, y1), (x2, y2), colour, thickness)
             if legs_dict:
                 cols = legs_dict['max_col']
                 leg_col_grps = consecutive(legs_dict['columns'])
@@ -520,9 +548,6 @@ with dai.Device(pipeline) as device:
                     x_min = int(box_min /cols * width)
                     x_max = int(box_max / cols * width)
                     y_max = int(height * legs_dict['top'])
-                    colour = (0, 0, 255)
-                    col_white = (255,255,255)
-                    thickness = 3
                     output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour, thickness)
                         # Output image
                 x_dir = int(legs_dict['mean_col']/cols * width)
