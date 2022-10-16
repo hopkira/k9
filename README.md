@@ -24,7 +24,8 @@ This software is designed to work with the following hardware:
 * USB microphone
 * RoboClaw PID motor controller controlling two motors with encoders
 * OAK-D camera (either original or lite)
-Most of the hardware access is via abstraction modules that can easily be repurposed leaving the core of the program intact.
+
+Most of the hardware access is via abstraction modules that can easily be repurposed leaving the core of the program (the audio and motor controllers) intact.
 
  Details on the hardware design of K9 are provided [here](https://k9-build.blogspot.com/p/this-post-provides-quick-tour-of-the.html).
 
