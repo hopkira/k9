@@ -434,7 +434,7 @@ class Legs_Detector():
         mem.storeSensorReading("follow", move, angle)
         result["top"] = self.keep_top
         result["angle"] = float(my_angle)
-        result["dist"] =  float(result["dist"]) / 1000.0,
+        result["dist"] =  float(result["dist"]) / 1000.0
         result["max_cols"] = int(pix_width)
         result["num_cols"] = float(result["max_col"]) - float(result["min_col"])
         return result
