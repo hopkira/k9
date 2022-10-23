@@ -436,7 +436,7 @@ class Legs_Detector():
         result["angle"] = my_angle
         result["dist"] =  float(result["dist"]) / 1000.0,
         result["max_cols"] = pix_width
-        result["num_cols"] = float(result["max_col"]) - float["min_col"]
+        result["num_cols"] = float(result["max_col"]) - float(result["min_col"])
         return result
 
 
