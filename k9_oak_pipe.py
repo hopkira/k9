@@ -385,7 +385,7 @@ class Legs_Detector():
                 big_col_ind.append([bc_min, bc_max])
                 dists = []
                 for col in big_col:
-                    dists.append(np.mean(subset[:,col-1]))
+                    dists.append(np.mean(valid_image[:,col-1]))
                 dist_mean = np.mean(dists)
                 big_dists.append(dist_mean)
         else:
