@@ -327,7 +327,7 @@ class Legs_Detector():
         # are in reality by multiplying  the gaps between their centres
         # by the sensed depth.  Too large a number means the two rectangles
         # can't be legs from the same person
-        self.max_gap_dist_prod = 100,000
+        self.max_gap_dist_prod = 100000.0
 
     def record_legs_vector(self,depth_image) -> dict:
         '''
@@ -418,7 +418,7 @@ class Legs_Detector():
             big_dists[index_min] = store
             cen1 = float((big_col_ind[index_min][0] + big_col_ind[index_min][1]) / 2)
             cen2 = float((big_col_ind[index_next_min][0] + big_col_ind[index_next_min][1]) / 2)
-            dist_cen = abs(cen1 - cen2)
+            dist_cen = float(abs(cen1 - cen2))
             if ((big_dists[index_next_min] - big_dists[index_min]) < self.max_depth_diff) and \
             ((dist_cen * float(big_dists[index_min])) < self.max_gap_dist_prod):
                 result["min_col"] = int(min(big_col_ind[index_min][0], big_col_ind[index_next_min][0]))
