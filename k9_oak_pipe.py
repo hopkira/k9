@@ -386,7 +386,7 @@ class Legs_Detector():
                 dists = []
                 for col in big_col:
                     dists.append(np.mean(valid_image[:,col-1]))
-                dist_mean = np.mean(dists)
+                dist_mean = float(np.mean(dists))
                 big_dists.append(dist_mean)
         else:
             mem.storeSensorReading("follow",0,0)
@@ -616,7 +616,7 @@ with dai.Device(pipeline) as device:
                 x_dir = int(mean_col/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour_red, thickness)
                 bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + "degrees"
-                dist_txt = "d = " +  "{:.2f}".format(float(legs_dict['dist'])) + "m"
+                dist_txt = "d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
                 com_txt = "comb: " + str(legs_dict["combined"])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
                 output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
