@@ -395,10 +395,10 @@ class Legs_Detector():
         result = {}
         index_min = np.argmin(big_dists)
         result = {
-                    "index" : index_min,
-                    "dist" : big_dists[index_min],
-                    "min_col" : big_col_ind[index_min][0],
-                    "max_col" : big_col_ind[index_min][1]
+                    "index" : int(index_min),
+                    "dist" : float(big_dists[index_min]),
+                    "min_col" : int(big_col_ind[index_min][0]),
+                    "max_col" : int(big_col_ind[index_min][1])
         }
         '''
         Refine the result by deciding whether to combine in the second 
@@ -421,11 +421,11 @@ class Legs_Detector():
             dist_cen = abs(cen1 - cen2)
             if ((big_dists[index_next_min] - big_dists[index_min]) < self.max_depth_diff) and \
             ((dist_cen * float(big_dists[index_min])) < self.max_gap_dist_prod):
-                result["min_col"] = min(big_col_ind[index_min][0], big_col_ind[index_next_min][0])
-                result["max_col"] = max(big_col_ind[index_min][1],big_col_ind[index_next_min][1])
+                result["min_col"] = int(min(big_col_ind[index_min][0], big_col_ind[index_next_min][0]))
+                result["max_col"] = int(max(big_col_ind[index_min][1],big_col_ind[index_next_min][1]))
                 result["combined"] = 1.0
         # prepare the result object
-        direction = float((((result["max_col"] + result["min_col"]) / 2) - mid_point) / pix_width)
+        direction = float((((float(result["max_col"]) + float(result["min_col"])) / 2) - mid_point) / pix_width)
         angle = float(direction * math.radians(cam_h_fov))
         my_angle = math.degrees(angle)
         move = float(result["dist"] - sweet_spot)
@@ -433,9 +433,9 @@ class Legs_Detector():
         # print("Follow:", move, angle)
         mem.storeSensorReading("follow", move, angle)
         result["top"] = self.keep_top
-        result["angle"] = my_angle
+        result["angle"] = float(my_angle)
         result["dist"] =  float(result["dist"]) / 1000.0,
-        result["max_cols"] = pix_width
+        result["max_cols"] = int(pix_width)
         result["num_cols"] = float(result["max_col"]) - float(result["min_col"])
         return result
 
