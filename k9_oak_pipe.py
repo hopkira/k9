@@ -307,15 +307,8 @@ class Legs_Detector():
     ''''
     Detects legs and records the vector to them.  This is done by 
     detecting vertical slices of the image that include an object
-    and then averaging the distance for each slice. Te valid slices
-    are averaged to detemine the likely centre of the legs
-
-    TODO:
-    Only use contiguous slides with at least five columns in the column.
-
-    If the gap bettween the nearest two contiguous slices is less than
-    x columns AND their average depth is within 20% then use the center of the
-    two nearest columns, otherwise use just the centre of the nearest. 
+    and then averaging the distance for each slice. One or two contiguous
+    rectangle of a minimum width are used to determine the target.
     '''
 
     def __init__ (self):
@@ -323,7 +316,18 @@ class Legs_Detector():
         # func = np.mean # averages cells during decimation
         self.keep_top = 0.7 # bottom 15% of image tends to include floor
         self.certainty = 0.5 # likelihood that a person in in the column
-        self.min_columns = 10 # min number of valid columns (single leg)
+         # max_depth_diff is the largest allowable differrence between the column
+         # depth readings in mm to allow both columns to be taken into account in the 
+         # direction and depth.
+        self.max_depth_diff = 200
+        # Min_col_size is the minimum width of a consecutive column 
+        # to allow it to be taken into account.
+        self.min_col_size = 5
+        # max_gap_dist_prod is a measure of how close two rectangles
+        # are in reality by multiplying  the gaps between their centres
+        # by the sensed depth.  Too large a number means the two rectangles
+        # can't be legs from the same person
+        self.max_gap_dist_prod = 100,000
 
     def record_legs_vector(self,depth_image) -> dict:
         '''
@@ -361,30 +365,79 @@ class Legs_Detector():
         # if there are sufficient non zero columns left, then
         # determine the average angle that these columns as a multiplier for the h_fov
         num_cols = int(len(indices))
-        if num_cols > self.min_columns :
-            # determine the average distance to all valid columns
-            final_distance = float(np.average(subset))
-            mean_col = float(np.average(indices))
-            direction = float((mean_col - mid_point) / pix_width)
-            angle = float(direction * math.radians(cam_h_fov))
-            my_angle = math.degrees(angle)
-            move = float(final_distance - sweet_spot)
-            move = move / 1000.0 # convert to m
-            # print("Follow:", move, angle)
-            mem.storeSensorReading("follow", move, angle)
-            legs_dict = {
-                "top" : self.keep_top,
-                "columns" : indices,
-                "angle" : my_angle,
-                "dist" : final_distance/1000.0,
-                "max_col" : pix_width,
-                "mean_col" : mean_col,
-                "num_cols" : num_cols
-            }
-            return legs_dict
+        # Create a column_set list of each group of indices
+        column_set = np.split(indices, np.where(np.diff(indices) != 1)[0]+1)
+        # Strip out all the consecutive columns that are not wide enough
+        # and place the remaining colums in big_cols
+        big_cols = []
+        for col in column_set:
+            if col.size >= self.min_col_size:
+                big_cols.append(col)
+        # Calculate the mean distances (big_dists) for the big columns and
+        # store their column ranges (big_col_ind).
+        big_dists =  []
+        big_col_ind = []
+        indices =  {}
+        if len(big_cols) > 0:
+            for big_col in big_cols:
+                bc_min = np.amin(big_col)
+                bc_max = np.amax(big_col)
+                big_col_ind.append([bc_min, bc_max])
+                dists = []
+                for col in big_col:
+                    dists.append(np.mean(subset[:,col-1]))
+                dist_mean = np.mean(dists)
+                big_dists.append(dist_mean)
         else:
             mem.storeSensorReading("follow",0,0)
             return None
+        # record the result for the nearest column
+        result = {}
+        index_min = np.argmin(big_dists)
+        result = {
+                    "index" : index_min,
+                    "dist" : big_dists[index_min],
+                    "min_col" : big_col_ind[index_min][0],
+                    "max_col" : big_col_ind[index_min][1]
+        }
+        '''
+        Refine the result by deciding whether to combine in the second 
+        nearest contiguous rectangle in terms of depth. This will only happen
+        if the depth distances are within a fixed tolerance and the rectangle
+        themselves are within a range determined by their distance. 
+        If the depth is small then the rectangles can be further apart, 
+        if the depth is further, then the rectangles must be closer. 
+        This measure is calculated from the product of the distance between 
+        the centres of the rectangle and their minimum distance.
+        '''
+        result["combined"] = 0
+        if np.size(big_dists) > 1:
+            store = big_dists[index_min]
+            big_dists[index_min] = max_range
+            index_next_min = np.argmin(big_dists)
+            big_dists[index_min] = store
+            cen1 = (big_col_ind[index_min][0] + big_col_ind[index_min][1]) / 2
+            cen2 = (big_col_ind[index_next_min][0] + big_col_ind[index_next_min][1]) / 2
+            dist_cen = abs(cen1 - cen2)
+            if ((big_dists[index_next_min] - big_dists[index_min]) < self.max_depth_diff) and \
+            ((dist_cen * big_dists[index_min]) < self.max_gap_dist_prod):
+                result["min_col"] = min(big_col_ind[index_min][0], big_col_ind[index_next_min][0])
+                result["max_col"] = max(big_col_ind[index_min][1],big_col_ind[index_next_min][1])
+                result["combined"] = 1.0
+        # prepare the result object
+        direction = float((((result["max_col"] + result["min_col"]) / 2) - mid_point) / pix_width)
+        angle = float(direction * math.radians(cam_h_fov))
+        my_angle = math.degrees(angle)
+        move = float(result["dist"] - sweet_spot)
+        move = move / 1000.0 # convert to m
+        # print("Follow:", move, angle)
+        mem.storeSensorReading("follow", move, angle)
+        result["top"] = self.keep_top
+        result["angle"] = my_angle
+        result["dist"] =  result["dist"] / 1000.0,
+        result["max_cols"] = pix_width
+        result["num_cols"] = result["max_col"] - result["min_col"]
+        return result
 
 
 class Person_Detector():
@@ -470,14 +523,6 @@ class Person_Detector():
             mem.storeSensorReading("person",0,0)
             return {}
 
-def consecutive(columns):
-    column_set = np.split(columns, np.where(np.diff(columns) != 1)[0]+1)
-    return column_set
-
-def minmax(column_set):
-    col_max = np.amax(column_set)
-    col_min = np.amin(column_set)
-    return col_min,col_max
 
 # if executed from the command line then execute arguments as functions
 if __name__ == '__main__':
@@ -560,23 +605,22 @@ with dai.Device(pipeline) as device:
             #  If legs have been spotted, draw red
             #  bounding boxes
             if legs_dict:
-                cols = legs_dict['max_col']
-                leg_col_grps = consecutive(legs_dict['columns'])
-                for col_grp in leg_col_grps:
-                    box_min, box_max = minmax(col_grp)
-                    x_min = int(box_min /cols * width)
-                    x_max = int(box_max / cols * width)
-                    y_max = int(height * legs_dict['top'])
-                    output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour_red, thickness)
-                        # Output image
-                x_dir = int(legs_dict['mean_col']/cols * width)
+                box_min = legs_dict["min_col"]
+                box_max = legs_dict["max_col"]
+                cols = legs_dict['max_cols']
+                x_min = int(box_min /cols * width)
+                x_max = int(box_max / cols * width)
+                y_max = int(height * legs_dict['top'])
+                output = cv2.rectangle(output, (x_min, 0), (x_max, y_max), colour_red, thickness)
+                mean_col = (box_min + box_max) / 2
+                x_dir = int(mean_col/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour_red, thickness)
                 bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + "degrees"
                 dist_txt = "d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
-                cols_txt = "cols: " + str(legs_dict['num_cols'])
+                com_txt = "comb: " + str(legs_dict["combined"])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
                 output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
-                output = cv2.putText(output, cols_txt, (x_dir + 15, int(y_max/2) + 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
+                output = cv2.putText(output, com_txt, (x_dir + 15, int(y_max/2) + 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
             cv2.imshow("OAK Perception Preview", output)
             key = cv2.waitKey(1)
         # print out the FPS achieved
