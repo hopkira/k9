@@ -420,7 +420,7 @@ class Legs_Detector():
             cen2 = (big_col_ind[index_next_min][0] + big_col_ind[index_next_min][1]) / 2
             dist_cen = abs(cen1 - cen2)
             if ((big_dists[index_next_min] - big_dists[index_min]) < self.max_depth_diff) and \
-            ((dist_cen * big_dists[index_min]) < self.max_gap_dist_prod):
+            ((dist_cen * float(big_dists[index_min])) < self.max_gap_dist_prod):
                 result["min_col"] = min(big_col_ind[index_min][0], big_col_ind[index_next_min][0])
                 result["max_col"] = max(big_col_ind[index_min][1],big_col_ind[index_next_min][1])
                 result["combined"] = 1.0
