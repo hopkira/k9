@@ -396,7 +396,7 @@ class Legs_Detector():
         index_min = np.argmin(big_dists)
         result = {
                     "index" : int(index_min),
-                    "dist" : float(big_dists[index_min]),
+                    "dist" : float(dist_mean),
                     "min_col" : int(big_col_ind[index_min][0]),
                     "max_col" : int(big_col_ind[index_min][1])
         }
@@ -616,7 +616,6 @@ with dai.Device(pipeline) as device:
                 x_dir = int(mean_col/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour_red, thickness)
                 bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + "degrees"
-                print("Distance: ",legs_dict["dist"])
                 dist_txt = "d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
                 com_txt = "comb: " + str(legs_dict["combined"])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
