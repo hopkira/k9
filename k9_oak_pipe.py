@@ -416,8 +416,8 @@ class Legs_Detector():
             big_dists[index_min] = max_range
             index_next_min = np.argmin(big_dists)
             big_dists[index_min] = store
-            cen1 = (big_col_ind[index_min][0] + big_col_ind[index_min][1]) / 2
-            cen2 = (big_col_ind[index_next_min][0] + big_col_ind[index_next_min][1]) / 2
+            cen1 = float((big_col_ind[index_min][0] + big_col_ind[index_min][1]) / 2)
+            cen2 = float((big_col_ind[index_next_min][0] + big_col_ind[index_next_min][1]) / 2)
             dist_cen = abs(cen1 - cen2)
             if ((big_dists[index_next_min] - big_dists[index_min]) < self.max_depth_diff) and \
             ((dist_cen * float(big_dists[index_min])) < self.max_gap_dist_prod):
