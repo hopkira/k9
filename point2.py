@@ -20,7 +20,7 @@ class Fwd_Collision_Detect():
     def __init__(self):
         # Point cloud loop constants
         self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 1)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 3.3
         self.pc_width = 160
@@ -28,7 +28,7 @@ class Fwd_Collision_Detect():
         self.pc_height = 100
         self.cy = self.pc_height / 2
         self.pc_max_range  = 10000.0
-        self.pc_min_range  = 200.0
+        self.pc_min_range  = 300.0
         self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
 
     def record_min_dist(self,depth_image) -> float:
@@ -61,6 +61,7 @@ class Fwd_Collision_Detect():
         binned_depths = pd.Series(scope[:,2])
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
+        print("Bins:",np.shape(totals))
         # shape the simplified bins into a 2D array
         totals = totals.values.reshape(1,7)
         # for each column in the array, find out the closest
@@ -117,6 +118,8 @@ stereo.depth.link(xoutDepth.input)
 print("Creating device")
 device = dai.Device()
 
+fc = Fwd_Collision_Detect()
+
 with device:
     print("Starting pipeline")
     device.startPipeline(pipeline)
@@ -125,7 +128,8 @@ with device:
     print("Ready to process images")
     while True:
         frame = qDepth.get().getCvFrame()
-        print(np.shape(frame))
+        print("Min dist:",fc.record_min_dist(frame))
+        # print(np.shape(frame)) # 480, 640
         im_frame = getDepthFrame(frame)
         cv2.imshow("False Depth Image", im_frame)
         if cv2.waitKey(1) == ord("q"):
