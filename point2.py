@@ -42,7 +42,7 @@ class Fwd_Collision_Detect():
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
         x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
-        y = np.where(valid, 268.0 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
+        y = np.where(valid, 300.0 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
         z2 = z.flatten()
         x2 = x.flatten()
         y2 = y.flatten()
