@@ -7,35 +7,29 @@ import cv2
 import numpy as np
 import depthai as dai
 
-# Depth configuration
-lrcheck = False
-extended = False
-subpixel = False
-median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
-
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
 camLeft = pipeline.create(dai.node.MonoCamera)
 camRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
-xoutLeft = pipeline.create(dai.node.XLinkOut)
-xoutRight = pipeline.create(dai.node.XLinkOut)
+# xoutLeft = pipeline.create(dai.node.XLinkOut)
+# xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
 camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 camLeft.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 camRight.setResolution(dai.MonoCameraProperties.SensorResolution.THE_720_P)
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
-stereo.initialConfig.setMedianFilter(median)
+stereo.initialConfig.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)
 stereo.setRectifyEdgeFillColor(0)
-stereo.setLeftRightCheck(lrcheck)
-stereo.setExtendedDisparity(extended)
-stereo.setSubpixel(subpixel)
+stereo.setLeftRightCheck(False)
+stereo.setExtendedDisparity(False)
+stereo.setSubpixel(False)
 xoutDepth.setStreamName("depth")
-camLeft.out.link(stereo.left)
-camRight.out.link(stereo.right)
-stereo.syncedLeft.link(xoutLeft.input)
-stereo.syncedRight.link(xoutRight.input)
+#camLeft.out.link(stereo.left)
+#camRight.out.link(stereo.right)
+#stereo.syncedLeft.link(xoutLeft.input)
+#stereo.syncedRight.link(xoutRight.input)
 stereo.depth.link(xoutDepth.input)
 print("Pipeline created")
 
