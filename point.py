@@ -44,6 +44,7 @@ device = dai.Device()
 with device:
     print("Starting pipeline")
     device.startPipeline(pipeline)
+    print("Pipeline started")
     qDepth = [device.getOutputQueue(name = "depth", max_size = 1, blocking = False)]
     print("Ready to process images")
     while True:
