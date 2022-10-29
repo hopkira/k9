@@ -43,7 +43,7 @@ stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
 stereo.initialConfig.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)  # KERNEL_7x7 default
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
 stereo.setLeftRightCheck(True)
-stereo.setExtendedDisparity(True)
+stereo.setExtendedDisparity(False)
 stereo.setSubpixel(True)
 
 xoutLeft.setStreamName("left")
