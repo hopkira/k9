@@ -21,6 +21,8 @@ class Fwd_Collision_Detect():
         # Point cloud loop constants - ranges      
         self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
         self.y_bins = pd.interval_range(start = 0, end = 800, periods = 8)
+        print("xbin:",self.x_bins)
+        print("ybin:",self.y_bins)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 2.05
         self.pc_width = 640
@@ -30,6 +32,8 @@ class Fwd_Collision_Detect():
         self.pc_max_range  = 10000.0
         self.pc_min_range  = 200.0
         self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
+        print("cols:",self.column)
+        print("rows:",self.row)
 
     def record_min_dist(self,depth_image) -> float:
         '''
@@ -55,7 +59,7 @@ class Fwd_Collision_Detect():
         in_scope = in_scope.reshape(-1, 3)
         scope = np.where(in_scope, cloud, np.nan)
         scope = scope[~np.isnan(scope).any(axis=1)]
-        print(np.shape(scope))
+        # print(np.shape(scope))
         # place the points into a set of 10cm square bins
         x_index = pd.cut(scope[:,0], self.x_bins)
         y_index = pd.cut(scope[:,1], self.y_bins)
@@ -68,7 +72,7 @@ class Fwd_Collision_Detect():
         min = float(np.amin(totals))
         im_totals = totals - min
         max = float(np.max(im_totals))
-        print("PC:",min, max)
+        # print("PC:",min, max)
         disp = (im_totals / max * 255.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
         dim = (700, 800) 
