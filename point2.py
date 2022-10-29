@@ -69,7 +69,7 @@ class Fwd_Collision_Detect():
         mean = np.mean(im_totals)
         disp = (im_totals / mean * 128.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
-        dim = (640, 280)
+        dim = (280, 640)
         resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
         cv2.imshow("Resized point cloud image", resized)
         # for each column in the array, find out the closest
