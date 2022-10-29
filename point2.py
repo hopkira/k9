@@ -14,10 +14,7 @@ def getDepthFrame(frame):
     min = np.amin(frame)
     frame = frame - min
     mean = np.mean(frame)
-    print(min,mean)
-    # disp = (frame * (65535.0 / max)).astype(np.uint16)
     disp = (frame / mean * 128.0).astype(np.uint8)
-    # disp = (frame / 255.0).astype(np.uint8)
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
     return disp
 
@@ -61,38 +58,17 @@ camRight.out.link(stereo.right)
 stereo.disparity.link(xoutDisparity.input)
 stereo.depth.link(xoutDepth.input)
 
-streams = ["disparity", "depth"]
-
 device = dai.Device()
 
-'''
-calibData = device.readCalibration()
-leftMesh, rightMesh = getMesh(calibData)
-if generateMesh:
-    meshLeft = list(leftMesh.tobytes())
-    meshRight = list(rightMesh.tobytes())
-    stereo.loadMeshData(meshLeft, meshRight)
-
-if meshDirectory is not None:
-    saveMeshFiles(leftMesh, rightMesh, meshDirectory)
-'''
-
-print("Creating DepthAI device")
 with device:
+    print("Starting pipeline")
     device.startPipeline(pipeline)
-
-    # Create a receive queue for each stream
-    qList = [device.getOutputQueue(stream, 8, blocking=False) for stream in streams]
-
+    print("Pipeline started")
+    qDepth = [device.getOutputQueue(name = "depth", max_size = 1, blocking = False)]
+    print("Ready to process images")
     while True:
-        for q in qList:
-            name = q.getName()
-            frame = q.get().getCvFrame()
-            if name == "depth":
-                frame = getDepthFrame(frame)
-            elif name == "disparity":
-                frame = getDisparityFrame(frame)
-
-            cv2.imshow(name, frame)
+        inDepth = qDepth.get().getCvFrame()
+        frame = getDepthFrame(frame)
+        cv2.imshow("False Depth Image", frame)
         if cv2.waitKey(1) == ord("q"):
             break
