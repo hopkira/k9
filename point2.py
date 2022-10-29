@@ -36,21 +36,21 @@ stereo.setLeftRightCheck(False)
 stereo.setExtendedDisparity(False)
 stereo.setSubpixel(False)
 
-xoutLeft.setStreamName("left")
-xoutRight.setStreamName("right")
+#xoutLeft.setStreamName("left")
+#xoutRight.setStreamName("right")
 xoutDisparity.setStreamName("disparity")
 xoutDepth.setStreamName("depth")
-xoutRectifLeft.setStreamName("rectifiedLeft")
-xoutRectifRight.setStreamName("rectifiedRight")
+#xoutRectifLeft.setStreamName("rectifiedLeft")
+#xoutRectifRight.setStreamName("rectifiedRight")
 
 camLeft.out.link(stereo.left)
 camRight.out.link(stereo.right)
-stereo.syncedLeft.link(xoutLeft.input)
-stereo.syncedRight.link(xoutRight.input)
+#stereo.syncedLeft.link(xoutLeft.input)
+#stereo.syncedRight.link(xoutRight.input)
 stereo.disparity.link(xoutDisparity.input)
 stereo.depth.link(xoutDepth.input)
 
-streams = ["left", "right", "disparity", "depth"]
+streams = ["disparity", "depth"]
 
 device = dai.Device()
 
