@@ -19,8 +19,8 @@ class Fwd_Collision_Detect():
 
     def __init__(self):
         # Point cloud loop constants
-        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
+        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 70)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 160)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 3.3
         self.pc_width = 640
