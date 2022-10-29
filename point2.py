@@ -79,7 +79,7 @@ class Fwd_Collision_Detect():
         #plt.xlim(-350,350)
         #plt.ylim(-200,1600)
         #plt.show()
-        if not np.isnan(min_dist):
+        if min_dist:
             min_dist = float(min_dist/1000.0)
             mem.storeState("forward", min_dist)
             return min_dist
