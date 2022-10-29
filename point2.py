@@ -20,15 +20,15 @@ class Fwd_Collision_Detect():
     def __init__(self):
         # Point cloud loop constants - ranges      
         self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
+        self.y_bins = pd.interval_range(start = 0, end = 800, periods = 8)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
-        self.fy = 3.3
+        self.fy = 2.05
         self.pc_width = 640
         self.cx = self.pc_width / 2
         self.pc_height = 480
         self.cy = self.pc_height / 2
         self.pc_max_range  = 10000.0
-        self.pc_min_range  = 300.0
+        self.pc_min_range  = 200.0
         self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
 
     def record_min_dist(self,depth_image) -> float:
@@ -38,7 +38,7 @@ class Fwd_Collision_Detect():
         '''
 
         # Ignore points too close or too far away
-        valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
+        valid = (depth_image > self.pc_min_range) & (depth_image < self.pc_max_range)
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
         x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
@@ -50,7 +50,7 @@ class Fwd_Collision_Detect():
         # Remove points that are projected to fall outside the field of view
         # points below floor level, above 1.6m or those more than 2m to the
         # sides of the robot are ignored
-        in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 350) & (cloud[:,0] > -350)
+        in_scope = (cloud[:,1] < 800) & (cloud[:,1] > 0) & (cloud[:,0] < 350) & (cloud[:,0] > -350)
         in_scope = np.repeat(in_scope, 3)
         in_scope = in_scope.reshape(-1, 3)
         scope = np.where(in_scope, cloud, np.nan)
@@ -64,14 +64,14 @@ class Fwd_Collision_Detect():
         #
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(16,7)
+        totals = totals.values.reshape(8,7)
         min = float(np.amin(totals))
         im_totals = totals - min
         max = float(np.max(im_totals))
         print("PC:",min, max)
         disp = (im_totals / max * 255.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
-        dim = (350, 800) 
+        dim = (700, 800) 
         resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
         cv2.imshow("Resized point cloud image", resized)
         # for each column in the array, find out the closest
