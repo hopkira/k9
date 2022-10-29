@@ -64,6 +64,9 @@ class Fwd_Collision_Detect():
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
         totals = totals.values.reshape(16,7)
+        dim = (320, 140)
+        resized = cv2.resize(totals, dim, interpolation = cv2.INTER_AREA)
+        cv2.imshow("Resized point cloud image", resized)
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
