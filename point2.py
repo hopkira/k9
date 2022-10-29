@@ -64,9 +64,9 @@ class Fwd_Collision_Detect():
         totals = binned_depths.groupby([y_index, x_index]).mean()
         # shape the simplified bins into a 2D array
         totals = totals.values.reshape(8,7)
-        min = float(np.amin(totals))
+        min = float(np.nanmin(totals))
         im_totals = totals - min
-        max = float(np.max(im_totals))
+        max = float(np.nanmax(im_totals))
         # print("PC:",min, max)
         disp = (im_totals / max * 255.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
@@ -79,8 +79,7 @@ class Fwd_Collision_Detect():
         # y values are irrelevant
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            min_dist_cols = np.nanmin(totals, axis = 0)
-            min_dist = float(np.nanmin(min_dist_cols))
+            min_dist = float(np.nanmin(totals))
         # inject the resulting 40 sensor points into thew
         # short term memory of the robot
         # point_cloud = point_cloud[16:24]
