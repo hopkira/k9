@@ -39,7 +39,7 @@ with device:
     print("Starting pipeline")
     device.startPipeline(pipeline)
     print("Pipeline started")
-    qDepth = device.getOutputQueue(name = "depth", maxSize = 2, blocking = False)
+    qDepth = device.getOutputQueue(name = "depth", maxSize = 3, blocking = False)
     print("Ready to process images")
     while True:
         frame = qDepth.get().getCvFrame()
