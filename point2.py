@@ -18,9 +18,9 @@ class Fwd_Collision_Detect():
     '''
 
     def __init__(self):
-        # Point cloud loop constants
-        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 14)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 32)
+        # Point cloud loop constants - ranges      
+        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 3.3
         self.pc_width = 640
@@ -61,16 +61,17 @@ class Fwd_Collision_Detect():
         y_index = pd.cut(scope[:,1], self.y_bins)
         binned_depths = pd.Series(scope[:,2])
         # simplify each bin to a single median value
+        #
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(14,32)
-        min = np.amin(totals)
+        totals = totals.values.reshape(7,16)
+        min = float(np.amin(totals))
         im_totals = totals - min
-        max = np.max(im_totals)
+        max = float(np.max(im_totals))
         print("PC:",min, max)
         disp = (im_totals / max * 255.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
-        dim = (350, 800)
+        dim = (350, 800) 
         resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
         cv2.imshow("Resized point cloud image", resized)
         # for each column in the array, find out the closest
