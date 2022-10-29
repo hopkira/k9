@@ -23,9 +23,9 @@ class Fwd_Collision_Detect():
         self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 3.3
-        self.pc_width = 160
+        self.pc_width = 640
         self.cx = self.pc_width / 2
-        self.pc_height = 100
+        self.pc_height = 480
         self.cy = self.pc_height / 2
         self.pc_max_range  = 10000.0
         self.pc_min_range  = 300.0
