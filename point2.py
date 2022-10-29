@@ -69,8 +69,9 @@ class Fwd_Collision_Detect():
         # y values are irrelevant
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            min_dist = np.nanmin(totals, axis = 0)
-        # inject the resulting 40 sensor points into the
+            min_dist_cols = np.nanmin(totals, axis = 0)
+            min_dist = float(np.nanmin(min_dist_cols))
+        # inject the resulting 40 sensor points into thew
         # short term memory of the robot
         # point_cloud = point_cloud[16:24]
         # min_dist = np.amin(point_cloud)
