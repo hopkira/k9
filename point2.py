@@ -67,6 +67,7 @@ class Fwd_Collision_Detect():
         min = np.amin(totals)
         im_totals = totals - min
         max = np.max(im_totals)
+        print("PC:",min, max)
         disp = (im_totals / max * 255.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
         dim = (350, 800)
