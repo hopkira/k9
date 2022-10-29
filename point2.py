@@ -19,8 +19,8 @@ class Fwd_Collision_Detect():
 
     def __init__(self):
         # Point cloud loop constants
-        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 70)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 160)
+        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 14)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 32)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 3.3
         self.pc_width = 640
@@ -42,7 +42,7 @@ class Fwd_Collision_Detect():
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
         x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
-        y = np.where(valid, 268 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
+        y = np.where(valid, 268.0 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
         z2 = z.flatten()
         x2 = x.flatten()
         y2 = y.flatten()
@@ -63,7 +63,7 @@ class Fwd_Collision_Detect():
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(70,160)
+        totals = totals.values.reshape(14,32)
         min = np.amin(totals)
         im_totals = totals - min
         max = np.max(im_totals)
