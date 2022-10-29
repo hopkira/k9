@@ -16,7 +16,7 @@ def getDepthFrame(frame):
     mean = np.mean(frame)
     print(min,mean)
     # disp = (frame * (65535.0 / max)).astype(np.uint16)
-    modify = (frame / mean * 128.0).astype(np.uint8)
+    disp = (frame / mean * 128.0).astype(np.uint8)
     # disp = (frame / 255.0).astype(np.uint8)
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
     return disp
