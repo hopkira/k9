@@ -19,8 +19,8 @@ class Fwd_Collision_Detect():
 
     def __init__(self):
         # Point cloud loop constants
-        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 700)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 1600)
+        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 35)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 80)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
         self.fy = 3.3
         self.pc_width = 640
@@ -63,7 +63,7 @@ class Fwd_Collision_Detect():
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(1600,700)
+        totals = totals.values.reshape(80,35)
         min = np.amin(totals)
         im_totals = totals - min
         mean = np.mean(im_totals)
