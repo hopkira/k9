@@ -7,46 +7,37 @@ import cv2
 import numpy as np
 import depthai as dai
 
+# Depth configuration
 resolution = (1280, 720)
 lrcheck = True
 extended = True
 subpixel = True
-
 median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
 
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
-
 camLeft = pipeline.create(dai.node.MonoCamera)
 camRight = pipeline.create(dai.node.MonoCamera)
 stereo = pipeline.create(dai.node.StereoDepth)
 xoutLeft = pipeline.create(dai.node.XLinkOut)
 xoutRight = pipeline.create(dai.node.XLinkOut)
 xoutDepth = pipeline.create(dai.node.XLinkOut)
-
 camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
 camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-
 camLeft.setResolution(resolution)
 camRight.setResolution(resolution)
-
 stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
-stereo.initialConfig.setMedianFilter(median)  # KERNEL_7x7 default
-stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
+stereo.initialConfig.setMedianFilter(median)
+stereo.setRectifyEdgeFillColor(0)
 stereo.setLeftRightCheck(lrcheck)
 stereo.setExtendedDisparity(extended)
 stereo.setSubpixel(subpixel)
-
 xoutDepth.setStreamName("depth")
-
 camLeft.out.link(stereo.left)
 camRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
-
 stereo.depth.link(xoutDepth.input)
-
-streams = ["depth")]
 
 device = dai.Device()
 
