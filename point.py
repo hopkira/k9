@@ -8,10 +8,9 @@ import numpy as np
 import depthai as dai
 
 # Depth configuration
-resolution = (1280, 720)
-lrcheck = True
-extended = True
-subpixel = True
+lrcheck = False
+extended = False
+subpixel = False
 median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
 
 print("Creating Stereo Depth pipeline")
@@ -43,9 +42,8 @@ device = dai.Device()
 
 with device:
     device.startPipeline(pipeline)
-    qDepth = [device.getOutputQueue(name = "depth", max_size = 3, blocking = False)]
+    qDepth = [device.getOutputQueue(name = "depth", max_size = 1, blocking = False)]
     while True:
-
         inDepth = qDepth.get().getCvFrame()
         frame = frame.astype(np.uint16)
         cv2.imshow("Depth", frame)
