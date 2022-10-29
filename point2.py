@@ -10,6 +10,14 @@ def getDisparityFrame(frame):
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
     return disp
 
+def getDepthFrame(frame):
+    min = np.amin(frame)
+    frame = frame = min
+    max = np.amax(frame)
+    disp = (frame * (65535.0 / max)).astype(np.uint16)
+    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+    return disp
+
 print("Creating Stereo Depth pipeline")
 pipeline = dai.Pipeline()
 
@@ -78,6 +86,7 @@ with device:
             name = q.getName()
             frame = q.get().getCvFrame()
             if name == "depth":
+                frame = getDepthFrame(frame)
                 frame = frame.astype(np.uint16)
             elif name == "disparity":
                 frame = getDisparityFrame(frame)
