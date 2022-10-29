@@ -63,7 +63,7 @@ class Fwd_Collision_Detect():
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(80,35)
+        totals = totals.values.reshape(35,80)
         min = np.amin(totals)
         im_totals = totals - min
         mean = np.mean(im_totals)
