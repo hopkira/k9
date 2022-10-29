@@ -12,7 +12,7 @@ def getDisparityFrame(frame):
 
 def getDepthFrame(frame):
     min = np.amin(frame)
-    frame = frame = min
+    frame = frame - min
     max = np.amax(frame)
     disp = (frame * (65535.0 / max)).astype(np.uint16)
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
@@ -87,7 +87,6 @@ with device:
             frame = q.get().getCvFrame()
             if name == "depth":
                 frame = getDepthFrame(frame)
-                frame = frame.astype(np.uint16)
             elif name == "disparity":
                 frame = getDisparityFrame(frame)
 
