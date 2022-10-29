@@ -43,7 +43,7 @@ device = dai.Device()
 
 with device:
     device.startPipeline(pipeline)
-    qDepth = [device.getOutputQueue(name = "depth", max_size = 8, blocking = False)]
+    qDepth = [device.getOutputQueue(name = "depth", max_size = 3, blocking = False)]
     while True:
 
         inDepth = qDepth.get().getCvFrame()
