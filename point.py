@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+# coding: utf-8
+# Author: Richard Hopkins
+# Date: 29 October 2022
+#
+import cv2
+import numpy as np
+import depthai as dai
+
+resolution = (1280, 720)
+lrcheck = True
+extended = True
+subpixel = True
+
+median = dai.StereoDepthProperties.MedianFilter.KERNEL_7x7
+
+print("Creating Stereo Depth pipeline")
+pipeline = dai.Pipeline()
+
+camLeft = pipeline.create(dai.node.MonoCamera)
+camRight = pipeline.create(dai.node.MonoCamera)
+stereo = pipeline.create(dai.node.StereoDepth)
+xoutLeft = pipeline.create(dai.node.XLinkOut)
+xoutRight = pipeline.create(dai.node.XLinkOut)
+xoutDepth = pipeline.create(dai.node.XLinkOut)
+
+camLeft.setBoardSocket(dai.CameraBoardSocket.LEFT)
+camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+
+camLeft.setResolution(resolution)
+camRight.setResolution(resolution)
+
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+stereo.initialConfig.setMedianFilter(median)  # KERNEL_7x7 default
+stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
+stereo.setLeftRightCheck(lrcheck)
+stereo.setExtendedDisparity(extended)
+stereo.setSubpixel(subpixel)
+
+xoutDepth.setStreamName("depth")
+
+camLeft.out.link(stereo.left)
+camRight.out.link(stereo.right)
+stereo.syncedLeft.link(xoutLeft.input)
+stereo.syncedRight.link(xoutRight.input)
+
+stereo.depth.link(xoutDepth.input)
+
+streams = ["depth")]
+
+device = dai.Device()
+
+with device:
+    device.startPipeline(pipeline)
+    qDepth = [device.getOutputQueue(name = "depth", max_size = 8, blocking = False)]
+    while True:
+
+        inDepth = qDepth.get().getCvFrame()
+        frame = frame.astype(np.uint16)
+        cv2.imshow("Depth", frame)
+        if cv2.waitKey(1) == ord("q"):
+            break
