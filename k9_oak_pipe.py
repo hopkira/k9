@@ -65,16 +65,18 @@ spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetw
 objectTracker = pipeline.create(dai.node.ObjectTracker)
 
 # Configure stereo vision node
-stereo.setLeftRightCheck(False)
+stereo.setLeftRightCheck(True)
 stereo.setExtendedDisparity(False)
-stereo.setSubpixel(False)
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_DENSITY)
+stereo.setSubpixel(True)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+stereo.initialConfig.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)
+stereo.setRectifyEdgeFillColor(0)
 
 # Configure mono camera nodes
 right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_400_P)
+right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
+left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
 
 # Configure colour camera node
 camRgb.setPreviewSize(300, 300)
@@ -155,6 +157,13 @@ def main():
     if testing:
         print("Visual test mode active")
 
+def getDepthFrame(frame):
+    frame_min = np.amin(frame)
+    frame = frame - frame_min
+    mean = np.mean(frame)
+    disp = (frame / mean * 128.0).astype(np.uint8)
+    disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
+    return disp
 
 class Point_Cloud():
     '''
@@ -237,14 +246,14 @@ class Fwd_Collision_Detect():
     def __init__(self):
         # Point cloud loop constants
         self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 1)
+        self.y_bins = pd.interval_range(start = 0, end = 800, periods = 8)
         self.fx = 1.4 # values found by measuring known sized objects at known distances
-        self.fy = 3.3
-        self.pc_width = 160
+        self.fy = 1.4
+        self.pc_width = 640
         self.cx = self.pc_width / 2
-        self.pc_height = 100
+        self.pc_height = 480
         self.cy = self.pc_height / 2
-        self.pc_max_range  = 10000.0
+        self.pc_max_range  = 5000.0
         self.pc_min_range  = 200.0
         self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
 
@@ -259,7 +268,7 @@ class Fwd_Collision_Detect():
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
         x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
-        y = np.where(valid, 268 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
+        y = np.where(valid, 300 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
         z2 = z.flatten()
         x2 = x.flatten()
         y2 = y.flatten()
@@ -267,7 +276,7 @@ class Fwd_Collision_Detect():
         # Remove points that are projected to fall outside the field of view
         # points below floor level, above 1.6m or those more than 2m to the
         # sides of the robot are ignored
-        in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 350) & (cloud[:,0] > -350)
+        in_scope = (cloud[:,1] < 800) & (cloud[:,1] > 0) & (cloud[:,0] < 350) & (cloud[:,0] > -350)
         in_scope = np.repeat(in_scope, 3)
         in_scope = in_scope.reshape(-1, 3)
         scope = np.where(in_scope, cloud, np.nan)
@@ -279,13 +288,24 @@ class Fwd_Collision_Detect():
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(1,7)
+        totals = totals.values.reshape(8,7)
+        if testing:
+            img_min = float(np.nanmin(totals))
+            im_totals = totals - img_min
+            img_max = float(np.nanmax(im_totals))
+            # print("PC:",min, max)
+            disp = (im_totals / img_max * 255.0).astype(np.uint8)
+            disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
+            flipv = cv2.flip(disp, 0)
+            dim = (350, 400) 
+            resized = cv2.resize(flipv, dim, interpolation = cv2.INTER_AREA)
+            cv2.imshow("Point cloud image", resized)
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            min_dist = np.nanmin(totals)
+            min_dist = float(np.nanmin(totals))
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         # point_cloud = point_cloud[16:24]
@@ -295,7 +315,7 @@ class Fwd_Collision_Detect():
         #plt.xlim(-350,350)
         #plt.ylim(-200,1600)
         #plt.show()
-        if not np.isnan(min_dist):
+        if min_dist:
             min_dist = float(min_dist/1000.0)
             mem.storeState("forward", min_dist)
             return min_dist
@@ -542,7 +562,7 @@ if testing:
 with dai.Device(pipeline) as device:
     # declare buffer queues for the streams
     FPS =  0.0
-    qDep = device.getOutputQueue(name="depth", maxSize=1, blocking=False)
+    qDep = device.getOutputQueue(name="depth", maxSize=3, blocking=False)
     if testing:
         qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
@@ -560,7 +580,7 @@ with dai.Device(pipeline) as device:
     while True:
         start_time = time.time() # start time of the loop
         inDepth = qDep.get()
-        depth_image = inDepth.getFrame() # get latest information from queue
+        depth_image = inDepth.get().getCvFrame() # get latest information from queue
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
@@ -571,6 +591,8 @@ with dai.Device(pipeline) as device:
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
+            im_frame = getDepthFrame(frame)
+            cv2.imshow("False Depth Image", im_frame)
             in_rgb = qRgb.get()
             preview = in_rgb.getCvFrame() # get RGB frame
             # Resize frame to fit Pi VNC viewer
