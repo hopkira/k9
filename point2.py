@@ -63,13 +63,13 @@ class Fwd_Collision_Detect():
         totals = binned_depths.groupby([y_index, x_index]).median()
         print("Bins:",np.shape(totals))
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(1,7)
+        totals = totals.values.reshape(16,7)
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
-            min_dist = np.nanmin(totals)
+            min_dist = np.nanmin(totals, axis = 0)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         # point_cloud = point_cloud[16:24]
