@@ -4,12 +4,6 @@ import cv2
 import numpy as np
 import depthai as dai
 
-def getDisparityFrame(frame):
-    maxDisp = stereo.initialConfig.getMaxDisparity()
-    disp = (frame * (255.0 / maxDisp)).astype(np.uint8)
-    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
-    return disp
-
 def getDepthFrame(frame):
     min = np.amin(frame)
     frame = frame - min
