@@ -37,12 +37,15 @@ camRight.out.link(stereo.right)
 stereo.syncedLeft.link(xoutLeft.input)
 stereo.syncedRight.link(xoutRight.input)
 stereo.depth.link(xoutDepth.input)
+print("Pipeline created")
 
 device = dai.Device()
 
 with device:
+    print("Starting pipeline")
     device.startPipeline(pipeline)
     qDepth = [device.getOutputQueue(name = "depth", max_size = 1, blocking = False)]
+    print("Ready to process images")
     while True:
         inDepth = qDepth.get().getCvFrame()
         frame = frame.astype(np.uint16)
