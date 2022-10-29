@@ -16,7 +16,7 @@ def getDepthFrame(frame):
     max = np.amax(frame)
     disp = (frame * (65535.0 / max)).astype(np.uint16)
     disp = (frame / 255.0).astype(np.uint8)
-    disp = cv2.applyColorMap(disp, cv2.COLORMAP_JET)
+    disp = cv2.applyColorMap(disp, cv2.COLORMAP_INFERNO)
     return disp
 
 print("Creating Stereo Depth pipeline")
