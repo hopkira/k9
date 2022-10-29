@@ -50,7 +50,7 @@ stereo.syncedRight.link(xoutRight.input)
 stereo.disparity.link(xoutDisparity.input)
 stereo.depth.link(xoutDepth.input)
 
-streams = ["left", "right", "diparity", "depth"]
+streams = ["left", "right", "disparity", "depth"]
 
 device = dai.Device()
 
