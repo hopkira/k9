@@ -55,13 +55,13 @@ class Fwd_Collision_Detect():
         in_scope = in_scope.reshape(-1, 3)
         scope = np.where(in_scope, cloud, np.nan)
         scope = scope[~np.isnan(scope).any(axis=1)]
+        print(np.shape(scope))
         # place the points into a set of 10cm square bins
         x_index = pd.cut(scope[:,0], self.x_bins)
         y_index = pd.cut(scope[:,1], self.y_bins)
         binned_depths = pd.Series(scope[:,2])
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
-        print("Bins:",np.shape(totals))
         # shape the simplified bins into a 2D array
         totals = totals.values.reshape(16,7)
         # for each column in the array, find out the closest
