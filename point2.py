@@ -39,7 +39,7 @@ camRight.setBoardSocket(dai.CameraBoardSocket.RIGHT)
 for monoCam in (camLeft, camRight):  # Common config
     monoCam.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
 
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_QUALITY)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
 stereo.initialConfig.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)  # KERNEL_7x7 default
 stereo.setRectifyEdgeFillColor(0)  # Black, to better see the cutout
 stereo.setLeftRightCheck(True)
