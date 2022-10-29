@@ -61,7 +61,7 @@ with device:
     qDepth = device.getOutputQueue(name = "depth", maxSize = 1, blocking = False)
     print("Ready to process images")
     while True:
-        inDepth = qDepth.get().getCvFrame()
+        frame = qDepth.get().getCvFrame()
         frame = getDepthFrame(frame)
         cv2.imshow("False Depth Image", frame)
         if cv2.waitKey(1) == ord("q"):
