@@ -1,8 +1,89 @@
 #!/usr/bin/env python3
 
 import cv2
+import warnings
 import numpy as np
 import depthai as dai
+import pandas as pd
+
+from memory import Memory
+
+mem = Memory()
+
+class Fwd_Collision_Detect():
+    '''
+    Creates a focussed point cloud that determines any obstacles
+    directly in front of the robot and returns the minimum distance
+    to the closest
+    '''
+
+    def __init__(self):
+        # Point cloud loop constants
+        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
+        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 1)
+        self.fx = 1.4 # values found by measuring known sized objects at known distances
+        self.fy = 3.3
+        self.pc_width = 160
+        self.cx = self.pc_width / 2
+        self.pc_height = 100
+        self.cy = self.pc_height / 2
+        self.pc_max_range  = 10000.0
+        self.pc_min_range  = 200.0
+        self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
+
+    def record_min_dist(self,depth_image) -> float:
+        '''
+        Distills the point cloud down to a single value that is the distance to the
+        nearest obstacle that is directly in front of the robot
+        '''
+
+        # Ignore points too close or too far away
+        valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
+        # Calculate the point cloud using simple extrapolation from depth
+        z = np.where(valid, depth_image, 0.0)
+        x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
+        y = np.where(valid, 268 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
+        z2 = z.flatten()
+        x2 = x.flatten()
+        y2 = y.flatten()
+        cloud = np.column_stack((x2,y2,z2))
+        # Remove points that are projected to fall outside the field of view
+        # points below floor level, above 1.6m or those more than 2m to the
+        # sides of the robot are ignored
+        in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 350) & (cloud[:,0] > -350)
+        in_scope = np.repeat(in_scope, 3)
+        in_scope = in_scope.reshape(-1, 3)
+        scope = np.where(in_scope, cloud, np.nan)
+        scope = scope[~np.isnan(scope).any(axis=1)]
+        # place the points into a set of 10cm square bins
+        x_index = pd.cut(scope[:,0], self.x_bins)
+        y_index = pd.cut(scope[:,1], self.y_bins)
+        binned_depths = pd.Series(scope[:,2])
+        # simplify each bin to a single median value
+        totals = binned_depths.groupby([y_index, x_index]).median()
+        # shape the simplified bins into a 2D array
+        totals = totals.values.reshape(1,7)
+        # for each column in the array, find out the closest
+        # bin; as the robot cannot duck or jump, the
+        # y values are irrelevant
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=RuntimeWarning)
+            min_dist = np.nanmin(totals)
+        # inject the resulting 40 sensor points into the
+        # short term memory of the robot
+        # point_cloud = point_cloud[16:24]
+        # min_dist = np.amin(point_cloud)
+        # mem.storeState("forward", min_dist)
+        #plt.scatter(x2,-y2,c=z2,cmap='afmhot',s=10)
+        #plt.xlim(-350,350)
+        #plt.ylim(-200,1600)
+        #plt.show()
+        if not np.isnan(min_dist):
+            min_dist = float(min_dist/1000.0)
+            mem.storeState("forward", min_dist)
+            return min_dist
+        else:
+            return None
 
 def getDepthFrame(frame):
     min = np.amin(frame)
@@ -33,6 +114,7 @@ camLeft.out.link(stereo.left)
 camRight.out.link(stereo.right)
 stereo.depth.link(xoutDepth.input)
 
+print("Creating device")
 device = dai.Device()
 
 with device:
@@ -43,6 +125,7 @@ with device:
     print("Ready to process images")
     while True:
         frame = qDepth.get().getCvFrame()
+        print(np.shape(frame))
         im_frame = getDepthFrame(frame)
         cv2.imshow("False Depth Image", im_frame)
         if cv2.waitKey(1) == ord("q"):
