@@ -75,8 +75,9 @@ class Fwd_Collision_Detect():
         # print("PC:",min, max)
         disp = (im_totals / max * 255.0).astype(np.uint8)
         disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
+        flipv = cv2.flip(disp, 0)
         dim = (700, 800) 
-        resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
+        resized = cv2.resize(flipv, dim, interpolation = cv2.INTER_AREA)
         cv2.imshow("Resized point cloud image", resized)
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
