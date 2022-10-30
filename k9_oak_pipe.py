@@ -32,120 +32,6 @@ print("All imports done!")
 #from matplotlib import pyplot as plt
 #print("Picture drawing loaded...")
 
-testing = False
-
-mem = Memory()
-
-# Oak-Lite Horizontal FoV
-cam_h_fov = 73.0
-
-# Point cloud variabless
-cam_height = 268.0 # mm distance from floor
-fx = 1.3514 # values derived mathematically due to new resolution and fov
-fy = 1.7985 # values derived mathematically due to new resolution and fov
-pc_width = 160
-cx = pc_width / 2
-pc_height = 120
-cy = pc_height / 2
-
-# Shared contraints 
-min_range = 750.0 # default for device is mm
-max_range = 1750.0 # default for device is mm
-sweet_spot = min_range + ((max_range - min_range) / 2.0)
-
-# Heel constants
-heel_confidence = 0.7 # NN certainty that its a person
-heel_lower = 200 # minimum depth for person detection
-heel_upper = 5000 # maximu depth for person detection
-
-# Path to NN model
-nnBlob = "/home/pi/depthai-python/examples/models/mobilenet-ssd_openvino_2021.4_5shave.blob"
-
-# Create OAK-D Lite pipeline
-print("Creating Oak pipeline...")
-pipeline = dai.Pipeline()
-
-# Create nodes within pipeline
-stereo = pipeline.create(dai.node.StereoDepth)
-right = pipeline.create(dai.node.MonoCamera)
-left = pipeline.create(dai.node.MonoCamera)
-camRgb = pipeline.create(dai.node.ColorCamera)
-spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
-objectTracker = pipeline.create(dai.node.ObjectTracker)
-
-# Configure stereo vision node
-stereo.setLeftRightCheck(True)
-stereo.setExtendedDisparity(False)
-stereo.setSubpixel(True)
-stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
-stereo.initialConfig.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)
-stereo.setRectifyEdgeFillColor(0)
-
-# Configure mono camera nodes
-right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
-left.setBoardSocket(dai.CameraBoardSocket.LEFT)
-right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
-left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
-
-# Configure colour camera node
-camRgb.setPreviewSize(300, 300)
-camRgb.setPreviewKeepAspectRatio(False)
-camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
-camRgb.setInterleaved(False)
-camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
-
-# Configure Spatial Detection Neural Network Node
-spatialDetectionNetwork.setBlobPath(nnBlob)
-spatialDetectionNetwork.setConfidenceThreshold(heel_confidence)
-spatialDetectionNetwork.input.setBlocking(False)
-spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
-spatialDetectionNetwork.setDepthLowerThreshold(heel_lower)
-spatialDetectionNetwork.setDepthUpperThreshold(heel_upper)
-
-# Configure Object Tracker Node
-objectTracker.setDetectionLabelsToTrack([15])
-objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
-objectTracker.setTrackerIdAssignmentPolicy(dai.TrackerIdAssignmentPolicy.SMALLEST_ID)
-objectTracker.inputTrackerFrame.setBlocking(False)
-objectTracker.inputTrackerFrame.setQueueSize(2)
-
-# Linking nodes together in pipeline
-# Connect mono cameras to stereo pipe
-left.out.link(stereo.left)
-right.out.link(stereo.right)
-
-# Connect colour camera preview to Spatial Detection Network pipeline
-camRgb.preview.link(spatialDetectionNetwork.input)
-
-# Connect colour camera video frame to Object Tracker pipeline
-camRgb.video.link(objectTracker.inputTrackerFrame)
-
-# Pass the video received.by the Spatial Detection Network to the to Object Tracker input
-spatialDetectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
-
-# Connext the output of the Spatial Detection Network to the input of the object tracker
-spatialDetectionNetwork.out.link(objectTracker.inputDetections)
-
-# Connect the depth output to the Spatial Detection Network depth input
-stereo.depth.link(spatialDetectionNetwork.inputDepth)
-
-# Define OAK-lite output streams
-# Create depth output stream
-xOut = pipeline.create(dai.node.XLinkOut)
-xOut.setStreamName("depth")
-stereo.depth.link(xOut.input)
-
-# Create tracker output stream
-trackerOut = pipeline.create(dai.node.XLinkOut)
-trackerOut.setStreamName("tracklets")
-objectTracker.out.link(trackerOut.input)
-
-# Decimate the depth image by a factor of 4
-config = stereo.initialConfig.get()
-config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
-config.postProcessing.decimationFilter.decimationFactor = 4
-stereo.initialConfig.set(config)
-
 def main():
     global testing
     parser = argparse.ArgumentParser(description='Runs OAK pipe to find people in view.')
@@ -166,15 +52,6 @@ def main():
     if testing:
         print("Visual test mode active")
 
-def getDepthFrame(frame):
-    frame_min = np.amin(frame)
-    frame = frame - frame_min
-    mean = np.mean(frame)
-    disp = (frame / mean * 128.0).astype(np.uint8)
-    dim = (640, 480) 
-    resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
-    resized_disp = cv2.applyColorMap(resized, cv2.COLORMAP_HOT)
-    return resized_disp
 
 class Point_Cloud():
     '''
@@ -232,6 +109,7 @@ class Point_Cloud():
         totals = totals.values.reshape(self.height_elem,self.width_elem)
         return totals
 
+
 class Big_Point_Cloud():
     '''
     Creates a point cloud that determines any obstacles in front of the robot
@@ -241,6 +119,11 @@ class Big_Point_Cloud():
         self.bpc = Point_Cloud(4000,1560)
         # Pre-calculate the angles in the point cloud
         self.angles_array = np.arange(-36.5, 39.42, 3.04)
+
+    def calc_cartesian(self, angle, depth):
+        x = depth * math.sin(math.radians(angle))
+        y = depth * math.cos(math.radians(angle))
+        return x,y
 
     def record_point_cloud(self,depth_image):
         '''
@@ -262,7 +145,7 @@ class Big_Point_Cloud():
             for index, point in enumerate(point_cloud):
                 angle = self.angles_array[index]
                 depth = point/10.0
-                x,y = calcCartesian(angle, depth)
+                x,y = self.calc_cartesian(angle, depth)
                 if not (np.isnan(x) or np.isnan(y)):
                     points[index+1,0] = x
                     points[index+1,1] = y
@@ -286,10 +169,6 @@ class Big_Point_Cloud():
             # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point/1000.0), math.radians(float(self.angles_array[index])))
 
-def calcCartesian(angle, depth):
-    x = depth * math.sin(math.radians(angle))
-    y = depth * math.cos(math.radians(angle))
-    return x,y
 
 class Fwd_Collision_Detect():
     '''
@@ -562,6 +441,119 @@ class Person_Detector():
             mem.storeSensorReading("person",0,0)
             return {}
 
+testing = False
+
+mem = Memory()
+
+# Oak-Lite Horizontal FoV
+cam_h_fov = 73.0
+
+# Point cloud variabless
+cam_height = 268.0 # mm distance from floor
+fx = 1.3514 # values derived mathematically due to new resolution and fov
+fy = 1.7985 # values derived mathematically due to new resolution and fov
+pc_width = 160
+cx = pc_width / 2
+pc_height = 120
+cy = pc_height / 2
+
+# Shared contraints 
+min_range = 750.0 # default for device is mm
+max_range = 1750.0 # default for device is mm
+sweet_spot = min_range + ((max_range - min_range) / 2.0)
+
+# Heel constants
+heel_confidence = 0.7 # NN certainty that its a person
+heel_lower = 200 # minimum depth for person detection
+heel_upper = 5000 # maximu depth for person detection
+
+# Path to NN model
+nnBlob = "/home/pi/depthai-python/examples/models/mobilenet-ssd_openvino_2021.4_5shave.blob"
+
+# Create OAK-D Lite pipeline
+print("Creating Oak pipeline...")
+pipeline = dai.Pipeline()
+
+# Create nodes within pipeline
+stereo = pipeline.create(dai.node.StereoDepth)
+right = pipeline.create(dai.node.MonoCamera)
+left = pipeline.create(dai.node.MonoCamera)
+camRgb = pipeline.create(dai.node.ColorCamera)
+spatialDetectionNetwork = pipeline.create(dai.node.MobileNetSpatialDetectionNetwork)
+objectTracker = pipeline.create(dai.node.ObjectTracker)
+
+# Configure stereo vision node
+stereo.setLeftRightCheck(True)
+stereo.setExtendedDisparity(False)
+stereo.setSubpixel(True)
+stereo.setDefaultProfilePreset(dai.node.StereoDepth.PresetMode.HIGH_ACCURACY)
+stereo.initialConfig.setMedianFilter(dai.StereoDepthProperties.MedianFilter.KERNEL_7x7)
+stereo.setRectifyEdgeFillColor(0)
+
+# Configure mono camera nodes
+right.setBoardSocket(dai.CameraBoardSocket.RIGHT)
+left.setBoardSocket(dai.CameraBoardSocket.LEFT)
+right.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
+left.setResolution(dai.MonoCameraProperties.SensorResolution.THE_480_P)
+
+# Configure colour camera node
+camRgb.setPreviewSize(300, 300)
+camRgb.setPreviewKeepAspectRatio(False)
+camRgb.setResolution(dai.ColorCameraProperties.SensorResolution.THE_1080_P)
+camRgb.setInterleaved(False)
+camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.BGR)
+
+# Configure Spatial Detection Neural Network Node
+spatialDetectionNetwork.setBlobPath(nnBlob)
+spatialDetectionNetwork.setConfidenceThreshold(heel_confidence)
+spatialDetectionNetwork.input.setBlocking(False)
+spatialDetectionNetwork.setBoundingBoxScaleFactor(0.5)
+spatialDetectionNetwork.setDepthLowerThreshold(heel_lower)
+spatialDetectionNetwork.setDepthUpperThreshold(heel_upper)
+
+# Configure Object Tracker Node
+objectTracker.setDetectionLabelsToTrack([15])
+objectTracker.setTrackerType(dai.TrackerType.ZERO_TERM_COLOR_HISTOGRAM)
+objectTracker.setTrackerIdAssignmentPolicy(dai.TrackerIdAssignmentPolicy.SMALLEST_ID)
+objectTracker.inputTrackerFrame.setBlocking(False)
+objectTracker.inputTrackerFrame.setQueueSize(2)
+
+# Linking nodes together in pipeline
+# Connect mono cameras to stereo pipe
+left.out.link(stereo.left)
+right.out.link(stereo.right)
+
+# Connect colour camera preview to Spatial Detection Network pipeline
+camRgb.preview.link(spatialDetectionNetwork.input)
+
+# Connect colour camera video frame to Object Tracker pipeline
+camRgb.video.link(objectTracker.inputTrackerFrame)
+
+# Pass the video received.by the Spatial Detection Network to the to Object Tracker input
+spatialDetectionNetwork.passthrough.link(objectTracker.inputDetectionFrame)
+
+# Connext the output of the Spatial Detection Network to the input of the object tracker
+spatialDetectionNetwork.out.link(objectTracker.inputDetections)
+
+# Connect the depth output to the Spatial Detection Network depth input
+stereo.depth.link(spatialDetectionNetwork.inputDepth)
+
+# Define OAK-lite output streams
+# Create depth output stream
+xOut = pipeline.create(dai.node.XLinkOut)
+xOut.setStreamName("depth")
+stereo.depth.link(xOut.input)
+
+# Create tracker output stream
+trackerOut = pipeline.create(dai.node.XLinkOut)
+trackerOut.setStreamName("tracklets")
+objectTracker.out.link(trackerOut.input)
+
+# Decimate the depth image by a factor of 4
+config = stereo.initialConfig.get()
+config.postProcessing.decimationFilter.decimationMode.NON_ZERO_MEDIAN
+config.postProcessing.decimationFilter.decimationFactor = 4
+stereo.initialConfig.set(config)
 
 # if executed from the command line then execute arguments as functions
 if __name__ == '__main__':
@@ -574,8 +566,6 @@ if testing:
     xOutRgb.setStreamName("rgb")
     camRgb.video.link(xOutRgb.input)
     # objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
-    
-
 # Declare the device
 # device = dai.Device(pipeline)
 with dai.Device(pipeline) as device:
@@ -611,7 +601,13 @@ with dai.Device(pipeline) as device:
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
-            im_frame = getDepthFrame(depth_image)
+            frame_min = np.amin(depth_image)
+            depth_image = depth_image - frame_min
+            mean = np.mean(depth_image)
+            disp = (depth_image / mean * 128.0).astype(np.uint8)
+            dim = (640, 480) 
+            resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
+            im_frame = cv2.applyColorMap(resized, cv2.COLORMAP_HOT)
             cv2.imshow("False Depth Image", im_frame)
             in_rgb = qRgb.get()
             preview = in_rgb.getCvFrame() # get RGB frame
@@ -625,13 +621,15 @@ with dai.Device(pipeline) as device:
             colour_green = (0, 255, 0)
             thickness = 3
             output = cv2.resize(preview, dsize)
-            # Draw a green bounding box
-            # around the nearest person
+            # Include safe distance text and
+            # frames per second on preview window
             if min_dist:
                 dist_txt = "safe dist = " +  "{:.2f}".format(min_dist) + "m"
                 output = cv2.putText(output, dist_txt, (10, height - 40), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
                 FPS_txt = "FPS = " +  "{:.2f}".format(FPS)
                 output = cv2.putText(output, FPS_txt, (10, height - 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
+            # Draw a green bounding box
+            # around the nearest person
             if target_dict:
                 t = target_dict["tracklet"]             
                 bearing_txt = "t0 = " + "{:.0f}".format(target_dict['angle']) + "degrees"
@@ -690,5 +688,4 @@ with dai.Device(pipeline) as device:
                 print("Nothing to follow")
             min_dist = mem.retrieveState("forward")
             print("Can't move more than","{:.1f}".format(min_dist),"m forward.")
-            point_cloud = mem.retrieveSensorReadings("oak")
             print("*** OAK PIPE OUTPUT ENDS ***")
