@@ -239,13 +239,8 @@ class Big_Point_Cloud():
 
     def __init__(self):
         self.bpc = Point_Cloud(4000,1560)
-        # Pre-calculate the 40 angles in the point cloud
-        self.angles_array = []
-        angles = np.arange(-19.5, 20.5, 1)
-        for angle in angles:
-            my_angle = math.radians(angle / 19.5 * cam_h_fov / 2.0)
-            round_angle = round(my_angle, 3)
-            self.angles_array.append(round_angle)
+        # Pre-calculate the angles in the point cloud
+        self.angles_array = np.arange(-36.5, 39.42, 3.04)
 
     def record_point_cloud(self,depth_image):
         '''
@@ -263,7 +258,7 @@ class Big_Point_Cloud():
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         if testing:
-            points = np.zeros((42,2))
+            points = np.zeros((27,2))
             for index, point in enumerate(point_cloud):
                 angle = self.angles_array[index]
                 depth = point/10.0
@@ -277,7 +272,7 @@ class Big_Point_Cloud():
             win_width = int(abs(x_max - x_min))
             win_height = int(abs(y_max - y_min))       
             pc_image = np.zeros((win_height, win_width, 3), np.uint8)
-            for index in range(41):
+            for index in range(26):
                 from_p = (int(points[index,0] - x_min), int(points[index,1] - y_min))
                 to_p = (int(points[index+1,0] - x_min), int(points[index+1,1] - y_min))
                 cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 3)
