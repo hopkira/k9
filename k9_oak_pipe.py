@@ -182,7 +182,7 @@ class Point_Cloud():
     that have been projected into each block by the point cloud.
     '''
 
-    def __init__(self, width:int, height:int, min_depth:float = 200.0, max_depth:float = 10000.0):
+    def __init__(self, width:int=4000, height:int=1600, min_depth:float = 200.0, max_depth:float = 10000.0):
         self.width = width
         self.height = height
         self.pc_min_range = min_depth
@@ -254,10 +254,34 @@ class Big_Point_Cloud():
             point_cloud = np.nanmin(totals, axis = 0)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
+        if testing:
+            points = np.zeros((42,2))
+            for index, point in enumerate(point_cloud):
+                angle = self.angles_array[index]
+                depth = point/1000.0
+                x,y = calcCartesian(to_angle, to_depth)
+                points[index+1,0] = x
+                points[index+1,1] = y
+            x_min = np.nanmin(points[:,0])
+            x_max = np.nanmax(points[:,0])
+            y_min = np.nanmin(points[:,1])
+            y_max = np.nanmax(points[:,1])`
+            win_width = abs(x_max - x_min)
+            win_height = abs(y_max - y_min)       
+            pc_image = np.zeros((win_height,win_width,3), np.uint8)
+            for index in range(41):
+                from_p = (points[index,0] - x_min,points[index,1] - y_min)
+                to_p = (points[index+1,0] - x_min, points[index+1,1] - y_min)
+                cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 5)
+            cv2.imsshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
             # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point/1000.0),float(self.angles_array[index]))
 
+def calcCartesian(angle, depth):
+    x = depth * math.sin(angle)
+    y = depth * math.cos(angle)
+    return x,y
 
 class Fwd_Collision_Detect():
     '''
