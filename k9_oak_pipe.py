@@ -201,8 +201,8 @@ class Point_Cloud():
         '''
         # Ignore points too close or too far away
         valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
-        print("Depth image",np.shape(depth_image))
-        print("Valid image",np.shape(valid))
+        #print("Depth image",np.shape(depth_image))
+        #print("Valid image",np.shape(valid))
 
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
