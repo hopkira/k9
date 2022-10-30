@@ -68,6 +68,15 @@ A complex Oak-lite sensor pipeline that is used to provide scanning functions fr
   * Detect person at a distance (for heeling; recorded in Redis as 'person')
   * Follow a nearby obstacle (recorded in Redis as 'follow')
   * Oak-d-lite based point cloud (multiple points recorded as 'oak')
+The program can be started standalone with the '-t' flag for testing purposes on a VNC/graphical terminal or native pi screen; this makes the program run an order of magnitude slower, but visualises each of the programs main functions  including:
+ * An overhead view of the 73 degree forward looking point cloud (shown as a green line)
+ * A false colour view of the depth camera output
+ * A full colour preview of the colour camera with:
+   * bounding boxes for legs shown in red
+   * bounding boxes for people in green
+   * text indicating current frames per second
+   * text indicating the safe distance K9 can move in a straight line
+ * A false colour view of the 5x8 forward point cloud which is used to determine how far ahead K9 can safely travel in a straight line
 
 Requires a virtual environment to run, follow the DepthAI installation instructions (workon depthAI).
 
