@@ -276,6 +276,10 @@ class Big_Point_Cloud():
                 from_p = (int(points[index,0] - x_min), int(points[index,1] - y_min))
                 to_p = (int(points[index+1,0] - x_min), int(points[index+1,1] - y_min))
                 cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 3)
+            x_text = "X: (" + str(x_min) + "m ," + str(x_max) + "m)"
+            y_text = "Y: (" + str(y_min) + "m ," + str(y_max) + "m)"
+            pc_image = cv2.putText(pc_image, x_text, (10, height - 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
+            pc_image = cv2.putText(pc_image, y_text, (10, height - 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
             cv2.imshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
             # print(str(index),str(point))
