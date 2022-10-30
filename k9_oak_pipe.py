@@ -263,8 +263,9 @@ class Big_Point_Cloud():
                 angle = self.angles_array[index]
                 depth = point/10.0
                 x,y = calcCartesian(angle, depth)
-                points[index+1,0] = x
-                points[index+1,1] = y
+                if not (np.isnan(x) or np.isnan(y)):
+                    points[index+1,0] = x
+                    points[index+1,1] = y
             x_min = np.nanmin(points[:,0])
             x_max = np.nanmax(points[:,0])
             y_min = np.nanmin(points[:,1])
