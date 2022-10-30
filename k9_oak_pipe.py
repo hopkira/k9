@@ -171,8 +171,10 @@ def getDepthFrame(frame):
     frame = frame - frame_min
     mean = np.mean(frame)
     disp = (frame / mean * 128.0).astype(np.uint8)
-    disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
-    return disp
+    dim = (480, 640) 
+    resized = cv2.resize(disp, dim, interpolation = cv2.INTER_AREA)
+    resized_disp = cv2.applyColorMap(resized, cv2.COLORMAP_HOT)
+    return resized_disp
 
 class Point_Cloud():
     '''
