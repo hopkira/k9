@@ -271,9 +271,9 @@ class Big_Point_Cloud():
             x_max = np.nanmax(points[:,0])
             y_min = np.nanmin(points[:,1])
             y_max = np.nanmax(points[:,1])
-            win_width = abs(x_max - x_min)
-            win_height = abs(y_max - y_min)       
-            pc_image = np.zeros((win_height,win_width,3), np.uint8)
+            win_width = int(abs(x_max - x_min))
+            win_height = int(abs(y_max - y_min))       
+            pc_image = np.zeros((win_height, win_width, 3), np.uint8)
             for index in range(41):
                 from_p = (points[index,0] - x_min,points[index,1] - y_min)
                 to_p = (points[index+1,0] - x_min, points[index+1,1] - y_min)
