@@ -39,6 +39,17 @@ mem = Memory()
 # Oak-Lite Horizontal FoV
 cam_h_fov = 73.0
 
+# Point cloud variabless
+cam_height = 268.0
+fx = 1.351 # values derived mathematically due to new resolution
+fy = 1.798 # values derived mathematically due to new resolution
+pc_width = 640
+cx = self.pc_width / 2
+pc_height = 480
+cy = self.pc_height / 2
+pc_max_range  = 10000.0
+pc_min_range  = 200.0
+
 # Shared contraints 
 min_range = 750.0 # default for device is mm
 max_range = 1750.0 # default for device is mm
@@ -165,24 +176,50 @@ def getDepthFrame(frame):
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
     return disp
 
-class Point_Cloud():
+class Point_Cloud(width, height):
+    def __init__(self):
+        self.width = width
+        self.height = height
+        self.x_bins = pd.interval_range(start = -self.width/2, end = self.width/2, periods = self.width/100)
+        self.y_bins = pd.interval_range(start = 0, end = self.height, periods = self.height/100)
+        self.column, self.row = np.meshgrid(np.arange(pc_width), np.arange(pc_height), sparse=True)
+
+    def populate_bins(self, depth_image):
+        # Ignore points too close or too far away
+        valid = (depth_image >= pc_min_range) & (depth_image <= pc_max_range)
+        # Calculate the point cloud using simple extrapolation from depth
+        z = np.where(valid, depth_image, 0.0)
+        x = np.where(valid, (z * (self.column - cx) /cx / fx) + 120.0 , pc_max_range)
+        y = np.where(valid, cam_height - (z * (self.row - cy) / cy / fy) , pc_max_range)
+        z2 = z.flatten()
+        x2 = x.flatten()
+        y2 = y.flatten()
+        cloud = np.column_stack((x2,y2,z2))
+        # Remove points that are projected to fall outside the field of view
+        # points below floor level, above 1.6m or those more than 2m to the
+        # sides of the robot are ignored
+        in_scope = (cloud[:,1] < self.height) & (cloud[:,1] > 0) & (cloud[:,0] < self.width/2) & (cloud[:,0] > -self.width/2)
+        in_scope = np.repeat(in_scope, 3)
+        in_scope = in_scope.reshape(-1, 3)
+        scope = np.where(in_scope, cloud, np.nan)
+        scope = scope[~np.isnan(scope).any(axis=1)]
+        # place the points into a set of 10cm square bins
+        x_index = pd.cut(scope[:,0], self.x_bins)
+        y_index = pd.cut(scope[:,1], self.y_bins)
+        binned_depths = pd.Series(scope[:,2])
+        # simplify each bin to a single median value
+        totals = binned_depths.groupby([y_index, x_index]).median()
+        # shape the simplified bins into a 2D array
+        totals = totals.values.reshape(height/100,width/100)
+        return totals
+
+class Big_Point_Cloud():
     '''
     Creates a point cloud that determines any obstacles in front of the robot
     '''
 
     def __init__(self):
-        # Point cloud loop constants
-        self.x_bins = pd.interval_range(start = -2000, end = 2000, periods = 40)
-        self.y_bins = pd.interval_range(start = 0, end = 1600, periods = 16)
-        self.fx = 1.4 # values found by measuring known sized objects at known distances
-        self.fy = 3.3
-        self.pc_width = 160
-        self.cx = self.pc_width / 2
-        self.pc_height = 100
-        self.cy = self.pc_height / 2
-        self.pc_max_range  = 10000.0
-        self.pc_min_range  = 200.0
-        self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
+        self.bpc = Point_Cloud(4000,1600)
         # Pre-calculate the 40 angles in the point cloud
         self.angles_array = []
         angles = np.arange(-19.5, 20.5, 1)
@@ -196,33 +233,7 @@ class Point_Cloud():
         Distills the point cloud down to a single value that is the distance to the
         nearest obstacle that is directly in front of the robot
         '''
-
-        # Ignore points too close or too far away
-        valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
-        # Calculate the point cloud using simple extrapolation from depth
-        z = np.where(valid, depth_image, 0.0)
-        x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
-        y = np.where(valid, 268 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
-        z2 = z.flatten()
-        x2 = x.flatten()
-        y2 = y.flatten()
-        cloud = np.column_stack((x2,y2,z2))
-        # Remove points that are projected to fall outside the field of view
-        # points below floor level, above 1.6m or those more than 2m to the
-        # sides of the robot are ignored
-        in_scope = (cloud[:,1] < 1600) & (cloud[:,1] > 0) & (cloud[:,0] < 2000) & (cloud[:,0] > -2000)
-        in_scope = np.repeat(in_scope, 3)
-        in_scope = in_scope.reshape(-1, 3)
-        scope = np.where(in_scope, cloud, np.nan)
-        scope = scope[~np.isnan(scope).any(axis=1)]
-        # place the points into a set of 10cm square bins
-        x_index = pd.cut(scope[:,0], self.x_bins)
-        y_index = pd.cut(scope[:,1], self.y_bins)
-        binned_depths = pd.Series(scope[:,2])
-        # simplify each bin to a single median value
-        totals = binned_depths.groupby([y_index, x_index]).median()
-        # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(16,40)
+        totals = self.bpc.populate_bins(depth_image)
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
@@ -244,18 +255,7 @@ class Fwd_Collision_Detect():
     '''
 
     def __init__(self):
-        # Point cloud loop constants
-        self.x_bins = pd.interval_range(start = -350, end = 350, periods = 7)
-        self.y_bins = pd.interval_range(start = 0, end = 800, periods = 8)
-        self.fx = 1.4 # values found by measuring known sized objects at known distances
-        self.fy = 1.4
-        self.pc_width = 640
-        self.cx = self.pc_width / 2
-        self.pc_height = 480
-        self.cy = self.pc_height / 2
-        self.pc_max_range  = 5000.0
-        self.pc_min_range  = 200.0
-        self.column, self.row = np.meshgrid(np.arange(self.pc_width), np.arange(self.pc_height), sparse=True)
+        self.fcd = Point_Cloud(700, 800)
 
     def record_min_dist(self,depth_image) -> float:
         '''
@@ -263,32 +263,7 @@ class Fwd_Collision_Detect():
         nearest obstacle that is directly in front of the robot
         '''
 
-        # Ignore points too close or too far away
-        valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
-        # Calculate the point cloud using simple extrapolation from depth
-        z = np.where(valid, depth_image, 0.0)
-        x = np.where(valid, (z * (self.column - self.cx) /self.cx / self.fx) + 120.0 , self.pc_max_range)
-        y = np.where(valid, 300 - (z * (self.row - self.cy) / self.cy / self.fy) , self.pc_max_range) # measured height is 268mm
-        z2 = z.flatten()
-        x2 = x.flatten()
-        y2 = y.flatten()
-        cloud = np.column_stack((x2,y2,z2))
-        # Remove points that are projected to fall outside the field of view
-        # points below floor level, above 1.6m or those more than 2m to the
-        # sides of the robot are ignored
-        in_scope = (cloud[:,1] < 800) & (cloud[:,1] > 0) & (cloud[:,0] < 350) & (cloud[:,0] > -350)
-        in_scope = np.repeat(in_scope, 3)
-        in_scope = in_scope.reshape(-1, 3)
-        scope = np.where(in_scope, cloud, np.nan)
-        scope = scope[~np.isnan(scope).any(axis=1)]
-        # place the points into a set of 10cm square bins
-        x_index = pd.cut(scope[:,0], self.x_bins)
-        y_index = pd.cut(scope[:,1], self.y_bins)
-        binned_depths = pd.Series(scope[:,2])
-        # simplify each bin to a single median value
-        totals = binned_depths.groupby([y_index, x_index]).median()
-        # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(8,7)
+        totals = self.fcd.ppopulate_bins(depth_image)
         if testing:
             img_min = float(np.nanmin(totals))
             im_totals = totals - img_min
@@ -567,7 +542,7 @@ with dai.Device(pipeline) as device:
         qRgb = device.getOutputQueue(name="rgb", maxSize=1, blocking=False)
     qTrack = device.getOutputQueue("tracklets", maxSize=1, blocking=False)
     print("Oak pipeline running...")
-    f_pc = Point_Cloud()
+    f_pc = Big_Point_Cloud()
     f_ld = Legs_Detector()
     f_pd = Person_Detector()
     f_cd = Fwd_Collision_Detect()
