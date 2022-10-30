@@ -43,9 +43,9 @@ cam_h_fov = 73.0
 cam_height = 268.0 # mm distance from floor
 fx = 1.351 # values derived mathematically due to new resolution and fov
 fy = 1.798 # values derived mathematically due to new resolution and fov
-pc_width = 640
+pc_width = 160
 cx = pc_width / 2
-pc_height = 480
+pc_height = 120
 cy = pc_height / 2
 
 # Shared contraints 
@@ -182,7 +182,7 @@ class Point_Cloud():
     that have been projected into each block by the point cloud.
     '''
 
-    def __init__(self, width:int=5120, height:int=1920, min_depth:float = 200.0, max_depth:float = 10000.0):
+    def __init__(self, width:int=4000, height:int=1560, min_depth:float = 200.0, max_depth:float = 10000.0):
         self.width = width
         self.height = height
         self.pc_min_range = min_depth
@@ -234,7 +234,7 @@ class Big_Point_Cloud():
     '''
 
     def __init__(self):
-        self.bpc = Point_Cloud(5120,1920)
+        self.bpc = Point_Cloud(4000,1560)
         # Pre-calculate the 40 angles in the point cloud
         self.angles_array = []
         angles = np.arange(-19.5, 20.5, 1)
@@ -294,7 +294,7 @@ class Fwd_Collision_Detect():
     '''
 
     def __init__(self):
-        self.fcd = Point_Cloud(640, 960)
+        self.fcd = Point_Cloud(6720, 960)
 
     def record_min_dist(self,depth_image) -> float:
         '''
