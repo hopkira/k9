@@ -259,13 +259,13 @@ class Big_Point_Cloud():
             for index, point in enumerate(point_cloud):
                 angle = self.angles_array[index]
                 depth = point/1000.0
-                x,y = calcCartesian(to_angle, to_depth)
+                x,y = calcCartesian(angle, depth)
                 points[index+1,0] = x
                 points[index+1,1] = y
             x_min = np.nanmin(points[:,0])
             x_max = np.nanmax(points[:,0])
             y_min = np.nanmin(points[:,1])
-            y_max = np.nanmax(points[:,1])`
+            y_max = np.nanmax(points[:,1])
             win_width = abs(x_max - x_min)
             win_height = abs(y_max - y_min)       
             pc_image = np.zeros((win_height,win_width,3), np.uint8)
