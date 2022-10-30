@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 # Author: Richard Hopkins
-# Date: 8 August 2022
+# Date: 30 October 2022
 #
-# This program uses the Oak-Lite camera from Luxonis
+# This program uses the OAK-D lite camera from Luxonis
 # to support three key functions:
 #   1. to identify the vector to the person in front of K9
 #   2. to identify the vector to the nearest vertical obstacle
 #      that is near K9 (that may not be recognisable as a person)
-#   3. generate a point cloud to help avoid collisions
-#   4. generate a focussed point cloud to avoid forward collisions
+#   3. generate a point cloud to help avoid forward collisions
+#   4. generate a focussed point cloud to avoid straight line collisions
 #
 import time
 #from turtle import distance
@@ -40,15 +40,13 @@ mem = Memory()
 cam_h_fov = 73.0
 
 # Point cloud variabless
-cam_height = 268.0
-fx = 1.351 # values derived mathematically due to new resolution
-fy = 1.798 # values derived mathematically due to new resolution
+cam_height = 268.0 # mm distance from floor
+fx = 1.351 # values derived mathematically due to new resolution and fov
+fy = 1.798 # values derived mathematically due to new resolution and fov
 pc_width = 640
 cx = pc_width / 2
 pc_height = 480
 cy = pc_height / 2
-pc_max_range  = 10000.0
-pc_min_range  = 200.0
 
 # Shared contraints 
 min_range = 750.0 # default for device is mm
@@ -177,20 +175,34 @@ def getDepthFrame(frame):
     return disp
 
 class Point_Cloud():
-    def __init__(self, width, height):
+    '''
+    Calculates a point cloud of an asked for size in mm
+    expressed as a 2D numpy array of 100x100mm blocks.
+    Each block contains the median depth reading of all the pixels
+    that have been projected into each block by the point cloud.
+    '''
+
+    def __init__(self, width:int, height:int, min_depth:float = 200.0, max_depth:float = 10000.0):
         self.width = width
         self.height = height
+        self.pc_min_range = min_depth
+        self.pc_max_range = max_depth
         self.x_bins = pd.interval_range(start = -self.width/2, end = self.width/2, periods = self.width/100)
         self.y_bins = pd.interval_range(start = 0, end = self.height, periods = self.height/100)
         self.column, self.row = np.meshgrid(np.arange(pc_width), np.arange(pc_height), sparse=True)
 
     def populate_bins(self, depth_image):
+        '''
+        Work out which points are valid, project them into a point cloud and then
+        group them into bins.  The median value of each bin is then reported back
+        as a two dimensional numpy array (height x width)
+        '''
         # Ignore points too close or too far away
-        valid = (depth_image >= pc_min_range) & (depth_image <= pc_max_range)
+        valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
-        x = np.where(valid, (z * (self.column - cx) /cx / fx) + 120.0 , pc_max_range)
-        y = np.where(valid, cam_height - (z * (self.row - cy) / cy / fy) , pc_max_range)
+        x = np.where(valid, (z * (self.column - cx) /cx / fx) + 120.0 , self.pc_max_range)
+        y = np.where(valid, cam_height - (z * (self.row - cy) / cy / fy) , self.pc_max_range)
         z2 = z.flatten()
         x2 = x.flatten()
         y2 = y.flatten()
@@ -242,7 +254,7 @@ class Big_Point_Cloud():
             point_cloud = np.nanmin(totals, axis = 0)
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
-        for index,point in enumerate(point_cloud):
+        for index, point in enumerate(point_cloud):
             # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point/1000.0),float(self.angles_array[index]))
 
@@ -251,7 +263,7 @@ class Fwd_Collision_Detect():
     '''
     Creates a focussed point cloud that determines any obstacles
     directly in front of the robot and returns the minimum distance
-    to the closest
+    to the closest; this determines how far it can move in a straight line
     '''
 
     def __init__(self):
