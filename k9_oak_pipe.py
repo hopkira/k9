@@ -278,7 +278,7 @@ class Big_Point_Cloud():
                 from_p = (int(points[index,0] - x_min), int(points[index,1] - y_min))
                 to_p = (int(points[index+1,0] - x_min), int(points[index+1,1] - y_min))
                 cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 5)
-            cv2.imsshow("Point cloud render", pc_image)
+            cv2.imshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
             # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point/1000.0),float(self.angles_array[index]))
