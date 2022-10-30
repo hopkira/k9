@@ -263,7 +263,7 @@ class Big_Point_Cloud():
             points = np.zeros((42,2))
             for index, point in enumerate(point_cloud):
                 angle = self.angles_array[index]
-                depth = point/1000.0
+                depth = point/100.0
                 x,y = calcCartesian(angle, depth)
                 points[index+1,0] = x
                 points[index+1,1] = y
@@ -296,7 +296,7 @@ class Fwd_Collision_Detect():
     '''
 
     def __init__(self):
-        self.fcd = Point_Cloud(6720, 960)
+        self.fcd = Point_Cloud(800, 960) # 5 x 8
 
     def record_min_dist(self,depth_image) -> float:
         '''
@@ -313,7 +313,7 @@ class Fwd_Collision_Detect():
             disp = (im_totals / img_max * 255.0).astype(np.uint8)
             disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
             flipv = cv2.flip(disp, 0)
-            dim = (320, 480) 
+            dim = (250, 400) 
             resized = cv2.resize(flipv, dim, interpolation = cv2.INTER_AREA)
             cv2.imshow("Point cloud image", resized)
         # for each column in the array, find out the closest
