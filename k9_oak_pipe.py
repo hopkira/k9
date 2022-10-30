@@ -259,6 +259,7 @@ class Big_Point_Cloud():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             point_cloud = np.nanmin(totals, axis = 0)
+            print("PC shape:",np.shape(point_cloud))
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         if testing:
