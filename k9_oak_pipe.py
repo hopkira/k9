@@ -615,7 +615,7 @@ with dai.Device(pipeline) as device:
             in_rgb = qRgb.get()
             preview = in_rgb.getCvFrame() # get RGB frame
             # Resize frame to fit Pi VNC viewer
-            scale = 0.5
+            scale = 1
             width = int(preview.shape[1] * scale)
             height = int(preview.shape[0] * scale)
             dsize = (width, height)
