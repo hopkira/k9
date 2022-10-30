@@ -44,9 +44,9 @@ cam_height = 268.0
 fx = 1.351 # values derived mathematically due to new resolution
 fy = 1.798 # values derived mathematically due to new resolution
 pc_width = 640
-cx = self.pc_width / 2
+cx = pc_width / 2
 pc_height = 480
-cy = self.pc_height / 2
+cy = pc_height / 2
 pc_max_range  = 10000.0
 pc_min_range  = 200.0
 
@@ -176,8 +176,8 @@ def getDepthFrame(frame):
     disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
     return disp
 
-class Point_Cloud(width, height):
-    def __init__(self):
+class Point_Cloud():
+    def __init__(self, width, height):
         self.width = width
         self.height = height
         self.x_bins = pd.interval_range(start = -self.width/2, end = self.width/2, periods = self.width/100)
@@ -566,7 +566,7 @@ with dai.Device(pipeline) as device:
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
-            im_frame = getDepthFrame(frame)
+            im_frame = getDepthFrame(depth_image)
             cv2.imshow("False Depth Image", im_frame)
             in_rgb = qRgb.get()
             preview = in_rgb.getCvFrame() # get RGB frame
