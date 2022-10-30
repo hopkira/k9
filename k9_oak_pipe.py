@@ -41,8 +41,8 @@ cam_h_fov = 73.0
 
 # Point cloud variabless
 cam_height = 268.0 # mm distance from floor
-fx = 1.351 # values derived mathematically due to new resolution and fov
-fy = 1.798 # values derived mathematically due to new resolution and fov
+fx = 1.3514 # values derived mathematically due to new resolution and fov
+fy = 1.7985 # values derived mathematically due to new resolution and fov
 pc_width = 160
 cx = pc_width / 2
 pc_height = 120
