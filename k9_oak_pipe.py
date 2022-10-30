@@ -265,7 +265,7 @@ class Big_Point_Cloud():
             points = np.zeros((42,2))
             for index, point in enumerate(point_cloud):
                 angle = self.angles_array[index]
-                depth = point/100.0
+                depth = point/10.0
                 x,y = calcCartesian(angle, depth)
                 points[index+1,0] = x
                 points[index+1,1] = y
@@ -279,7 +279,7 @@ class Big_Point_Cloud():
             for index in range(41):
                 from_p = (int(points[index,0] - x_min), int(points[index,1] - y_min))
                 to_p = (int(points[index+1,0] - x_min), int(points[index+1,1] - y_min))
-                cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 5)
+                cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 3)
             cv2.imshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
             # print(str(index),str(point))
