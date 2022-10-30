@@ -275,8 +275,8 @@ class Big_Point_Cloud():
             win_height = int(abs(y_max - y_min))       
             pc_image = np.zeros((win_height, win_width, 3), np.uint8)
             for index in range(41):
-                from_p = (points[index,0] - x_min,points[index,1] - y_min)
-                to_p = (points[index+1,0] - x_min, points[index+1,1] - y_min)
+                from_p = (int(points[index,0] - x_min), int(points[index,1] - y_min))
+                to_p = (int(points[index+1,0] - x_min), int(points[index+1,1] - y_min))
                 cv2.line(pc_image, from_p, to_p, color=(0,255,0), thickness = 5)
             cv2.imsshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
