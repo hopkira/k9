@@ -182,13 +182,13 @@ class Point_Cloud():
     that have been projected into each block by the point cloud.
     '''
 
-    def __init__(self, width:int=4000, height:int=1600, min_depth:float = 200.0, max_depth:float = 10000.0):
+    def __init__(self, width:int=5120, height:int=1920, min_depth:float = 200.0, max_depth:float = 10000.0):
         self.width = width
         self.height = height
         self.pc_min_range = min_depth
         self.pc_max_range = max_depth
-        self.x_bins = pd.interval_range(start = -self.width/2, end = self.width/2, periods = self.width/100)
-        self.y_bins = pd.interval_range(start = 0, end = self.height, periods = self.height/100)
+        self.x_bins = pd.interval_range(start = -int(self.width/2), end = int(self.width/2), periods = int(self.width/pc_width))
+        self.y_bins = pd.interval_range(start = 0, end = self.height, periods = int(self.height/pc_height))
         self.column, self.row = np.meshgrid(np.arange(pc_width), np.arange(pc_height), sparse=True)
 
     def populate_bins(self, depth_image):
@@ -199,10 +199,13 @@ class Point_Cloud():
         '''
         # Ignore points too close or too far away
         valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
+        print("Depth image",np.shape(depth_image))
+        print("Valid image",np.shape(valid))
+
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
-        x = np.where(valid, (z * (self.column - cx) /cx / fx) + 120.0 , self.pc_max_range)
-        y = np.where(valid, cam_height - (z * (self.row - cy) / cy / fy) , self.pc_max_range)
+        x = np.where(valid, (z * (self.column - cx) / cx / fx) + 120.0, self.pc_max_range)
+        y = np.where(valid, cam_height - (z * (self.row - cy) / cy / fy), self.pc_max_range)
         z2 = z.flatten()
         x2 = x.flatten()
         y2 = y.flatten()
@@ -231,7 +234,7 @@ class Big_Point_Cloud():
     '''
 
     def __init__(self):
-        self.bpc = Point_Cloud(4000,1600)
+        self.bpc = Point_Cloud(5120,1920)
         # Pre-calculate the 40 angles in the point cloud
         self.angles_array = []
         angles = np.arange(-19.5, 20.5, 1)
@@ -291,7 +294,7 @@ class Fwd_Collision_Detect():
     '''
 
     def __init__(self):
-        self.fcd = Point_Cloud(700, 800)
+        self.fcd = Point_Cloud(640, 960)
 
     def record_min_dist(self,depth_image) -> float:
         '''
@@ -308,7 +311,7 @@ class Fwd_Collision_Detect():
             disp = (im_totals / img_max * 255.0).astype(np.uint8)
             disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
             flipv = cv2.flip(disp, 0)
-            dim = (350, 400) 
+            dim = (320, 480) 
             resized = cv2.resize(flipv, dim, interpolation = cv2.INTER_AREA)
             cv2.imshow("Point cloud image", resized)
         # for each column in the array, find out the closest
