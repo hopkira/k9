@@ -282,8 +282,8 @@ class Big_Point_Cloud():
             mem.storeSensorReading("oak",float(point/1000.0),float(self.angles_array[index]))
 
 def calcCartesian(angle, depth):
-    x = depth * math.sin(angle)
-    y = depth * math.cos(angle)
+    x = depth * math.sin(math.radians(angle))
+    y = depth * math.cos(math.radians(angle))
     return x,y
 
 class Fwd_Collision_Detect():
