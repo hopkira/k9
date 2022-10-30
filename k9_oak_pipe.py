@@ -299,7 +299,7 @@ class Fwd_Collision_Detect():
         nearest obstacle that is directly in front of the robot
         '''
 
-        totals = self.fcd.ppopulate_bins(depth_image)
+        totals = self.fcd.populate_bins(depth_image)
         if testing:
             img_min = float(np.nanmin(totals))
             im_totals = totals - img_min
