@@ -284,7 +284,7 @@ class Big_Point_Cloud():
             cv2.imshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
             # print(str(index),str(point))
-            mem.storeSensorReading("oak",float(point/1000.0),float(self.angles_array[index]))
+            mem.storeSensorReading("oak",float(point/1000.0), math.radians(float(self.angles_array[index])))
 
 def calcCartesian(angle, depth):
     x = depth * math.sin(math.radians(angle))
