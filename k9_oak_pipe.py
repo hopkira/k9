@@ -185,6 +185,8 @@ class Point_Cloud():
     def __init__(self, width:int=4000, height:int=1560, min_depth:float = 200.0, max_depth:float = 10000.0):
         self.width = width
         self.height = height
+        self.width_elem = int(self.width/pc_width)
+        self.height_elem = int(self.height/pc_height)
         self.pc_min_range = min_depth
         self.pc_max_range = max_depth
         self.x_bins = pd.interval_range(start = -int(self.width/2), end = int(self.width/2), periods = int(self.width/pc_width))
@@ -225,7 +227,7 @@ class Point_Cloud():
         # simplify each bin to a single median value
         totals = binned_depths.groupby([y_index, x_index]).median()
         # shape the simplified bins into a 2D array
-        totals = totals.values.reshape(height/100,width/100)
+        totals = totals.values.reshape(self.height_elem,self.width_elem)
         return totals
 
 class Big_Point_Cloud():
