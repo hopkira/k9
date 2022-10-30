@@ -590,8 +590,9 @@ with dai.Device(pipeline) as device:
     last_reading = time.time()
     while True:
         start_time = time.time() # start time of the loop
-        inDepth = qDep.get()
-        depth_image = inDepth.get().getCvFrame() # get latest information from queue
+        depth_image = qDep.get().getCvFrame() # get latest information from queue
+        #inDepth = qDep.get()
+        #depth_image = inDepth.get().getCvFrame() # get latest information from queue
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
