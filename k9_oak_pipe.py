@@ -690,5 +690,4 @@ with dai.Device(pipeline) as device:
             min_dist = mem.retrieveState("forward")
             print("Can't move more than","{:.1f}".format(min_dist),"m forward.")
             point_cloud = mem.retrieveSensorReadings("oak")
-            print(str(point_cloud[20]))
             print("*** OAK PIPE OUTPUT ENDS ***")
