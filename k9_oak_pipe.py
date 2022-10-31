@@ -134,7 +134,7 @@ class Big_Point_Cloud():
         focus = totals[6:13,10:15]
         min_dist = float(np.nanmin(focus))
         print("Focus 7x5? ->",np.shape(focus))
-        print("Min dist: {:.1f}m.".format(min_dist/100.0)
+        print("Min dist: {:.1f}m.".format(min_dist/100.0))
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
