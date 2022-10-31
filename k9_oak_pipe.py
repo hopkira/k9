@@ -163,7 +163,7 @@ class Big_Point_Cloud():
             y_text = "Y: {:.1f}m, {:.1f}m".format(y_min/100, y_max/100)
             pc_image = cv2.putText(pc_image, x_text, (10, 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
             pc_image = cv2.putText(pc_image, y_text, (10, 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
-            cv2.imshow("Point cloud render", pc_image)
+            cv2.imshow("Point cloud", pc_image)
         for index, point in enumerate(point_cloud):
             mem.storeSensorReading("oak",float(point/1000.0), math.radians(float(self.angles_array[index])))
 
