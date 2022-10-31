@@ -136,7 +136,7 @@ class Big_Point_Cloud():
         if min_dist:
             min_dist = float(min_dist/1000.0)
             mem.storeState("forward", min_dist)
-        print("Focus 7x5? ->",np.shape(focus))
+        #print("Focus 7x5? ->",np.shape(focus))
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
@@ -600,7 +600,7 @@ with dai.Device(pipeline) as device:
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
-        if counter == 10:
+        if counter == 2:
             f_pc.record_point_cloud(depth_image)
             counter = 0
         #min_dist =  f_cd.record_min_dist(depth_image=depth_image)
