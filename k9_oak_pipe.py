@@ -131,7 +131,7 @@ class Big_Point_Cloud():
         nearest obstacle that is directly in front of the robot
         '''
         totals = self.bpc.populate_bins(depth_image)
-        focus = totals[0:8,10:15]
+        focus = totals[0:7,10:15]
         min_dist = float(np.nanmin(focus))
         if min_dist:
             min_dist = float(min_dist/1000.0)
