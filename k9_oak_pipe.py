@@ -589,7 +589,6 @@ with dai.Device(pipeline) as device:
     # Main loop  starts  here
     if testing:
         cv2.namedWindow("OAK Perception Preview", cv2.WINDOW_NORMAL)
-    counter =  0
     FPS_counter = 0
     last_reading = time.time()
     while True:
@@ -600,9 +599,7 @@ with dai.Device(pipeline) as device:
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
-        if counter == 2:
-            f_pc.record_point_cloud(depth_image)
-            counter = 0
+        f_pc.record_point_cloud(depth_image)
         #min_dist =  f_cd.record_min_dist(depth_image=depth_image)
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
@@ -672,7 +669,6 @@ with dai.Device(pipeline) as device:
             if cv2.waitKey(1) == ord("q"):
                 break
         # print out the FPS achieved
-        counter += 1
         FPS_counter +=1
         now_time = time.time()
         if not testing:
