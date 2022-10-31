@@ -147,6 +147,7 @@ class Big_Point_Cloud():
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         if testing:
+            colour_green = (0, 255, 0)
             points = np.zeros((27,2))
             for index, point in enumerate(point_cloud):
                 angle = self.angles_array[index]
