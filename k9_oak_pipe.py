@@ -150,10 +150,12 @@ class Big_Point_Cloud():
             x_max = np.nanmax(points[:,0])
             y_min = np.nanmin(points[:,1])
             y_max = np.nanmax(points[:,1])
-            win_width = 300
-            win_height = 300
             win_width = int(abs(x_max - x_min))
-            win_height = int(abs(y_max - y_min))       
+            if np.isnan(win_width):
+                win_width = 300
+            win_height = int(abs(y_max - y_min))  
+            if np.isnan(win_height):
+                win_height = 300
             pc_image = np.zeros((win_height, win_width, 3), np.uint8)
             for index in range(26):
                 from_p = (int(points[index,0] - x_min), int(points[index,1] - y_min))
