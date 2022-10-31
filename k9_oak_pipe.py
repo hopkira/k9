@@ -589,7 +589,7 @@ with dai.Device(pipeline) as device:
                 output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
                 output = cv2.putText(output, com_txt, (x_dir + 15, int(y_max/2) + 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
             cv2.imshow("OAK Perception Preview", output)
-            if cv2.waitKey(1) == ord("q"):
+            if cv2.waitKey(50) == ord("q"):
                 break
         # print out the FPS achieved
         FPS_counter +=1
