@@ -176,22 +176,22 @@ class Big_Point_Cloud():
             # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point/1000.0), math.radians(float(self.angles_array[index])))
 
-
+'''
 class Fwd_Collision_Detect():
-    '''
+    
     Creates a focussed point cloud that determines any obstacles
     directly in front of the robot and returns the minimum distance
     to the closest; this determines how far it can move in a straight line
-    '''
+    
 
     def __init__(self):
         self.fcd = Point_Cloud(800, 960) # 5 x 8
 
     def record_min_dist(self,depth_image) -> float:
-        '''
+        
         Distills the point cloud down to a single value that is the distance to the
         nearest obstacle that is directly in front of the robot
-        '''
+        
 
         totals = self.fcd.populate_bins(depth_image)
         if testing:
@@ -226,7 +226,7 @@ class Fwd_Collision_Detect():
             return min_dist
         else:
             return None
-        
+'''        
 
 class Legs_Detector():
     ''''
