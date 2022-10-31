@@ -9,17 +9,14 @@
 #   2. to identify the vector to the nearest vertical obstacle
 #      that is near K9 (that may not be recognisable as a person)
 #   3. generate a point cloud to help avoid forward collisions
-#   4. generate a focussed point cloud to avoid straight line collisions
+#      and to avoid straight line collisions
 #
 import time
-#from turtle import distance
 print("Time started...")
 import argparse
 print("Ready for arguments...")
 import math
 print("Counting on fingers... yep")
-# import skimage.measure as skim
-#print("Skikit ready to decimate...")
 import depthai as dai
 print("Depthai looking forward...")
 import numpy as np
@@ -29,8 +26,6 @@ print("Pandas are frolicking...")
 import warnings
 from memory import Memory
 print("All imports done!")
-#from matplotlib import pyplot as plt
-#print("Picture drawing loaded...")
 
 def main():
     global testing
@@ -80,9 +75,6 @@ class Point_Cloud():
         '''
         # Ignore points too close or too far away
         valid = (depth_image >= self.pc_min_range) & (depth_image <= self.pc_max_range)
-        #print("Depth image",np.shape(depth_image))
-        #print("Valid image",np.shape(valid))
-
         # Calculate the point cloud using simple extrapolation from depth
         z = np.where(valid, depth_image, 0.0)
         x = np.where(valid, (z * (self.column - cx) / cx / fx) + 120.0, self.pc_max_range)
@@ -136,14 +128,12 @@ class Big_Point_Cloud():
         if min_dist:
             min_dist = float(min_dist/1000.0)
             mem.storeState("forward", min_dist)
-        #print("Focus 7x5? ->",np.shape(focus))
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=RuntimeWarning)
             point_cloud = np.nanmin(totals, axis = 0)
-            # print("PC shape:",np.shape(point_cloud))
         # inject the resulting 40 sensor points into the
         # short term memory of the robot
         if testing:
@@ -173,60 +163,8 @@ class Big_Point_Cloud():
             pc_image = cv2.putText(pc_image, y_text, (10, 40), cv2.FONT_HERSHEY_PLAIN, 1, colour_green)
             cv2.imshow("Point cloud render", pc_image)
         for index, point in enumerate(point_cloud):
-            # print(str(index),str(point))
             mem.storeSensorReading("oak",float(point/1000.0), math.radians(float(self.angles_array[index])))
 
-'''
-class Fwd_Collision_Detect():
-    
-    Creates a focussed point cloud that determines any obstacles
-    directly in front of the robot and returns the minimum distance
-    to the closest; this determines how far it can move in a straight line
-    
-
-    def __init__(self):
-        self.fcd = Point_Cloud(800, 960) # 5 x 8
-
-    def record_min_dist(self,depth_image) -> float:
-        
-        Distills the point cloud down to a single value that is the distance to the
-        nearest obstacle that is directly in front of the robot
-        
-
-        totals = self.fcd.populate_bins(depth_image)
-        if testing:
-            img_min = float(np.nanmin(totals))
-            im_totals = totals - img_min
-            img_max = float(np.nanmax(im_totals))
-            # print("PC:",min, max)
-            disp = (im_totals / img_max * 255.0).astype(np.uint8)
-            disp = cv2.applyColorMap(disp, cv2.COLORMAP_HOT)
-            flipv = cv2.flip(disp, 0)
-            dim = (250, 400) 
-            resized = cv2.resize(flipv, dim, interpolation = cv2.INTER_AREA)
-            cv2.imshow("Point cloud image", resized)
-        # for each column in the array, find out the closest
-        # bin; as the robot cannot duck or jump, the
-        # y values are irrelevant
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=RuntimeWarning)
-            min_dist = float(np.nanmin(totals))
-        # inject the resulting 40 sensor points into the
-        # short term memory of the robot
-        # point_cloud = point_cloud[16:24]
-        # min_dist = np.amin(point_cloud)
-        # mem.storeState("forward", min_dist)
-        #plt.scatter(x2,-y2,c=z2,cmap='afmhot',s=10)
-        #plt.xlim(-350,350)
-        #plt.ylim(-200,1600)
-        #plt.show()
-        if min_dist:
-            min_dist = float(min_dist/1000.0)
-            mem.storeState("forward", min_dist)
-            return min_dist
-        else:
-            return None
-'''        
 
 class Legs_Detector():
     ''''
@@ -237,8 +175,6 @@ class Legs_Detector():
     '''
 
     def __init__ (self):
-        # decimate_level = 7 # reduces size of depth image
-        # func = np.mean # averages cells during decimation
         self.keep_top = 0.7 # bottom 15% of image tends to include floor
         self.certainty = 0.5 # likelihood that a person in in the column
          # max_depth_diff is the largest allowable differrence between the column
@@ -264,9 +200,7 @@ class Legs_Detector():
         # remove the bottom of the image as the figures that
         # are valid are mostly floor
         pix_height, pix_width = depth_image.shape
-        # pix_width = int(width / decimate_level)
         pix_height = int(self.keep_top * pix_height)
-        # depth_image = skim.block_reduce(frame,(decimate_level,decimate_level),func)
         # just use the depth data within valid ranges
         valid_frame = (depth_image >= min_range) & (depth_image <= max_range)
         # invalid cells will be set to max_range
@@ -399,18 +333,15 @@ class Person_Detector():
                             if tracklet.id == self.target["id"]
                             if tracklet.status.name == "TRACKED"
                             ]
-            # print("Existing target " + str(target["id"]) + " seen again")
             if candidate:
                 # refresh the data if identified
                 self.target["id"]  = candidate[0].id
                 self.target["status"] = candidate[0].status.name
                 self.target["x"] = candidate[0].spatialCoordinates.x
                 self.target["z"] = candidate[0].spatialCoordinates.z
-                # print("Target data " + str(target["id"]) + " refreshed")
             else:
                 # drop the target otherwise
                 self.target["id"] =  None
-                # print("Target lost and forgotten")
         else:
             # look for any new or tracked tracklets
             candidates = [tracklet for tracklet in trackletsData
@@ -418,16 +349,13 @@ class Person_Detector():
                             or tracklet.status.name == "TRACKED")]
             for candidate in candidates:
                 # identify the closest tracklet
-                # print("New or tracked candidate: " + str(candidate.id))
                 if candidate.spatialCoordinates.z < heel_range:
-                    # print("Closer candidate spotted")
                     heel_range = candidate.spatialCoordinates.z
                     self.target["id"]  = candidate.id
                     self.target["status"] = candidate.status.name
                     self.target["x"] = candidate.spatialCoordinates.x
                     self.target["z"] = candidate.spatialCoordinates.z
                     self.target["tracklet"] = candidate
-                    # print("Closest target id:",str(target["id"]))
         # store the nearest tracket (if there is one) in
         # the short term memory
         if self.target["id"] is not None:
@@ -452,7 +380,7 @@ testing = False
 
 mem = Memory()
 
-# Oak-Lite Horizontal FoV
+# OAK-D Lite Horizontal FoV
 cam_h_fov = 73.0
 
 # Point cloud variabless
@@ -572,9 +500,7 @@ if testing:
     xOutRgb = pipeline.create(dai.node.XLinkOut)
     xOutRgb.setStreamName("rgb")
     camRgb.video.link(xOutRgb.input)
-    # objectTracker.passthroughTrackerFrame.link(xOutRgb.input)
 # Declare the device
-# device = dai.Device(pipeline)
 with dai.Device(pipeline) as device:
     # declare buffer queues for the streams
     FPS =  0.0
@@ -586,22 +512,18 @@ with dai.Device(pipeline) as device:
     f_pc = Big_Point_Cloud()
     f_ld = Legs_Detector()
     f_pd = Person_Detector()
-    #f_cd = Fwd_Collision_Detect()
-    # Main loop  starts  here
     if testing:
         cv2.namedWindow("OAK Perception Preview", cv2.WINDOW_NORMAL)
     FPS_counter = 0
     last_reading = time.time()
+    # Main loop  starts  here
     while True:
         start_time = time.time() # start time of the loop
         depth_image = qDep.get().getCvFrame() # get latest information from queue
-        #inDepth = qDep.get()
-        #depth_image = inDepth.get().getCvFrame() # get latest information from queue
         # Retrieve latest tracklets
         track = qTrack.get()
         trackletsData = track.tracklets
         f_pc.record_point_cloud(depth_image)
-        #min_dist =  f_cd.record_min_dist(depth_image=depth_image)
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
