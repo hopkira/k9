@@ -131,10 +131,10 @@ class Big_Point_Cloud():
         nearest obstacle that is directly in front of the robot
         '''
         totals = self.bpc.populate_bins(depth_image)
-        focus = totals[6:13,10:15]
+        focus = totals[0:10,8:16]
         min_dist = float(np.nanmin(focus))
         print("Focus 7x5? ->",np.shape(focus))
-        print("Min dist: {:.1f}m.".format(min_dist/100.0))
+        print("Min dist2: {:.1f}m.".format(min_dist/1000.0))
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
