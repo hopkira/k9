@@ -630,6 +630,7 @@ with dai.Device(pipeline) as device:
             output = cv2.resize(preview, dsize)
             # Include safe distance text and
             # frames per second on preview window
+            min_dist = mem.retrieveState("forward")
             if min_dist:
                 dist_txt = "safe dist = " +  "{:.2f}".format(min_dist) + "m"
                 output = cv2.putText(output, dist_txt, (10, height - 40), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
