@@ -131,10 +131,13 @@ class Big_Point_Cloud():
         nearest obstacle that is directly in front of the robot
         '''
         totals = self.bpc.populate_bins(depth_image)
-        focus = totals[0:10,8:16]
+        focus = totals[0:10,7:15]
         min_dist = float(np.nanmin(focus))
+        if min_dist:
+            min_dist = float(min_dist/1000.0)
+            mem.storeState("forward", min_dist)
         print("Focus 7x5? ->",np.shape(focus))
-        print("Min dist2: {:.1f}m.".format(min_dist/1000.0))
+        print("Min dist2: {:.2f}m.".format(min_dist/1000.0))
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
@@ -583,7 +586,7 @@ with dai.Device(pipeline) as device:
     f_pc = Big_Point_Cloud()
     f_ld = Legs_Detector()
     f_pd = Person_Detector()
-    f_cd = Fwd_Collision_Detect()
+    #f_cd = Fwd_Collision_Detect()
     # Main loop  starts  here
     if testing:
         cv2.namedWindow("OAK Perception Preview", cv2.WINDOW_NORMAL)
@@ -601,7 +604,7 @@ with dai.Device(pipeline) as device:
         if counter == 10:
             f_pc.record_point_cloud(depth_image)
             counter = 0
-        min_dist =  f_cd.record_min_dist(depth_image=depth_image)
+        #min_dist =  f_cd.record_min_dist(depth_image=depth_image)
         legs_dict = f_ld.record_legs_vector(depth_image=depth_image)
         target_dict = f_pd.record_person_vector(trackletsData=trackletsData)
         if testing:
