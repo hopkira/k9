@@ -672,7 +672,7 @@ with dai.Device(pipeline) as device:
         FPS_counter +=1
         now_time = time.time()
         if not testing:
-            time.sleep(0.1)
+            time.sleep(0.05)
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
             FPS = FPS_counter / 10.0
