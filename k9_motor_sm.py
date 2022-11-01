@@ -179,42 +179,49 @@ class Following(State):
     def __init__(self):
         super(Following, self).__init__()
         logo.stop()
+        angle = 0
+        move = 0
         while True:
             message = check_queue()
             if message != "no_message":
                 self.on_event(message)
+            # read in available target information from memory
             target_dict = mem.retrieveLastSensorReading("follow")
+            person_dict = mem.retrieveLastSensorReading("person")
+            # chose the detected legs over person targetting
             if target_dict["angle"] != 0 and target_dict["distance"] != 0 :
-                self.angle = target_dict["angle"]
-                self.move = target_dict["distance"]
-                print("Following: direction:", self.angle, "distance:", self.move)
+                angle = target_dict["angle"]
+                move = target_dict["distance"]
+            elif person_dict["angle"] !=0 and person_dict["distance"] != 0:
+                angle = person_dict["angle"]
+                move = person_dict["distance"]
+            # move if the angle or distance is not zero
+            if angle != 0 or move !=0:
+                print("Following: direction:", angle, "distance:", move)
                 damp_angle = 3.0
                 damp_distance = 2.0
-                if abs(self.angle) >= (0.1 * damp_angle) :
+                if abs(angle) >= (0.1 * damp_angle) :
                     if mem.retrieveState("rotate") > 0.0:
-                        logo.rt(self.angle / damp_angle, fast = True)
-                        print("Turning: ",str(self.angle / damp_angle))
+                        logo.rt(angle / damp_angle, fast = True)
+                        print("Turning: ",str(angle / damp_angle))
                     else:
                         voice.speak("Turn blocked")
                         time.sleep(3.0)
                 else:
-                    if abs(self.move) >= (0.05 * damp_distance) :
-                        distance = self.move / damp_distance
+                    if abs(move) >= (0.05 * damp_distance) :
+                        distance = move / damp_distance
                         safe_forward = mem.retrieveState("forward")
                         # nb should also retrieve a backward state
                         if  safe_forward > distance:
                             logo.forward(distance)
-                            print("Moving forward: ", str(distance) )
+                            print("Moving forward detected distance: ", str(distance) )
                         else:
                             logo.forward(safe_forward)
-                            print("Moving forward: ", str(safe_forward))
+                            print("Moving forward safe distance: ", str(safe_forward))
 
     def on_event(self, event):
         if event == 'StayHere':
             voice.speak("Staying here")
-            return ManualControl()
-        if event == 'turn_blocked':
-            voice.speak("Turn blocked")
             return ManualControl()
         return self
 
