@@ -555,16 +555,16 @@ with dai.Device(pipeline) as device:
             # frames per second on preview window
             min_dist = mem.retrieveState("forward")
             if min_dist:
-                dist_txt = "safe dist = " +  "{:.2f}".format(min_dist) + "m"
+                dist_txt = "safe dist = {:.2f}m".format(min_dist)
                 output = cv2.putText(output, dist_txt, (10, height - 40), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
-                FPS_txt = "FPS = " +  "{:.2f}".format(FPS)
+                FPS_txt = "FPS = {:.2f}".format(FPS)
                 output = cv2.putText(output, FPS_txt, (10, height - 20), cv2.FONT_HERSHEY_PLAIN, 1, col_white)
             # Draw a green bounding box
             # around the nearest person
             if target_dict:
                 t = target_dict["tracklet"]             
-                bearing_txt = "t0 = " + "{:.0f}".format(target_dict['angle']) + "degrees"
-                dist_txt = "td = " +  "{:.2f}".format(target_dict['dist']) + "m"
+                bearing_txt = "t0 = {:.0f} degrees".format(target_dict['angle'])
+                dist_txt = "td = {:.2f}m".format(target_dict['dist'])
                 roi = t.roi.denormalize(width, height)
                 x1 = int(roi.topLeft().x)
                 y1 = int(roi.topLeft().y)
@@ -586,8 +586,8 @@ with dai.Device(pipeline) as device:
                 mean_col = (box_min + box_max) / 2
                 x_dir = int(mean_col/cols * width)
                 output = cv2.circle(output, (x_dir, int(y_max/2)), 10, colour_red, thickness)
-                bearing_txt = "0 = " + "{:.0f}".format(legs_dict['angle']) + "degrees"
-                dist_txt = "d = " +  "{:.2f}".format(legs_dict['dist']) + "m"
+                bearing_txt = "0 = {:.0f} degrees".format(legs_dict['angle'])
+                dist_txt = "d = {:.2f}m".format(legs_dict['dist'])
                 com_txt = "comb: " + str(legs_dict["combined"])
                 output = cv2.putText(output, bearing_txt, (x_dir + 15, int(y_max/2)), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
                 output = cv2.putText(output, dist_txt, (x_dir + 15, int(y_max/2) + 20), cv2.FONT_HERSHEY_PLAIN, 1, colour_red)
@@ -603,19 +603,19 @@ with dai.Device(pipeline) as device:
         # Every 10 seconds print out the short term memory
         if (now_time - last_reading) > 10:
             FPS = FPS_counter / 10.0
-            print("FPS: " + "{:.1f}".format(FPS))
+            print("FPS: {:.1f}".format(FPS))
             last_reading = now_time
             FPS_counter = 0
             person = mem.retrieveLastSensorReading("person")
             try: 
-                print("Person at:","{:.2f}".format(person['distance']),"m and at","{:.2f}".format(person['angle']),"radians.")
+                print("Person at: {:.2f}m and at {:.2f} degrees.".format(person['distance'], math.degrees(person['angle'])))
             except KeyError:
                 print("No Person currently detected")
             follow = mem.retrieveLastSensorReading("follow")
             try: 
-                print("Move towards:","{:.2f}".format(follow['distance']),"m and at","{:.2f}".format(follow['angle']),"radians.")
+                print("Move towards: {:.2f}m and at {:.2f} degrees.".format((follow['distance']), math.degrees(follow['angle'])))
             except KeyError:
                 print("Nothing to follow")
             min_dist = mem.retrieveState("forward")
-            print("Can't move more than","{:.1f}".format(min_dist),"m forward.")
+            print("Can't move more than {:.1f}m forward".format(min_dist))
             print("*** OAK PIPE OUTPUT ENDS ***")
