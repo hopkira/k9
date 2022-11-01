@@ -195,6 +195,14 @@ class Following(State):
             elif person_dict["angle"] !=0 and person_dict["distance"] != 0:
                 angle = person_dict["angle"]
                 move = person_dict["distance"]
+            # if there is nothing detected, then aim for
+            # the last detected set of legs
+            else:
+                target_dicts = mem.retrieveSensorReadings("follow")
+                for target_dict in target_dicts:
+                    if target_dict["angle"] != 0:
+                        angle = target_dict["angle"]
+                        break
             # move if the angle or distance is not zero
             if angle != 0 or move !=0:
                 print("Following: direction:", angle, "distance:", move)
