@@ -5,6 +5,7 @@ patterns = {
     "three" : [[1,2,3],[2,3,4],[3,4,1],[4,1,2]],
     "chase": [[1],[2],[3],[4],[3],[2]]
 }
+pins = ["DUMMY","Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y8","X9","X10","X11","X12"]
 def main():
     seq = patterns["one"]
     seq_len = len(seq)
