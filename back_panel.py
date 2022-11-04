@@ -61,7 +61,7 @@ class BackLights():
         self.__write(text)
 
     def on(self):
-        self.__write("on")
+        self.__write("original")
 
     def off(self):
         self.__write("off")
