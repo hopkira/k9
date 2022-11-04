@@ -13,6 +13,33 @@
 # to the micropython device using:
 #
 # pyboard.py --device /dev/tty.usbmodem388D384731342 -f cp panel.py :main.py
+#
+# Light schemes:
+#   original
+#   colour
+#   diagonal
+#   two
+#   three
+#   four
+#   six
+#   red
+#   green
+#   blue
+#   spiral
+#   chase_v
+#   chase_h
+#   cols
+#   rows
+#   on
+#   off
+#
+# Speeds (with ms delay)
+#    fastest: 50,
+#    fast   : 100
+#    normal : 200
+#    slow   : 400
+#    slowest: 800
+#
 import serial
 
 class BackLights():
