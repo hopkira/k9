@@ -1,4 +1,5 @@
 import pyb
+from machine import Pin
 
 patterns = {
     "original": [[4],[5],[6],[8],[1],[10],[9],[12],[7],[11],[2],[3]],
@@ -40,14 +41,17 @@ def main():
     while True:
         # Turn off all lights
         for pin in pins:
-            p = pyb.Pin(pin, Pin.OUT_PP)
-            p.low()
-            #pyb.LED(led).off()
+            p = Pin(pin, Pin.OUT)
+            p.value(0)
+            #print(pin, " off")
+            #pyb.LED(led).value(0)
         # Turn on all lights in this phase
         for pin in seq[phase]:
-            p = pyb.Pin(pins[seq[phase][pin]], Pin.OUT_PP)
-            p.high()
-            #pyb.LED(led).on()
+            #print("Pin:",pin," Seq:",seq[phase])
+            p = Pin(pins[pin-1], Pin.OUT)
+            p.value(1)
+            #print(pins[pin-1], " on")
+            #pyb.LED(led).value(1)
         phase += 1 # increment the phase
         # go back to phase zero if done
         if phase > seq_len -1: 
