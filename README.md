@@ -50,7 +50,7 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 
 | Python module | Description |
 |---|---|
-|back_lights.py|Controls back panel flashing lights; used to indicate when K9 is thinking|
+|back_panel.py|Controls back panel flashing lights; used to indicate when K9 is thinking. The program talks to the panel.py MicroPython program that runs on a Pyboard Lite|
 |eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level = listening for hotword; mid level = listening for audio command; high level = speaking, unable to listen)|
 |ears.py|Controls the LIDAR ears - supports various speeds and LIDAR modes to help avoid collisions|
 |state.py|Simple finite state machine class to simplify the core program|
