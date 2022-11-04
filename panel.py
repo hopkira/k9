@@ -4,6 +4,7 @@ from machine import Pin
 patterns = {
     "original": [[4],[5],[6],[8],[1],[10],[9],[12],[7],[11],[2],[3]],
     "colour": [[5,10,7,4],[1,9,2,8],[6,3,12],[11]],
+    "colourflow": [[5],[10],[7],[4],[1],[9],[2],[8],[6],[3],[12],[11]],
     "diagonal" : [[9],[6],[3],[10],[7],[4],[11],[8],[12],[5],[2],[1]],
     "two": [[5,3],[9,8],[2,7],[6,12],[1,11],[10,4]],
     "three": [[1,10,8],[9,2,11],[5,7,4],[6,3,12]],
@@ -12,11 +13,14 @@ patterns = {
     "red": [[5,10,7,4]],
     "green": [[1,9,2,8]],
     "blue": [[6,3,12]],
+    "yellow": [[11],[]],
     "spiral": [[7],[6],[5],[9],[10],[11],[12],[8],[4],[3],[2],[1]],
     "chase_v": [[1],[5],[9],[10],[6],[2],[3],[7],[11],[12],[8],[4]],
     "chase_h": [[1],[2],[3],[4],[8],[7],[6],[5],[9],[10],[11],[12]],
     "cols" : [[1,5,9],[2,6,10],[3,7,11],[4,8,12]],
     "rows" : [[1,2,3,4],[5,6,7,8],[9,10,11,12]],
+    "centre": [[1,2,3,4,5,8,9,10,11,12],[6,7]],
+    "cross": [[1,4,6,7,9,12],[2,3,5,8,10,11]],
     "on": [[1,2,3,4,5,6,7,8,9,10,11,12]],
     "off": [[]]
 }
@@ -37,21 +41,15 @@ def main():
     phase = 0
     wait = 150
     serial = pyb.USB_VCP()
-    # leds = range(1,5)
     while True:
         # Turn off all lights
         for pin in pins:
             p = Pin(pin, Pin.OUT)
             p.value(0)
-            #print(pin, " off")
-            #pyb.LED(led).value(0)
         # Turn on all lights in this phase
         for pin in seq[phase]:
-            #print("Pin:",pin," Seq:",seq[phase])
             p = Pin(pins[pin-1], Pin.OUT)
             p.value(1)
-            #print(pins[pin-1], " on")
-            #pyb.LED(led).value(1)
         phase += 1 # increment the phase
         # go back to phase zero if done
         if phase > seq_len -1: 

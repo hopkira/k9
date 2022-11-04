@@ -34,7 +34,7 @@
 #   off
 #
 # Speeds (with ms delay)
-#    fastest: 50,
+#    fastest: 50
 #    fast   : 100
 #    normal : 200
 #    slow   : 400
