@@ -33,7 +33,17 @@ speeds = {
     "slowest": 800
 }
 
-pins = ["Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y8","X9","X10","X11","X12"]
+pin_label = ["Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y8","X9","X10","X11","X12"]
+
+switch_label = ["X18","X19","X20","X21"]
+
+pin_out = []
+for pin in pin_label:
+    pin_out.append(Pin(pin, Pin.OUT))
+
+switches = []
+for switch in switch_label:
+    switches.append(Pin(pin, Pin.OUT))
 
 def main():
     seq = patterns["original"]
@@ -43,13 +53,11 @@ def main():
     serial = pyb.USB_VCP()
     while True:
         # Turn off all lights
-        for pin in pins:
-            p = Pin(pin, Pin.OUT)
-            p.value(0)
+        for pin in pin_out:
+            pin_out[pin].value(0)
         # Turn on all lights in this phase
         for pin in seq[phase]:
-            p = Pin(pins[pin-1], Pin.OUT)
-            p.value(1)
+            pin_out[pin].value(1)
         phase += 1 # increment the phase
         # go back to phase zero if done
         if phase > seq_len -1: 
@@ -61,6 +69,11 @@ def main():
             for line in lines:
                 command = ""
                 command = line.decode().strip()
+                # logic for individual switches
+                if "tv_on" in command:
+                    switches[0].value(1)
+                if "tv_off" in command:
+                    switches[0].value(0)
                 # if the command is a light
                 # sequence then switch to that
                 # one and reset phase

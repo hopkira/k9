@@ -65,3 +65,9 @@ class BackLights():
 
     def off(self):
         self.__write("off")
+
+    def tv_on(self):
+        self.__write("tvon")
+
+    def tv_off(self):
+        self.__write("tvoff")
