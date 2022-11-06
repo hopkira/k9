@@ -12,7 +12,7 @@
 # program.  The panel.py program can be uploaded
 # to the micropython device using:
 #
-# pyboard.py --device /dev/tty.usbmodem388D384731342 -f cp panel.py :main.py
+# python3 pyboard.py --device /dev/tty.usbmodem388D384731342 -f cp panel.py :main.py
 #
 # Light schemes:
 #   original
