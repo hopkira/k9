@@ -1,5 +1,22 @@
-import pyb
+#!/usr/bin/env python
+# coding: utf-8
+# Author: Richard Hopkins
+# Date: 12 Novelner 2022
+#
+# This program run on a Pi Pico
+# running MicroPython
+#
+import uselect
 from machine import Pin
+from sys import stdin
+from time import sleep
+
+# Serial USB reading by Ben Renninson
+# https://github.com/GSGBen/pico-serial
+buffered_input = []
+input_line_this_tick = ""
+TERMINATOR = "\n"
+latest_input_line = ""
 
 patterns = {
     "manual": [[]],
@@ -37,7 +54,7 @@ speeds = {
 # These are the pins used to control the lights
 # they correspond 1:1 with the pins used to
 # monitor the switches 
-light_pin_labels = ["Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y8","X9","X10","X11","X12"]
+light_pin_labels = list(range(12))
 light_pins = []
 for pin in light_pin_labels:
     light_pins.append(Pin(pin, Pin.OUT))
@@ -49,10 +66,27 @@ debounce_time = 10
 switch_states = []
 
 # Create list of switch pins
-switch_labels = ["X1","X2","X3","X4","X5","X6","X7","X8","Y9","Y10","Y11","Y12"]
+switch_labels = list(range(13,25))
 switches = []
 for switch in switch_labels:
     switches.append(Pin(switch, Pin.IN, Pin.PULL_DOWN))
+
+def read_serial_input():
+    global buffered_input, input_line_this_tick, TERMINATOR
+    select_result = uselect.select([stdin], [], [], 0)
+    while select_result[0]:
+        input_character = stdin.read(1)
+        buffered_input.append(input_character)
+        select_result = uselect.select([stdin], [], [], 0)
+    if TERMINATOR in buffered_input:
+        line_ending_index = buffered_input.index(TERMINATOR)
+        input_line_this_tick = "".join(buffered_input[:line_ending_index])
+        if line_ending_index < len(buffered_input):
+            buffered_input = buffered_input[line_ending_index + 1 :]
+        else:
+            buffered_input = []
+    else:
+        input_line_this_tick = ""
 
 # main loop
 def main():
@@ -66,7 +100,6 @@ def main():
     seq_len = len(seq)
     phase = 0
     wait = 150
-    serial = pyb.USB_VCP()
     while True:
         # monitor for pressing a switch
         # set the lights in accordance
@@ -74,40 +107,40 @@ def main():
         if pattern == "manual":
             debounced = debounced_switches()
             for num, switch in enumerate(debounced):
-                pin.out[num].value(int(switch))
+                light_pins[num].value(int(switch))
         else:
             # Follow the automated pattern
             # First, turn off all lights,
-            for pin in light_pins:
-                light_pins[pin].value(0)
+            for num, pin in enumerate(light_pins):
+                light_pins[num].value(0)
             # then turn on all
             # lights in this phase
             for pin in seq[phase]:
-                light_pins[pin].value(1)
+                light_pins[pin-1].value(1)
             phase += 1 # now increment the phase
             # go back to phase zero if done
             if phase > seq_len -1: 
                 phase = 0
-            pyb.delay(wait)
+            sleep(wait/1000)
         # check for instructions from Pi
-        lines = serial.readlines()
-        if lines:
-            for line in lines:
-                command = ""
-                command = line.decode().strip()
-                # if the command is a light
-                # sequence then switch to that
-                # one and reset phase
-                if command in patterns:
-                    pattern = command
-                    seq = patterns[pattern]
-                    seq_len = len(seq)
-                    phase = 0
-                # if the command is speed
-                # related then change
-                # wait time
-                if command in speeds:
-                    wait = int(speeds[command])
+        read_serial_input()
+        if input_line_this_tick:
+            latest_input_line = input_line_this_tick
+            command = ""
+            command = latest_input_line.strip()
+            # if the command is a light
+            # sequence then switch to that
+            # one and reset phase
+            if command in patterns:
+                pattern = command
+                seq = patterns[pattern]
+                seq_len = len(seq)
+                phase = 0
+            # if the command is speed
+            # related then change
+            # wait time
+            if command in speeds:
+                wait = int(speeds[command])
 
 def debounced_switches():
     global switch_states

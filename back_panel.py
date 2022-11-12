@@ -12,7 +12,7 @@
 # program.  The panel.py program can be uploaded
 # to the micropython device using:
 #
-# python3 pyboard.py --device /dev/tty.usbmodem388D384731342 -f cp panel.py :main.py
+# python3 pyboard.py --device /dev/tty.usbmodem387A384631342 -f cp panel.py :main.py
 #
 # Light schemes:
 #   original
@@ -45,7 +45,7 @@ import serial
 class BackLights():
     def __init__(self) -> None:
         self.ser = serial.Serial(
-            port='/dev/tty.usbmodem388D384731342',
+            port='/dev/tty.usbmodem387A384631342', # replace with your device name
             baudrate = 115200,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
