@@ -6,10 +6,11 @@
 # This program run on a Pi Pico
 # running MicroPython
 #
-import uselect
-from machine import Pin
 from sys import stdin
 from time import sleep
+
+import uselect
+from machine import Pin
 
 # Serial USB reading by Ben Renninson
 # https://github.com/GSGBen/pico-serial
@@ -139,8 +140,21 @@ def main():
             # if the command is speed
             # related then change
             # wait time
-            if command in speeds:
+            elif command in speeds:
                 wait = int(speeds[command])
+            elif "light" in command:
+                #  expects command in the forma
+                # "light num action" where num is 1 to 12
+                # and action is on|off|toggle
+                num, action = tuple(command.strip("light").split())
+                num = int(num)
+                if action == "toggle":
+                    value = not(debounced_switches()[num-1])
+                elif action == 'on':
+                    value = 1
+                elif action == 'off':
+                    value = 0
+                light_pins[num-1].value(int(value))
 
 def debounced_switches():
     global switch_states, switches, debounce_time
