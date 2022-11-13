@@ -66,10 +66,10 @@ debounce_time = 10
 switch_states = []
 
 # Create list of switch pins
-switch_labels = list(range(13,25))
+switch_labels = [12,13,14,15,16,17,18,19,20,21,22,26]
 switches = []
 for switch in switch_labels:
-    switches.append(Pin(switch, Pin.IN, Pin.PULL_DOWN))
+    switches.append(Pin(switch, Pin.IN, Pin.PULL_UP))
 
 def read_serial_input():
     global buffered_input, input_line_this_tick, TERMINATOR
@@ -143,7 +143,7 @@ def main():
                 wait = int(speeds[command])
 
 def debounced_switches():
-    global switch_states
+    global switch_states, switches, debounce_time
     # Record the state of all switches as true or false
     switch_values=[]
     for switch in switches:
@@ -161,7 +161,7 @@ def debounced_switches():
     # logically AND the history of each switch
     # Switches with all True, will be True, every other
     # state (including any bounciness) will be False
-    debounced = [all(l) for l in zip(*switch_states)]
+    debounced = [all(row) for row in zip(*switch_states)]
     return debounced
 
 main()
