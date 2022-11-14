@@ -12,7 +12,7 @@
 # program.  The panel.py program can be uploaded
 # to the micropython device using:
 #
-# python3 pyboard.py --device /dev/tty.usbmodem388D384731342 -f cp panel.py :main.py
+# python3 pyboard.py --device /dev/tty.usbmodem387A384631342 -f cp panel.py :main.py
 #
 # Light schemes:
 #   original
@@ -45,12 +45,12 @@ import serial
 class BackLights():
     def __init__(self) -> None:
         self.ser = serial.Serial(
-            port='/dev/tty.usbmodem388D384731342',
+            port='/dev/tty.usbmodem387A384631342', # replace with your device name
             baudrate = 115200,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             bytesize=serial.EIGHTBITS,
-            timeout=10
+            timeout=1
             )
 
     def __write(self,text:str) -> None:
@@ -66,8 +66,29 @@ class BackLights():
     def off(self):
         self.__write("off")
 
+    def turn_on(self, num:int):
+        self.__write("light",num,"on")
+    
+    def turn_off(self, num:int):
+        self.__write("light",num,"off")
+
+    def toggle(self, num:int):
+        self.__write("light",num,"toggle")
+
     def tv_on(self):
         self.__write("tvon")
 
     def tv_off(self):
         self.__write("tvoff")
+
+    def get_switch_state(self) -> list:
+        self.switch_state = []
+        self._write("switchstate")
+        input = self.ser.readlines()
+        for line in input:
+            if "switchstate:" in line:
+                line = line.strip("\nswitchae: ")
+                for value in line:
+                    self.switch_state.append(bool(value))
+        return self.switch_state
+            

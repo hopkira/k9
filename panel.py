@@ -1,7 +1,26 @@
-import pyb
+#!/usr/bin/env python
+# coding: utf-8
+# Author: Richard Hopkins
+# Date: 12 Novelner 2022
+#
+# This program run on a Pi Pico
+# running MicroPython
+#
+from sys import stdin
+from time import sleep
+
+import uselect
 from machine import Pin
 
+# Serial USB reading by Ben Renninson
+# https://github.com/GSGBen/pico-serial
+buffered_input = []
+input_line_this_tick = ""
+TERMINATOR = "\n"
+latest_input_line = ""
+
 patterns = {
+    "manual": [[]],
     "original": [[4],[5],[6],[8],[1],[10],[9],[12],[7],[11],[2],[3]],
     "colour": [[5,10,7,4],[1,9,2,8],[6,3,12],[11]],
     "colourflow": [[5],[10],[7],[4],[1],[9],[2],[8],[6],[3],[12],[11]],
@@ -33,57 +52,130 @@ speeds = {
     "slowest": 800
 }
 
-pin_label = ["Y1","Y2","Y3","Y4","Y5","Y6","Y7","Y8","X9","X10","X11","X12"]
+# These are the pins used to control the lights
+# they correspond 1:1 with the pins used to
+# monitor the switches 
+light_pin_labels = list(range(12))
+light_pins = []
+for pin in light_pin_labels:
+    light_pins.append(Pin(pin, Pin.OUT))
 
-switch_label = ["X18","X19","X20","X21"]
+# Switch debounce time
+debounce_time = 10
 
-pin_out = []
-for pin in pin_label:
-    pin_out.append(Pin(pin, Pin.OUT))
+# Empty list of switchh states
+switch_states = []
 
+# Create list of switch pins
+switch_labels = [12,13,14,15,16,17,18,19,20,21,22,26]
 switches = []
-for switch in switch_label:
-    switches.append(Pin(pin, Pin.OUT))
+for switch in switch_labels:
+    switches.append(Pin(switch, Pin.IN, Pin.PULL_UP))
 
+def read_serial_input():
+    global buffered_input, input_line_this_tick, TERMINATOR
+    select_result = uselect.select([stdin], [], [], 0)
+    while select_result[0]:
+        input_character = stdin.read(1)
+        buffered_input.append(input_character)
+        select_result = uselect.select([stdin], [], [], 0)
+    if TERMINATOR in buffered_input:
+        line_ending_index = buffered_input.index(TERMINATOR)
+        input_line_this_tick = "".join(buffered_input[:line_ending_index])
+        if line_ending_index < len(buffered_input):
+            buffered_input = buffered_input[line_ending_index + 1 :]
+        else:
+            buffered_input = []
+    else:
+        input_line_this_tick = ""
+
+# main loop
 def main():
-    seq = patterns["original"]
+    '''
+    Main loop that allows for the selection and driving of
+    the selected pattern, including a manual pattern that
+    reflects the status of the physical switches
+    '''
+    pattern = "manual"
+    seq = patterns[pattern]
     seq_len = len(seq)
     phase = 0
     wait = 150
-    serial = pyb.USB_VCP()
     while True:
-        # Turn off all lights
-        for pin in pin_out:
-            pin_out[pin].value(0)
-        # Turn on all lights in this phase
-        for pin in seq[phase]:
-            pin_out[pin].value(1)
-        phase += 1 # increment the phase
-        # go back to phase zero if done
-        if phase > seq_len -1: 
-            phase = 0
-        pyb.delay(wait)
+        # monitor for pressing a switch
+        # set the lights in accordance
+        # with the pattern
+        if pattern == "manual":
+            debounced = debounced_switches()
+            for num, switch in enumerate(debounced):
+                light_pins[num].value(int(switch))
+        else:
+            # Follow the automated pattern
+            # First, turn off all lights,
+            for num, pin in enumerate(light_pins):
+                light_pins[num].value(0)
+            # then turn on all
+            # lights in this phase
+            for pin in seq[phase]:
+                light_pins[pin-1].value(1)
+            phase += 1 # now increment the phase
+            # go back to phase zero if done
+            if phase > seq_len -1: 
+                phase = 0
+            sleep(wait/1000)
         # check for instructions from Pi
-        lines = serial.readlines()
-        if lines:
-            for line in lines:
-                command = ""
-                command = line.decode().strip()
-                # logic for individual switches
-                if "tv_on" in command:
-                    switches[0].value(1)
-                if "tv_off" in command:
-                    switches[0].value(0)
-                # if the command is a light
-                # sequence then switch to that
-                # one and reset phase
-                if command in patterns:
-                    seq = patterns[command]
-                    seq_len = len(seq)
-                    phase = 0
-                # if the command is speed
-                # related then change
-                # wait time
-                if command in speeds:
-                    wait = int(speeds[command])
+        read_serial_input()
+        if input_line_this_tick:
+            latest_input_line = input_line_this_tick
+            command = ""
+            command = latest_input_line.strip()
+            # if the command is a light
+            # sequence then switch to that
+            # one and reset phase
+            if command in patterns:
+                pattern = command
+                seq = patterns[pattern]
+                seq_len = len(seq)
+                phase = 0
+            # if the command is speed
+            # related then change
+            # wait time
+            elif command in speeds:
+                wait = int(speeds[command])
+            elif "light" in command:
+                #  expects command in the forma
+                # "light num action" where num is 1 to 12
+                # and action is on|off|toggle
+                num, action = tuple(command.strip("light").split())
+                num = int(num)
+                if action == "toggle":
+                    value = not(debounced_switches()[num-1])
+                elif action == 'on':
+                    value = 1
+                elif action == 'off':
+                    value = 0
+                light_pins[num-1].value(int(value))
+
+def debounced_switches():
+    global switch_states, switches, debounce_time
+    # Record the state of all switches as true or false
+    switch_values=[]
+    for switch in switches:
+        switch_values.append(bool(switch.value()))
+    # Append the latest state of all switches to
+    # the state list
+    switch_states.append(switch_values)
+    # Trim the number of states to match
+    # the debounce timer by popping off
+    # the top of the list if needed
+    if len(switch_states) > debounce_time:
+        switch_states.pop(0)
+    # Transpose the state by switch 2D array so that each
+    # switch becomes a row with its own history.  Then 
+    # logically AND the history of each switch
+    # Switches with all True, will be True, every other
+    # state (including any bounciness) will be False
+    debounced = [all(row) for row in zip(*switch_states)]
+    return debounced
+
 main()
