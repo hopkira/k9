@@ -166,23 +166,24 @@ class SimonGame():
 
         # K9 says match this pattern
         sequence = []
-        play_stream = AudioStream()
+        self.play_stream = AudioStream()
         # toggle a number of lights and play notes
         for seq in range(length):
             btn_num = random.randrange(12) + 1
             sequence.append(btn_num)
             k9lights.toggle(btn_num)
             note = self.prefix + self.notes[btn_num] + self.suffix
-            play_stream.play_file(note)
+            self.play_stream.play_file(note)
         # quickly toggle the lights back
         for seq in sequence:
             k9lights.toggle(seq)
-        play_stream.close()
         for button in sequence:
             if self.right_button_pressed(button):
                 continue
             else:
+                self.play_stream.close()
                 return False
+        self.play_stream.close()
         return True
 
     def right_button_pressed(self, button:int) -> bool:
@@ -199,10 +200,12 @@ class SimonGame():
                 return False
             current_state = k9lights.get_switch_state()
             for num,state in enumerate(start_state):
-                if start_state[num] ^ current_state[num] != 0:
-                    if state == button:
+                if state ^ current_state[num] != 0:
+                    if num == button:
+                        self.play_stream.play_file(button)
                         return True
                     else:
+                        self.play_stream.play_file(num)
                         blocking_speech(random_phrase("Incorrect"))
                         return False
 
