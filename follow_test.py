@@ -3,6 +3,7 @@ import time
 
 mem = Memory()
 while True:
+    time.sleep(0.1)
     angle = 0
     move = 0
     target_dict = mem.retrieveLastSensorReading("follow")
