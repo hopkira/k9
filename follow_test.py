@@ -23,10 +23,10 @@ while True:
         for target_dict in target_dicts:
             try:
                 angle = target_dict["angle"]
+                print("Historic legs being used for direction purposes")
             except KeyError:
                 print("No historic legs found")
                 break
-        print("Historic legs being used for direction purposes")
     # move if the angle or distance is not zero
     if angle != 0 or move !=0:
         print("Following: direction:", angle, "distance:", move)
