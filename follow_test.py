@@ -66,6 +66,5 @@ while True:
                         print("Moving backward detected distance:", str(distance))
                     else:
                         print("Moving backward safe distance:", str(safe_backward))
-
     else:
         print("Nothing detected, not moving")
