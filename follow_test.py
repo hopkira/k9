@@ -17,16 +17,16 @@ def check_targets() -> tuple:
     source = ""
     target_dict = mem.retrieveLastSensorReading("follow")
     person_dict = mem.retrieveLastSensorReading("person")
-    if any(get_target(target_dict)):
+    if any((get_target(target_dict))):
         angle, move = get_target(target_dict)
         print("Legs:", angle, move)
-    elif any(get_target(person_dict)):
+    elif any((get_target(person_dict)):
         angle, move = get_target(person_dict)
         print("Person:", angle, move)
     else:
         target_dicts = mem.retrieveSensorReadings("follow")
         for target_dict in target_dicts:
-            if any(get_target(target_dict)):
+            if any((get_target(target_dict))):
                 angle, move = get_target(target_dict)
                 age = target_dict["time"] - time.time()
                 print(age,"s - old legs:", angle, move)
