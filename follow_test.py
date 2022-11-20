@@ -23,9 +23,10 @@ while True:
         for target_dict in target_dicts:
             try:
                 angle = target_dict["angle"]
-                print("Historic legs being used for direction purposes")
-                print(str(target_dict))
-                break
+                age = target_dict["time"] - time.time()
+                if angle != 0:
+                    print("Historic angle of ", str(angle),"radians and",round(age),"seconds old" )
+                    break
             except KeyError:
                 print("No historic legs found")
                 break
