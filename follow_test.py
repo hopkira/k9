@@ -2,14 +2,16 @@ from memory import Memory
 import time
 
 def get_target(dict:dict) -> tuple:
+    angle = False
+    move = False
     try:
         if dict["angle"] != 0 or dict["distance"] != 0 :
             print(str(dict))
             angle = dict["angle"]
             move = dict["distance"]
-            return angle, move
     except KeyError:
-        return False, False
+        pass
+    return angle, move
     
 def check_targets() -> tuple:
     angle = False
