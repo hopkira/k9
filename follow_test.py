@@ -24,6 +24,7 @@ while True:
             try:
                 angle = target_dict["angle"]
                 print("Historic legs being used for direction purposes")
+                break
             except KeyError:
                 print("No historic legs found")
                 break
