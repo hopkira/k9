@@ -20,7 +20,7 @@ def check_targets() -> tuple:
     if any((get_target(target_dict))):
         angle, move = get_target(target_dict)
         print("Legs:", angle, move)
-    elif any((get_target(person_dict)):
+    elif any((get_target(person_dict))):
         angle, move = get_target(person_dict)
         print("Person:", angle, move)
     else:
