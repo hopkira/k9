@@ -50,3 +50,5 @@ while True:
                     print("Moving forward detected distance: ", str(distance) )
                 else:
                     print("Moving forward safe distance: ", str(safe_forward))
+    else:
+        print("Nothing detected, not moving")
