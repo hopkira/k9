@@ -279,7 +279,7 @@ def mqtt_callback(client, userdata, message):
         k9.state.on_event(payload)
 
 def random_phrase(phrase:str) -> str:
-    phrase_dict = phrases(phrase)
+    phrase_dict = phrases[phrase]
     length = len(phrase_dict)
     index = random.randint(0,length-1)
     message = phrase_dict[index] 
