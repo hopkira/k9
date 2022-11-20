@@ -125,9 +125,11 @@ class Big_Point_Cloud():
         totals = self.bpc.populate_bins(depth_image)
         focus = totals[0:7,10:15]
         min_dist = float(np.nanmin(focus))
-        if min_dist:
+        if np.isnan(min_dist):
+            min_dist = 0.0
+        else:
             min_dist = float(min_dist/1000.0)
-            mem.storeState("forward", min_dist)
+        mem.storeState("forward", min_dist)
         # for each column in the array, find out the closest
         # bin; as the robot cannot duck or jump, the
         # y values are irrelevant
