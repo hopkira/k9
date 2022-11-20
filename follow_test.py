@@ -3,6 +3,8 @@ import time
 
 mem = Memory()
 while True:
+    angle = 0
+    move = 0
     target_dict = mem.retrieveLastSensorReading("follow")
     person_dict = mem.retrieveLastSensorReading("person")
     # chose the detected legs over person targetting
