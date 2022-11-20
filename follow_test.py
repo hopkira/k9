@@ -20,12 +20,13 @@ while True:
     # the last detected set of legs
     else:
         target_dicts = mem.retrieveSensorReadings("follow")
-        print("Historic legs being used for direction purposes")
         for target_dict in target_dicts:
-            if target_dict["angle"] != 0:
+            try:
                 angle = target_dict["angle"]
-                move = 0
+            except KeyError:
+                print("No historic legs found")
                 break
+        print("Historic legs being used for direction purposes")
     # move if the angle or distance is not zero
     if angle != 0 or move !=0:
         print("Following: direction:", angle, "distance:", move)
