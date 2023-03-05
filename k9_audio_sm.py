@@ -162,6 +162,8 @@ class Responding(State):
         k9lights.on()
         if connected():
             intent, answer = k9qa.robot_response(self.command)
+            if intent == 'QuestionMe':
+                answer = k9history.get_answer(self.command)
         else:
             if 'listen' in self.command:
                 intent = 'StopListening'
