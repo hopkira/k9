@@ -3,7 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-secrets.py
+*.pth
+
+speech/
 
 # Temp/backup files
 *.bkp
