@@ -37,8 +37,8 @@ def speak(speech:str) -> None:
     params = {"text":speech}
     query = urlencode(params)
     coqui_tts = coqui_tts + "?" + query
-    response = urlretrieve(coqui_tts, "speech.wav")
-    cmd = ['play','speech.wav']
+    response = urlretrieve(coqui_tts, "/home/pi/k9/speech.wav")
+    cmd = ['play','/home/pi/k9/speech.wav']
     speaking = Popen(cmd)
     Popen.wait(speaking)
     eyes.set_level(store_eyes)

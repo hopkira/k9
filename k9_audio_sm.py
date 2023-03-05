@@ -236,7 +236,7 @@ class K9AudioSM(object):
         k9eyes.set_level(1)
         k9ears.scan()
         k9tail.center()
-        k9voice.speak("Waiting for hotword")
+        k9voice.speak("Waiting for command")
         mem.storeState("speaking",1.0)
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(1.0)
