@@ -33,7 +33,7 @@ def speak(speech:str) -> None:
     eyes.on()
     print('Speech server:', speech)
     speaking = None
-    coqui_tts = "http://localhost:5002/api/tts"
+    coqui_tts = "http://ros2local:5002/api/tts"
     params = {"text":speech}
     query = urlencode(params)
     coqui_tts = coqui_tts + "?" + query
