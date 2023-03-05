@@ -44,6 +44,10 @@ print("Able to listen...")
 from k9_lichess_bot import ChessGame
 print("Able to play chess!")
 from memory import Memory
+print("Short term memory remembering...")
+sys.path.append('..')
+from who_uni.qanda import Backhistory
+print("Back history loaded...")
 print("All imports done!")
 
 # Standard phrases for K9 to use when needed
@@ -176,7 +180,7 @@ class Responding(State):
                 intent = 'PlayChess'
             else:
                 intent = 'QuestionMe'
-                answer = random_phrase(intent)
+                answer = k9history.get_answer(self.command)
         # Some phrases need a standard response
         answer_list = ('StopListening', 'ComeHere', 'FollowMe','StayThere','TurnAbout','PlayChess')
         if intent in answer_list:
@@ -303,6 +307,7 @@ k9tail = Tail()
 mem = Memory()
 k9voice =  Voice()
 k9stt = Listen()
+k9history = Backhistory()
 
 try:
     k9 = K9AudioSM()
