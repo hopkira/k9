@@ -31,7 +31,6 @@ Most of the hardware access is via abstraction modules that can easily be repurp
 
 ## Cloud subscriptions
 For full conversational capability, the software requires:
-* an [IBM Cloud id](https://www.ibm.com/cloud) under the Lite (free) plan for speech generation;
 * a free account with [PicoVoice](https://picovoice.ai/platform/porcupine/) to use the Porcupine hotword
 * a GPT-3 account with [OpenAI](https://openai.com/api/) for responses and intents (this is not free once the initial credits have been used)
 
@@ -59,9 +58,10 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 |k9gpt3conv.py|Interface to OpenAI's GPT3 to determine K9's audio responses and the intent of user commands|
 |voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
 |k9_lichess_bot.py|Chess module that enables him to create Lichess.com games and play chess|
+|qanda.py|History module that provides K9 with a backstory.  The backstory itself is recorded in k9_story_vectors_500.csv. Both files are currently in the who_uni repository, but will be replicated here after testing.
 
-## k9_streaming_tts.py
-Provides speech to text capability that can be used by multiple modules on a FIFO basis via MQTT.  Uses IBM Cloud TTS functionality over websockets when connected to the Internet.
+## k9_coqui_tts_server.py
+Provides speech to text capability that can be used by multiple modules on a FIFO basis via MQTT.  Uses a custom VITS voice server based on Coqui.  Talks to the k9_tts_server.py in the k9_speech_samples repository (this needs to be deployed separately on a NVIDIA/CUDA server that K9 can see).
 
 ## k9_oak_pipe.py
 A complex Oak-lite sensor pipeline that is used to provide scanning functions from the Oak stereoscopic camea.  This includes the scanning functionality to support heeling, following and collision avoidance.  All data is simplified and stored in Redis for other modules to use:
