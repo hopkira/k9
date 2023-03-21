@@ -67,15 +67,15 @@ class BackLights():
         self.__write("off")
 
     def turn_on(self, num:int):
-        text = "light" + str(num) + "on"
+        text = "light " + str(num) + " on"
         self.__write(text)
     
     def turn_off(self, num:int):
-        text = "light" + str(num) + "off"
+        text = "light " + str(num) + " off"
         self.__write(text)
 
     def toggle(self, num:int):
-        text = "light" + str(num) + "toggle"
+        text = "light " + str(num) + " toggle"
         self.__write(text)
 
     def tv_on(self):
