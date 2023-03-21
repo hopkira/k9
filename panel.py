@@ -20,6 +20,7 @@ TERMINATOR = "\n"
 latest_input_line = ""
 
 patterns = {
+    "computer": [[]],
     "manual": [[]],
     "original": [[4],[5],[6],[8],[1],[10],[9],[12],[7],[11],[2],[3]],
     "colour": [[5,10,7,4],[1,9,2,8],[6,3,12],[11]],
@@ -105,7 +106,9 @@ def main():
         # monitor for pressing a switch
         # set the lights in accordance
         # with the pattern
-        if pattern == "manual":
+        if pattern == "computer":
+            pass
+        elif pattern == "manual":
             debounced = debounced_switches()
             for num, switch in enumerate(debounced):
                 light_pins[num].value(int(switch))
@@ -143,6 +146,7 @@ def main():
             elif command in speeds:
                 wait = int(speeds[command])
             elif "light" in command:
+                pattern = "computer"
                 #  expects command in the forma
                 # "light num action" where num is 1 to 12
                 # and action is on|off|toggle
