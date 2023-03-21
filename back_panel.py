@@ -83,7 +83,7 @@ class BackLights():
 
     def get_switch_state(self) -> list:
         self.switch_state = []
-        self._write("switchstate")
+        self.__write("switchstate")
         input = self.ser.readlines()
         for line in input:
             if "switchstate:" in line:
