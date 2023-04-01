@@ -67,13 +67,16 @@ class BackLights():
         self.__write("off")
 
     def turn_on(self, num:int):
-        self.__write("light",num,"on")
+        text = "light " + str(num) + " on"
+        self.__write(text)
     
     def turn_off(self, num:int):
-        self.__write("light",num,"off")
+        text = "light " + str(num) + " off"
+        self.__write(text)
 
     def toggle(self, num:int):
-        self.__write("light",num,"toggle")
+        text = "light " + str(num) + " toggle"
+        self.__write(text)
 
     def tv_on(self):
         self.__write("tvon")
@@ -83,7 +86,7 @@ class BackLights():
 
     def get_switch_state(self) -> list:
         self.switch_state = []
-        self._write("switchstate")
+        self.__write("switchstate")
         input = self.ser.readlines()
         for line in input:
             if "switchstate:" in line:

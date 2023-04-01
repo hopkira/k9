@@ -160,10 +160,24 @@ class Responding(State):
         print("Eyes set in Responding state")
         k9ears.think()
         k9lights.on()
+        #
+        # If K9 is connected to the internet, then OpenAI GPT-3 is used to
+        # determine both the best answer and intent of the vocal command.
+        # If the intent is a quesion, then the internal history database
+        # is used to answer the question; if it doesn't know the answer
+        # K9 will fall back
+        # to a less specific and inaccurat GPT3
+        #
+        # When disconnected from the Internet, K9 will use simple word
+        # recognition to infer the intent and will respond with one of
+        # a stock set of phrases.
+        #
         if connected():
             intent, answer = k9qa.robot_response(self.command)
             if intent == 'QuestionMe':
-                answer = k9history.get_answer(self.command)
+                history_answer = k9history.get_answer(self.command)
+                if "Insufficient data" in history_answer:
+                    answer = history_answer
         else:
             if 'listen' in self.command:
                 intent = 'StopListening'
