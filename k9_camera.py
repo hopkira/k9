@@ -40,9 +40,9 @@ with open("known_faces.txt", "r") as f:
         known_names.append(name)
         known_genders.append(gender.strip())
 
-#gender model
-#model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
-#pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
+# gender models can be downloaded from:
+# model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
+# pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
 
 # Load the gender detection model
 gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender.caffemodel")
@@ -52,6 +52,7 @@ camera = cv2.VideoCapture(0)
 
 try:
     while True:
+        time.sleep(0.2)
         # Grab a single frame of video
         ret, frame = camera.read()
 

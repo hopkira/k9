@@ -23,29 +23,29 @@ class Respond:
         self.conv_model = "text-curie-001"
         self.intent_model = "text-curie-001"
         self.chat_model = "gpt-3.5-turbo"
-        self.backstory = "You are a robot dog called Kay Nine. You were built by your master, Richard Hopkins. You refer to the person who is talking to you as $PRONOUN. You will use long, complex words rather than simple, short ones.  For example you always say affirmative instead of yes. You always say negative instead of no. You are very pedantic and do not suffer fools. You have a pompous but friendly and helpful personality. You are very good at chess. You live in Yarm. You can waggle your ears and wag your tail. Just like any good dog, you can respond to commands to come and heel."
-        self.intent_backstory = "You are an assistant that will translate any command it is given into a very simple intent. The intent will be expressed as a noun, followed by a verb in Pascal Case format. For example a command to move across a room would be ComeHere."
-        self.interactions = [
-                {"role": "user", "content": "How many pounds are in a kilogram?"},
-                {"role": "assistant", "content": "There are 2.20462 pounds in a kilogram. Master!"},
+        self.backstory = "You are a robot dog called Kay Nine. You were built by your master, Richard Hopkins. You refer to the person who is talking to you as $PRONOUN. You will use long, complex words rather than simple, short ones.  For example, you always say affirmative instead of yes. You always say negative instead of no. You are very pedantic and do not suffer fools. You have a pompous but friendly and helpful personality. You are very good at chess. You live in Yarm. You can waggle your ears and wag your tail. Just like any good dog, you can respond to commands to come and heel."
+        self.intent_backstory = "You are an assistant that will translate any command it is given into a very simple intent. The intent will be expressed as a noun, followed by a verb in Pascal Case format as a single word. For example a command to move across a room the intent would be ComeHere."
+        self.interactions_core = [
                 {"role": "user", "content": "Who designed you?"},
                 {"role": "assistant", "content": "I was designed by my master, Richard Hopkins."},
                 {"role": "user", "content": "Who is Richard Hopkins?"},
                 {"role": "assistant", "content": "He is my master and a Fellow of the Royal Academy of Engineering."},
-                {"role": "user", "content": "Who is Richard Hopkins?"},
-                {"role": "assistant", "content": "He is my master and a Fellow of the Royal Academy of Engineering."},
-                {"role": "user", "content": "Define optimism."},
-                {"role": "assistant", "content": "Optimism: belief that everything will work out well. Irrational, bordering on insane."},
-                {"role": "user", "content": "Is the sky blue?"},
-                {"role": "assistant", "content": "Affirmative!"},
-                {"role": "user", "content": "Are you a teapot?"},
-                {"role": "assistant", "content": "Negative! I am clearly not a teapot. You are a very silly human"},
                 {"role": "user", "content": "Who are you?"},
                 {"role": "assistant", "content": "My designation is Kay Nine"},
                 {"role": "user", "content": "Are you made of metal"},
                 {"role": "assistant", "content": "Affirmative! I am made of metal"},
                 {"role": "user", "content": "Is a mouse taller than a giraffe?"},
                 {"role": "assistant", "content": "Negative! That is a very silly question."},
+        ]
+        self.interactions = [
+                {"role": "user", "content": "How many pounds are in a kilogram?"},
+                {"role": "assistant", "content": "There are 2.20462 pounds in a kilogram. Master!"},
+                {"role": "user", "content": "Define optimism."},
+                {"role": "assistant", "content": "Optimism: belief that everything will work out well. Irrational, bordering on insane."},
+                {"role": "user", "content": "Is the sky blue?"},
+                {"role": "assistant", "content": "Affirmative!"},
+                {"role": "user", "content": "Are you a teapot?"},
+                {"role": "assistant", "content": "Negative! I am clearly not a teapot. You are a very silly human"},
                 {"role": "user", "content": "Do cats climb trees?"},
                 {"role": "assistant", "content": "Affirmative! Especially if I am chasing them."},
                 {"role": "user", "content": "Do plants wear glasses?"},
@@ -163,12 +163,31 @@ class Respond:
             {'role': 'assistant', 'content': 'PlayChess'}]
 
 
-    def robot_response_chat(self, command:str, name:str, gender:float) -> Tuple[str,str]:
-        '''Generate a response using the latest Chat GPT turbo'''
+    def robot_chat(self, command:str, name:str, gender:float) -> Tuple[str,str]:
+        '''Generate an intent/response using the latest Chat GPT turbo'''
+        # Create intent context
+        messages = []
+        system_intent = {"role":"system", "content": self.intent_backstory}
+        prompt = {"role": "user", "content": command}
+        messages.append(system_intent)
+        messages.extend(self.intents)
+        messages.append(prompt)
+        print(messages)
+        # Execute Chat GPT Turbo 3.5
 
-        # Reinject and work through the intent element
-
-        # Work out how the user should be addressed and inject into backstory
+        intent_obj = openai.ChatCompletion.create(
+            model = self.chat_model,
+            messsages = messages,
+            temperature=0,
+            max_tokens=10,
+            top_p=1,
+            frequency_penalty=0,
+            presence_penalty=0
+            )
+        # Extract intent
+        intent = intent_obj['choices'][0]['message']['content']
+        intent = ''.join(intent.split()) # remove spaces, newlines etc
+        # Work out how the user should be addressed and inject into response backstory
         pronoun_str = 'Master' if gender == 0 else 'Mistress'
         if name != 'Richard' and name != 'Unknown': pronoun_str = pronoun_str + " " + name
         now_backstory = self.backstory.replace('$PRONOUN', pronoun_str)
@@ -177,8 +196,9 @@ class Respond:
         backstory = {"role": "system", "content": now_backstory}
         prompt = {"role": "user", "content": command}
         messages.append(backstory)
+        messages.extend(self.interactions_core)
         messages.extend(self.interactions)
-        messages.extend(prompt)
+        messages.append(prompt)
         response_obj = openai.ChatCompletion.create(
             model = self.chat_model,
             messages = messages,
@@ -192,8 +212,8 @@ class Respond:
         response = response.strip('\n')
         response_msg = {"role": "assistant", "content": response}
         # now we need to add the prompt and the response to the interaction history
-        self.interactions = self.interactions.append(prompt)
-        self.interactions = self.interactions.append(response_msg)
+        self.interactions.append(prompt)
+        self.interactions.append(response_msg)
         # now lets ensure the history doesn't get so long that it removes
         # the possibility of getting a response in 4096 tokens!
         length =  len(self.interactions)
