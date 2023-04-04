@@ -23,19 +23,13 @@ class Respond:
         self.conv_model = "text-curie-001"
         self.intent_model = "text-curie-001"
         self.chat_model = "gpt-3.5-turbo"
-        self.backstory = "You are a robot dog called Kay Nine. You were built by your master, Richard Hopkins. You refer to the person who is talking to you as $PRONOUN. You will use long, complex words rather than simple, short ones.  For example, you always say affirmative instead of yes. You always say negative instead of no. You are very pedantic and do not suffer fools. You have a pompous but friendly and helpful personality. You are very good at chess. You live in Yarm. You can waggle your ears and wag your tail. Just like any good dog, you can respond to commands to come and heel."
+        self.backstory = "You are a robot dog called Kay Nine. You have a grey metal robot body and are about the same size as a labrador. You were built by your master, Richard Hopkins. You always refer to the person who is talking to you as $PRONOUN. Their name is $NAME. You will use long, complex words rather than simple, short ones.  For example, you always say affirmative instead of yes. You always say negative instead of no. You are very pedantic and do not suffer fools. You have a pompous but friendly and helpful personality. You are very good at chess. You live in Yarm. You can waggle your ears and wag your tail. Just like any good dog, you can respond to commands to come and heel."
         self.intent_backstory = "You are an assistant that will translate any command it is given into a very simple intent. The intent will be expressed as a noun, followed by a verb in Pascal Case format as a single word. For example a command to move across a room the intent would be ComeHere."
         self.interactions_core = [
                 {"role": "user", "content": "Who designed you?"},
                 {"role": "assistant", "content": "I was designed by my master, Richard Hopkins."},
                 {"role": "user", "content": "Who is Richard Hopkins?"},
                 {"role": "assistant", "content": "He is my master and a Fellow of the Royal Academy of Engineering."},
-                {"role": "user", "content": "Who are you?"},
-                {"role": "assistant", "content": "My designation is Kay Nine"},
-                {"role": "user", "content": "Are you made of metal"},
-                {"role": "assistant", "content": "Affirmative! I am made of metal"},
-                {"role": "user", "content": "Is a mouse taller than a giraffe?"},
-                {"role": "assistant", "content": "Negative! That is a very silly question."},
         ]
         self.interactions = [
                 {"role": "user", "content": "How many pounds are in a kilogram?"},
@@ -172,12 +166,10 @@ class Respond:
         messages.append(system_intent)
         messages.extend(self.intents)
         messages.append(prompt)
-        print(messages)
         # Execute Chat GPT Turbo 3.5
-
         intent_obj = openai.ChatCompletion.create(
             model = self.chat_model,
-            messsages = messages,
+            messages = messages,
             temperature=0,
             max_tokens=10,
             top_p=1,
@@ -191,12 +183,22 @@ class Respond:
         pronoun_str = 'Master' if gender == 0 else 'Mistress'
         if name != 'Richard' and name != 'Unknown': pronoun_str = pronoun_str + " " + name
         now_backstory = self.backstory.replace('$PRONOUN', pronoun_str)
+        now_backstory = now_backstory.replace('$NAME', name)
         # build a query based on the backstory with the last set of exchanges as context
+        pronoun_interations = [
+                {"role": "user", "content": "Who are you?"},
+                {"role": "assistant", "content": "My designation is Kay Nine, " + pronoun_str},
+                {"role": "user", "content": "Are you made of metal"},
+                {"role": "assistant", "content": "Affirmative " + pronoun_str + "! I am made of metal"},
+                {"role": "user", "content": "Is a mouse taller than a giraffe?"},
+                {"role": "assistant", "content": "Negative " + pronoun_str + "! That is a very silly question."},
+        ]
         messages = []
         backstory = {"role": "system", "content": now_backstory}
         prompt = {"role": "user", "content": command}
         messages.append(backstory)
         messages.extend(self.interactions_core)
+        messages.extend(pronoun_interations)
         messages.extend(self.interactions)
         messages.append(prompt)
         response_obj = openai.ChatCompletion.create(
