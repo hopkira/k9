@@ -5,6 +5,7 @@ __pycache__/
 
 *.pth
 
+images/
 speech/
 
 # Temp/backup files
