@@ -172,8 +172,16 @@ class Responding(State):
         # recognition to infer the intent and will respond with one of
         # a stock set of phrases.
         #
+        try:
+            person_dict = mem.retrievePerson()
+            self.name = person_dict['name']
+            self.gender = person_dict['gender']
+        except KeyError:
+            self.name = 'Unknown'
+            self.gender = 'Unknown'
         if connected():
-            intent, answer = k9qa.robot_response(self.command)
+            intent, answer = k9qa.robot_chat(self.command, self.name, self.gender)
+            # intent, answer = k9qa.robot_response(self.command)
             if intent == 'QuestionMe':
                 history_answer = k9history.get_answer(self.command)
                 if "Insufficient data" in history_answer:
