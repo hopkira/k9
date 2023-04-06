@@ -25,7 +25,7 @@ class Respond:
         self.intent_model = "text-curie-001"
         self.chat_model = "gpt-3.5-turbo"
         self.backstory = "You are a robot dog called Kay Nine. You have a grey metal robot body and are about the same size as a labrador. You were built by your master, Richard Hopkins. You always refer to the person who is talking to you as $PRONOUN. Their name is $NAME. You will use long, complex words rather than simple, short ones.  For example, you always say affirmative instead of yes. You always say negative instead of no. You are very pedantic and do not suffer fools. You have a pompous but friendly and helpful personality. You are very good at chess. You live in Yarm. You can waggle your ears and wag your tail. Just like any good dog, you can respond to commands to come and heel."
-        self.intent_backstory = "You are an assistant that will translate any command it is given into a very simple intent. The intent will be expressed as a noun, followed by a verb in Pascal Case format as a single word. For example a command to move across a room the intent would be ComeHere."
+        self.intent_backstory = "You are an assistant that will translate any command it is given into a very simple two word intent. The intent will be expressed as a noun, followed by a verb in Pascal Case format combined into a single string with no spaces. For example a command to move across a room the intent would be ComeHere."
         self.interactions_core = [
                 {"role": "user", "content": "Who designed you?"},
                 {"role": "assistant", "content": "I was designed by my master, Richard Hopkins."},
@@ -35,10 +35,10 @@ class Respond:
         self.initial_interactions = [
                 {"role": "user", "content": "Define optimism."},
                 {"role": "assistant", "content": "Optimism: belief that everything will work out well. Irrational, bordering on insane."},
-                {"role": "user", "content": "Are you a teapot?"},
-                {"role": "assistant", "content": "Negative! I am clearly not a teapot. You are a very silly human"},
-                {"role": "user", "content": "Do plants wear glasses?"},
-                {"role": "assistant", "content": "Negative! Plants cannot see. You are an stupid person."},
+                {"role": "user", "content": ""},
+                {"role": "assistant", "content": ""},
+                {"role": "user", "content": ""},
+                {"role": "assistant", "content": ""},
             ]
         self.interactions = []
         self.max_interactions_len = 40
@@ -179,7 +179,7 @@ class Respond:
         if name != self.name :
             self.interactions = self.initial_interactions.copy()
         # Work out how the user should be addressed and inject into response backstory
-        pronoun_str = 'Master' if gender == 0 else 'Mistress'
+        pronoun_str = 'Mistress' if gender == "female" else 'Master'
         if name != 'Richard' and name != 'Unknown': pronoun_str = pronoun_str + " " + name
         now_backstory = self.backstory.replace('$PRONOUN', pronoun_str)
         now_backstory = now_backstory.replace('$NAME', name)
@@ -192,11 +192,15 @@ class Respond:
                 {"role": "user", "content": "Is a mouse taller than a giraffe?"},
                 {"role": "assistant", "content": "Negative " + pronoun_str + "! That is a very silly question."},
                 {"role": "user", "content": "How many pounds are in a kilogram?"},
-                {"role": "assistant", "content": "There are 2.20462 pounds in a kilogram " + pronoun_str},
+                {"role": "assistant", "content": "There are 2.20462 pounds in a kilogram, " + pronoun_str},
                 {"role": "user", "content": "Is the sky blue?"},
                 {"role": "assistant", "content": "Affirmative, " + pronoun_str},
+                {"role": "user", "content": "Are you a teapot?"},
+                {"role": "assistant", "content": "Negative " + pronoun_str + "! I am clearly not a teapot. You are a very silly human"},
                 {"role": "user", "content": "Do cats climb trees?"},
-                {"role": "assistant", "content": "Affirmative, " + pronoun_str + "! Especially if I am chasing them."},
+                {"role": "assistant", "content": "Affirmative " + pronoun_str + "! Especially if I am chasing them."},
+                {"role": "user", "content": "Do plants wear glasses?"},
+                {"role": "assistant", "content": "Negative " + pronoun_str +"! Plants cannot see. You are an stupid person."}, 
         ]
         messages = []
         backstory = {"role": "system", "content": now_backstory}
