@@ -2,10 +2,13 @@ import face_recognition
 import os
 
 # The folder containing the images
+# images should have the name format
+# james:male.jpg or julie:female.jpg
+
 images_folder = "images"
 
 # The database file
-database_file = "database.txt"
+database_file = "known_faces.txt"
 
 # Load the images and their names
 images = []

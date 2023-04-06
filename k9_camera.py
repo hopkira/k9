@@ -104,6 +104,10 @@ try:
                 index = matches.index(True)
                 name = known_names[index]
                 gender = known_genders[index]
+                if gender == "male": 
+                    gender_prediction = 0.0
+                else:
+                    gender_prediction = 1.0
             else:
                 # Resize the face image to match the input size of the gender detection model
                 resized_face_image = cv2.resize(face_image, (227, 227))
@@ -120,10 +124,9 @@ try:
         face_center_x = (right + left) // 2
         bearing = -(face_center_x - center_x) / center_x
         angle = float(bearing * math.radians(cam_h_fov))
+        gender="male" if gender_prediction==1.0 else "female"
+        mem.storePerson(str(name), str(gender), float(bearing))
 
-        mem.storeState("face_bearing",float(bearing))
-        mem.storeState("face_name",float(index))
-        mem.storeState("face_gender",float(gender_prediction))
 
 except KeyboardInterrupt:
     # Release handle to the webcam

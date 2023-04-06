@@ -37,9 +37,8 @@ class Memory():
             print("Recording data permanently") # let the user know they are in sim mode
         self.storeState("left:speed",0.0)
         self.storeState("right:speed",0.0)
-
-            
-    def storeState(self, key:str, value:float) -> None:
+      
+    def storeState(self, key:str, value) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
 
         Args:
@@ -69,7 +68,7 @@ class Memory():
         self.r.set(str(key) + ":now",str(value))
         self.r.set(str(key) + ":time:now",str(time.time()))
 
-    def retrieveState(self, key:str) -> float:
+    def retrieveState(self, key:str):
         '''Retrieves the last version of a desired key
 
         Args:
@@ -236,3 +235,27 @@ class Memory():
         '''
         
         return self.retrieveSensorReading(sensor)
+    
+    def storePerson(self, name:str, gender:str, bearing:float) -> None:
+        '''Saves the details of the person talking to the robot
+
+        Args:
+            name: first name of the person
+            gender: 'male' or 'female' as string
+            bearing: direction to person in degrees; zero is directly
+            forward whilst left is negative, right is positive
+        '''
+        self.storeState("name", name)
+        self.storeState("gender", gender)
+        self.storeState("bearing", str(bearing))
+
+    def retrievePerson(self) -> dict:
+        '''Retrieves the details of the last person talking to the robot
+        '''
+        name = float(self.retrieveState("name"))
+        gender = float(self.retrieveState("gender"))
+        bearing = float(self.retrieveState("bearing"))
+        dict = {"name": name,
+                "gender": gender,
+                "bearing": bearing}
+        return dict
