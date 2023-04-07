@@ -60,7 +60,7 @@ print("Embeddings loaded")
 # pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
 
 # Load the gender detection model
-gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender.caffemodel")
+gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender_net.caffemodel")
 print("Gender model loaded")
 
 # Open the video stream from the Pi Camera
