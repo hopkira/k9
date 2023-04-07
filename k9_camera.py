@@ -1,10 +1,10 @@
 
 #!/usr/bin/env python
 # coding: utf-8
-# Author: Richard Hopkins and Chat-GPT-4
+# Author: Richard Hopkins and Chat-GPT
 # Date: 3 April 2023
 #
-# Written in part by GPT-4 using the following prompt:
+# Written in part by Chat-GPT using the following prompt:
 #
 # Write a Python program that will:
 #   1. Run on the Raspberry Pi and use the Pi Camera to perform the detection
@@ -15,7 +15,7 @@
 #      specialist model to determine the likely gender of the face.
 #   4. Record the name, gender and horizontal bearing of the face (in degrees) in Redis
 #
-# Gender recognition code written by GPT-4 but clearly from the following:
+# Gender recognition code written by Chat-GPT but clearly from the following:
 # @article{Rothe-IJCV-2018,
 #  author = {Rasmus Rothe and Radu Timofte and Luc Van Gool},
 #  title = {Deep expectation of real and apparent age from a single image without facial landmarks},
@@ -33,6 +33,7 @@ import face_recognition
 import math
 from memory import Memory
 import time
+import sys
 
 # 6mm 3MP Pi HQ Camera
 cam_h_fov = 63.0
@@ -43,15 +44,18 @@ mem = Memory()
 known_faces = []
 known_names = []
 known_genders = []
-with open("known_faces.txt", "r") as f:
+with open("../face_db/face_encodings.txt", "r") as f:
     lines = f.readlines()
     for line in lines:
         face_encoding = np.fromstring(line, dtype=float, sep=' ')
         known_faces.append(face_encoding)
-        name, gender = line.split(":")
+        name, gender = line.split("|")
         known_names.append(name)
         known_genders.append(gender.strip())
+print(known_names)
+print(known_genders)
 
+sys.exit()
 # gender models can be downloaded from:
 # model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
 # pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
