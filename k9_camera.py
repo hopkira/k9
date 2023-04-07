@@ -64,73 +64,67 @@ gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender.caffemodel")
 # Open the video stream from the Pi Camera
 camera = cv2.VideoCapture(0)
 
-try:
-    while True:
-        time.sleep(0.2)
-        # Grab a single frame of video
-        ret, frame = camera.read()
+while True:
+    time.sleep(0.2)
+    # Grab a single frame of video
+    ret, frame = camera.read()
 
-        # Convert the frame to RGB color
-        rgb_frame = frame[:, :, ::-1]
+    # Convert the frame to RGB color
+    rgb_frame = frame[:, :, ::-1]
 
-        # Find all the faces and their locations in the current frame
-        face_locations = face_recognition.face_locations(rgb_frame)
+    # Find all the faces and their locations in the current frame
+    face_locations = face_recognition.face_locations(rgb_frame)
 
-        # If no faces are found, skip to the next frame
-        if len(face_locations) == 0:
-            continue
+    # If no faces are found, skip to the next frame
+    if len(face_locations) == 0:
+        continue
 
-        # Find the face closest to the center of the image
-        center_x = frame.shape[1] // 2
-        min_distance = math.inf
-        closest_face_location = None
-        for location in face_locations:
-            y, x, _ = location
-            distance = abs(x - center_x)
-            if distance < min_distance:
-                min_distance = distance
-                closest_face_location = location
+    # Find the face closest to the center of the image
+    center_x = frame.shape[1] // 2
+    min_distance = math.inf
+    closest_face_location = None
+    for location in face_locations:
+        y, x, _ = location
+        distance = abs(x - center_x)
+        if distance < min_distance:
+            min_distance = distance
+            closest_face_location = location
 
-        # Crop the image to the closest face
-        top, right, bottom, left = closest_face_location
-        face_image = rgb_frame[top:bottom, left:right]
+    # Crop the image to the closest face
+    top, right, bottom, left = closest_face_location
+    face_image = rgb_frame[top:bottom, left:right]
 
-        # Encode the face image and compare it to the known faces
-        unknown_face_encoding = face_recognition.face_encodings(face_image)
-        if len(unknown_face_encoding) > 0:
-            unknown_face_encoding = unknown_face_encoding[0]
+    # Encode the face image and compare it to the known faces
+    unknown_face_encoding = face_recognition.face_encodings(face_image)
+    if len(unknown_face_encoding) > 0:
+        unknown_face_encoding = unknown_face_encoding[0]
 
-            matches = face_recognition.compare_faces(known_faces, unknown_face_encoding)
-            # Find the name and gender of the closest match, or use "Unknown" and the predicted gender
-            name = "Unknown"
-            if True in matches:
-                index = matches.index(True)
-                name = face_data[index]['name']
-                gender = face_data[index]['gender']
-                if gender == "male": 
-                    gender_prediction = 0.0
-                else:
-                    gender_prediction = 1.0
+        matches = face_recognition.compare_faces(known_faces, unknown_face_encoding)
+        # Find the name and gender of the closest match, or use "Unknown" and the predicted gender
+        name = "Unknown"
+        if True in matches:
+            index = matches.index(True)
+            name = face_data[index]['name']
+            gender = face_data[index]['gender']
+            if gender == "male": 
+                gender_prediction = 0.0
             else:
-                # Resize the face image to match the input size of the gender detection model
-                resized_face_image = cv2.resize(face_image, (227, 227))
-                # Convert the face image to the input format of the gender detection model
-                blob = cv2.dnn.blobFromImage(resized_face_image, scalefactor=1.0, size=(227, 227),
-                                            mean=(78.4263377603, 87.7689143744, 114.895847746), swapRB=False, crop=False)
-                # Pass the face image through the gender detection model to predict the gender
-                gender_model.setInput(blob)
-                gender_predictions = gender_model.forward()
-                # Male if < 0.5 otherwise female
-                gender_prediction = round(gender_predictions[0])
+                gender_prediction = 1.0
+        else:
+            # Resize the face image to match the input size of the gender detection model
+            resized_face_image = cv2.resize(face_image, (227, 227))
+            # Convert the face image to the input format of the gender detection model
+            blob = cv2.dnn.blobFromImage(resized_face_image, scalefactor=1.0, size=(227, 227),
+                                        mean=(78.4263377603, 87.7689143744, 114.895847746), swapRB=False, crop=False)
+            # Pass the face image through the gender detection model to predict the gender
+            gender_model.setInput(blob)
+            gender_predictions = gender_model.forward()
+            # Male if < 0.5 otherwise female
+            gender_prediction = round(gender_predictions[0])
 
-        # Calculate the bearing to the face
-        face_center_x = (right + left) // 2
-        bearing = -(face_center_x - center_x) / center_x
-        angle = float(bearing * math.radians(cam_h_fov))
-        gender="male" if gender_prediction==1.0 else "female"
-        mem.storePerson(str(name), str(gender), float(bearing))
-
-
-except KeyboardInterrupt:
-    # Release handle to the webcam
-    camera.release()
+    # Calculate the bearing to the face
+    face_center_x = (right + left) // 2
+    bearing = -(face_center_x - center_x) / center_x
+    angle = float(bearing * math.radians(cam_h_fov))
+    gender="male" if gender_prediction==1.0 else "female"
+    mem.storePerson(str(name), str(gender), float(bearing))
