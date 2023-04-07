@@ -111,6 +111,7 @@ try:
 
         # Encode the face image and compare it to the known faces
         unknown_face_encoding = face_recognition.face_encodings(face_image)
+
         if len(unknown_face_encoding) > 0:
             print("Face encoded")
             unknown_face_encoding = unknown_face_encoding[0]
@@ -140,13 +141,13 @@ try:
                 # Male if < 0.5 otherwise female
                 #gender_prediction = round(gender_predictions[0])
 
-        # Calculate the bearing to the face
-        face_center_x = (right + left) // 2
-        bearing = -(face_center_x - center_x) / center_x
-        angle = float(bearing * math.radians(cam_h_fov))
-        gender="male" if gender_prediction==1.0 else "female"
-        mem.storePerson(str(name), str(gender), float(bearing))
-        print(name,gender,bearing)
+            # Calculate the bearing to the face
+            face_center_x = (right + left) // 2
+            bearing = -(face_center_x - center_x) / center_x
+            angle = float(bearing * math.radians(cam_h_fov))
+            gender="male" if gender_prediction==1.0 else "female"
+            mem.storePerson(str(name), str(gender), float(bearing))
+            print(name,gender,bearing)
 except KeyboardInterrupt:
     # Release the video stream and close the window
     camera.release()
