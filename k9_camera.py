@@ -79,8 +79,8 @@ try:
             break
 
         # Display the captured frame
-        cv2.imshow("Frame", frame)
-        cv2.waitKey(1)
+        #cv2.imshow("Frame", frame)
+        # cv2.waitKey(1)
 
         # Convert the frame to RGB color
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -104,15 +104,18 @@ try:
             if distance < min_distance:
                 min_distance = distance
                 closest_face_location = location
-
+        
         # Crop the image to the closest face
         top, right, bottom, left = closest_face_location
         face_image = rgb_frame[top:bottom, left:right]
 
-        # Convert the face locations to full_object_detection objects
-        face_landmarks = face_recognition.face_landmarks(rgb_frame, face_locations)
+        cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
+        cv2.imshow("Face", face_image)
+        cv2.waitKey(1)
 
-        unknown_face_encoding = face_recognition.face_encodings(face_image, [face_landmarks])
+        '''
+
+        unknown_face_encoding = face_recognition.face_encodings(rgb_frame, face_locations)
 
         if len(unknown_face_encoding) > 0:
             print("Face encoded")
@@ -150,6 +153,7 @@ try:
             gender="male" if gender_prediction==1.0 else "female"
             mem.storePerson(str(name), str(gender), float(bearing))
             print(name,gender,bearing)
+        '''
 except KeyboardInterrupt:
     # Release the video stream and close the window
     camera.release()
