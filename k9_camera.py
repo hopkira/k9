@@ -83,7 +83,7 @@ try:
         cv2.waitKey(1)
 
         # Convert the frame to RGB color
-        rgb_frame = frame[:, :, ::-1]
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
         # Find all the faces and their locations in the current frame
         face_locations = face_recognition.face_locations(rgb_frame)
