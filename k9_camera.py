@@ -41,7 +41,7 @@ cam_h_fov = 63.0
 mem = Memory()
 
 # Load the known faces and their names
-with open('../face_db/face_embeddings.txt', 'r') as file:
+with open('../face_db/face_encodings.txt', 'r') as file:
     lines = file.readlines()
 
 data = []
