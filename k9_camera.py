@@ -68,7 +68,7 @@ camera = cv2.VideoCapture(0)
 print("Video stream running")
 
 while True:
-    time.sleep(0.2)
+    #time.sleep(0.2)
     # Grab a single frame of video
     ret, frame = camera.read()
 
@@ -82,6 +82,7 @@ while True:
     if len(face_locations) == 0:
         continue
 
+    print("Face detected")
     # Find the face closest to the center of the image
     center_x = frame.shape[1] // 2
     min_distance = math.inf
@@ -100,12 +101,13 @@ while True:
     # Encode the face image and compare it to the known faces
     unknown_face_encoding = face_recognition.face_encodings(face_image)
     if len(unknown_face_encoding) > 0:
+        print("Face encoded")
         unknown_face_encoding = unknown_face_encoding[0]
-
         matches = face_recognition.compare_faces(known_faces, unknown_face_encoding)
         # Find the name and gender of the closest match, or use "Unknown" and the predicted gender
         name = "Unknown"
         if True in matches:
+            print("Face recognized")
             index = matches.index(True)
             name = face_data[index]['name']
             gender = face_data[index]['gender']
@@ -114,6 +116,7 @@ while True:
             else:
                 gender_prediction = 1.0
         else:
+            print("Face not recognized")
             # Resize the face image to match the input size of the gender detection model
             resized_face_image = cv2.resize(face_image, (227, 227))
             # Convert the face image to the input format of the gender detection model
@@ -131,3 +134,4 @@ while True:
     angle = float(bearing * math.radians(cam_h_fov))
     gender="male" if gender_prediction==1.0 else "female"
     mem.storePerson(str(name), str(gender), float(bearing))
+    print(name,gender,bearing)
