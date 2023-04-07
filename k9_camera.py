@@ -41,19 +41,17 @@ cam_h_fov = 63.0
 mem = Memory()
 
 # Load the known faces and their names
-known_faces = []
-known_names = []
-known_genders = []
-with open("../face_db/face_encodings.txt", "r") as f:
-    lines = f.readlines()
-    for line in lines:
-        face_encoding = np.fromstring(line, dtype=float, sep=' ')
-        known_faces.append(face_encoding)
-        name, gender = line.split("|")
-        known_names.append(name)
-        known_genders.append(gender.strip())
-print(known_names)
-print(known_genders)
+with open('file.txt', 'r') as file:
+    lines = file.readlines()
+
+data = []
+for line in lines:
+    parts = line.strip().split('|')
+    name = parts[0]
+    gender = parts[1]
+    embeddings = eval(parts[2])
+    data.append({'name': name, 'gender': gender, 'embeddings': embeddings})
+print(data)
 
 sys.exit()
 # gender models can be downloaded from:
