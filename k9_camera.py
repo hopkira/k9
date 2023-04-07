@@ -98,7 +98,8 @@ try:
         min_distance = math.inf
         closest_face_location = None
         for location in face_locations:
-            y, x, _ = location
+            top, right, bottom, left = location
+            x = (left + right) // 2
             distance = abs(x - center_x)
             if distance < min_distance:
                 min_distance = distance
