@@ -109,8 +109,10 @@ try:
         top, right, bottom, left = closest_face_location
         face_image = rgb_frame[top:bottom, left:right]
 
-        # Encode the face image and compare it to the known faces
-        unknown_face_encoding = face_recognition.face_encodings(face_image)
+        # Convert the face locations to full_object_detection objects
+        face_landmarks = face_recognition.face_landmarks(rgb_frame, face_locations)
+
+        unknown_face_encoding = face_recognition.face_encodings(face_image, [face_landmarks])
 
         if len(unknown_face_encoding) > 0:
             print("Face encoded")
