@@ -44,16 +44,16 @@ mem = Memory()
 with open('../face_db/face_encodings.txt', 'r') as file:
     lines = file.readlines()
 
-data = []
+face_data = []
+known_faces=[]
 for line in lines:
     parts = line.strip().split('|')
     name = parts[0]
     gender = parts[1]
     embeddings = eval(parts[2])
-    data.append({'name': name, 'gender': gender, 'embeddings': embeddings})
-print(data)
+    face_data.append({'name': name, 'gender': gender})
+    known_faces.append(embeddings)
 
-sys.exit()
 # gender models can be downloaded from:
 # model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
 # pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
@@ -99,13 +99,14 @@ try:
         unknown_face_encoding = face_recognition.face_encodings(face_image)
         if len(unknown_face_encoding) > 0:
             unknown_face_encoding = unknown_face_encoding[0]
+
             matches = face_recognition.compare_faces(known_faces, unknown_face_encoding)
             # Find the name and gender of the closest match, or use "Unknown" and the predicted gender
             name = "Unknown"
             if True in matches:
                 index = matches.index(True)
-                name = known_names[index]
-                gender = known_genders[index]
+                name = face_data[index]['name']
+                gender = face_data[index]['gender']
                 if gender == "male": 
                     gender_prediction = 0.0
                 else:
