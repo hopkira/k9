@@ -53,6 +53,7 @@ for line in lines:
     embeddings = eval(parts[2])
     face_data.append({'name': name, 'gender': gender})
     known_faces.append(embeddings)
+print("Embeddings loaded")
 
 # gender models can be downloaded from:
 # model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
@@ -60,9 +61,11 @@ for line in lines:
 
 # Load the gender detection model
 gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender.caffemodel")
+print("Gender model loaded")
 
 # Open the video stream from the Pi Camera
 camera = cv2.VideoCapture(0)
+print("Video stream running")
 
 while True:
     time.sleep(0.2)
