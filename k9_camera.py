@@ -130,7 +130,7 @@ try:
         # Draw bounding box around the face
         if closest_face_location:
             top, right, bottom, left = closest_face_location
-            cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
+            cv2.rectangle(frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
             # Perform face recognition on the closest face
             face_image = rgb_frame[top:bottom, left:right]
@@ -152,9 +152,9 @@ try:
 
             # Draw text label for the detected name and gender
             font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+            cv2.putText(frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
 
-        cv2.imshow("Frame", rgb_frame)
+        cv2.imshow("Frame", frame)
         cv2.waitKey(1)
 
         '''
