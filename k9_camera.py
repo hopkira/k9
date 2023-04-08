@@ -26,6 +26,13 @@
 #  year={2018},
 #  publisher={Springer}
 # }
+# gender models can be downloaded from:
+# model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
+# pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
+
+# Load the gender detection model
+#gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender_net.caffemodel")
+#print("Gender model loaded")
 
 import cv2
 import numpy as np
@@ -54,14 +61,6 @@ for line in lines:
     face_data.append({'name': name, 'gender': gender})
     known_faces.append(embeddings)
 print("Embeddings loaded")
-
-# gender models can be downloaded from:
-# model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
-# pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
-
-# Load the gender detection model
-#gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender_net.caffemodel")
-#print("Gender model loaded")
 
 # Open the video stream from the Pi Camera
 camera = cv2.VideoCapture(0)
@@ -101,16 +100,60 @@ try:
             top, right, bottom, left = location
             x = (left + right) // 2
             distance = abs(x - center_x)
-            if distance < min_distance:
+            size = (bottom - top) * (right - left)
+            if size > max_size and distance <= (frame.shape[1] * 0.25):
+                max_size = size
+                closest_face_location = location
+
+        
+        # Find all the faces and their locations in the current frame
+        face_locations = face_recognition.face_locations(rgb_frame)
+
+        # If no faces are found, skip to the next frame
+        if len(face_locations) == 0:
+            continue
+
+        print("Face detected")
+        # Find the face closest to the center of the image
+        center_x = frame.shape[1] // 2
+        min_distance = math.inf
+        closest_face_location = None
+        for location in face_locations:
+            top, right, bottom, left = location
+            x = (left + right) // 2
+            distance = abs(x - center_x)
+            if distance < min_distance and (right - left) > 40 and (left + right) / 2 > center_x:
                 min_distance = distance
                 closest_face_location = location
         
-        # Crop the image to the closest face
-        top, right, bottom, left = closest_face_location
-        face_image = rgb_frame[top:bottom, left:right]
+        # Draw bounding box around the face
+        if closest_face_location:
+            top, right, bottom, left = closest_face_location
+            cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
-        cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
-        cv2.imshow("Face", face_image)
+            # Perform face recognition on the closest face
+            face_image = rgb_frame[top:bottom, left:right]
+            face_encodings = face_recognition.face_encodings(face_image)
+            if len(face_encodings) == 0:
+                print("Face recognition failed")
+                continue
+            face_encoding = face_encodings[0]
+
+            # Compare face encoding with known faces
+            distances = face_recognition.face_distance(known_faces, face_encoding)
+            min_distance_index = np.argmin(distances)
+            if distances[min_distance_index] <= 0.6:
+                name = face_data[min_distance_index]['name']
+                gender = face_data[min_distance_index]['gender']
+            else:
+                name = 'Unknown'
+                gender = 'Unknown'
+
+            # Draw text label for the detected name and gender
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+
+        cv2.imshow("Frame", rgb_frame)
         cv2.waitKey(1)
 
         '''
