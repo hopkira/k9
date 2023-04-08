@@ -66,11 +66,12 @@ print("Embeddings loaded")
 camera = cv2.VideoCapture(0)
 if not camera.isOpened():
     print("Could not open video stream")
-print("Video stream running")
+print("Waiting for camera to warm up")
+
+time.sleep(2.0)
 
 try:
     while True:
-        time.sleep(0.2)
         # Grab a single frame of video
         ret, frame = camera.read()
         if not ret:
@@ -114,7 +115,7 @@ try:
             continue
 
         print("Face detected")
-        # Find the face closest to the center of the image
+        # Find a reasonably big face closest to the center of the image
         center_x = frame.shape[1] // 2
         min_distance = math.inf
         closest_face_location = None
@@ -122,7 +123,7 @@ try:
             top, right, bottom, left = location
             x = (left + right) // 2
             distance = abs(x - center_x)
-            if distance < min_distance and (right - left) > 40 and (left + right) / 2 > center_x:
+            if distance < min_distance and (right - left) > 20:
                 min_distance = distance
                 closest_face_location = location
         
