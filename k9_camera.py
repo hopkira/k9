@@ -93,6 +93,7 @@ try:
 
         print("Face detected")
         # Find the face closest to the center of the image
+        max_size = 0
         center_x = frame.shape[1] // 2
         min_distance = math.inf
         closest_face_location = None
@@ -105,7 +106,6 @@ try:
                 max_size = size
                 closest_face_location = location
 
-        
         # Find all the faces and their locations in the current frame
         face_locations = face_recognition.face_locations(rgb_frame)
 
