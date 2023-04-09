@@ -78,10 +78,6 @@ try:
             print("Error reading frame from video stream")
             break
 
-        # Display the captured frame
-        #cv2.imshow("Frame", frame)
-        # cv2.waitKey(1)
-
         # Convert the frame to RGB color
         rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
