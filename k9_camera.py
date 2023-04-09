@@ -66,7 +66,7 @@ print("Embeddings loaded")
 camera = picamera.PiCamera()
 camera.resolution = (640, 480)
 rgb_frame = np.empty((480, 640, 3), dtype=np.uint8)
-min_head_size = camera.resolution // 8
+min_head_size = camera.resolution[0] // 8
 print("Min head size is ", min_head_size, " pixels")
 
 print("Waiting for camera to warm up")
