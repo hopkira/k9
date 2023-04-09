@@ -66,6 +66,8 @@ print("Embeddings loaded")
 camera = picamera.PiCamera()
 camera.resolution = (640, 480)
 rgb_frame = np.empty((480, 640, 3), dtype=np.uint8)
+min_head_size = camera.resolution // 8
+print("Min head size is ", min_head_size, " pixels")
 
 print("Waiting for camera to warm up")
 
@@ -94,14 +96,15 @@ try:
         print("Face detected")
         # Find a reasonably big face closest to the center of the image
         center_x = rgb_frame.shape[1] // 2
-        min_distance = math.inf
         closest_face_location = None
+        min_size = 0
         for location in face_locations:
             top, right, bottom, left = location
             x = (left + right) // 2
             distance = abs(x - center_x)
-            print("Size = ", right - left, ", center dist = ", distance)
-            if (right - left) > 70 and distance < 35:
+            size = right - left
+            print("Size = ", size, ", center dist = ", distance)
+            if size > min_size and size > 70 and distance < (size * 2.0):
                 closest_face_location = location
 
         # If no faces are found, skip to the next frame
