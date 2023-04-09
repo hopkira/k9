@@ -135,7 +135,7 @@ try:
 
             # Perform face recognition on the closest face
             face_image = rgb_frame[top:bottom, left:right]
-            face_encodings = face_recognition.face_encodings([face_image])
+            face_encodings = face_recognition.face_encodings(face_image)[0]
             if len(face_encodings) == 0:
                 print("Face recognition failed")
                 continue
