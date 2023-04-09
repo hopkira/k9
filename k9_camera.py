@@ -48,6 +48,59 @@ cam_h_fov = 63.0
 
 mem = Memory()
 
+def detect_face(rgb_frame) -> dict:
+        face_locations = []
+        face_locations = face_recognition.face_locations(rgb_frame)
+        # If no faces are found, skip to the next frame
+        if len(face_locations) == 0:
+            return None
+
+        print("Face detected")
+        # Find a reasonably big face closest to the center of the image
+        center_x = rgb_frame.shape[1] // 2
+        closest_face_location = None
+        min_size = 0
+        for location in face_locations:
+            top, right, bottom, left = location
+            x = (left + right) // 2
+            distance = abs(x - center_x)
+            size = right - left
+            print("Size = ", size, ", center dist = ", distance)
+            if size > min_size and size > 70 and distance < (size * 2.0):
+                closest_face_location = location
+
+        # If no faces are found, skip to the next frame
+        if not closest_face_location:
+            print('No qualifying face')
+            return None
+
+        # Draw bounding box around the face
+        top, right, bottom, left = closest_face_location
+        cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
+
+        # Perform face recognition on the closest face
+        face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
+        if len(face_encodings) == 0:
+            print("Face recognition failed")
+            return None
+        face_encoding = face_encodings[0]
+
+        # Compare face encoding with known faces
+        distances = face_recognition.face_distance(known_faces, face_encoding)
+        min_distance_index = np.argmin(distances)
+        if distances[min_distance_index] <= 0.6:
+            name = face_data[min_distance_index]['name']
+            gender = face_data[min_distance_index]['gender']
+        else:
+            name = 'Unknown'
+            gender = 'Unknown'
+
+        # Draw text label for the detected name and gender
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+        dict = {"name": name, "gender":gender}
+        return dict
+
 # Load the known faces and their names
 with open('../face_db/face_encodings.txt', 'r') as file:
     lines = file.readlines()
@@ -76,73 +129,11 @@ time.sleep(2.0)
 # Create a window to display the video
 cv2.namedWindow("Face recognition")
 
-i = 0
-
 try:
     while True:
-
         time.sleep(0.2)
-        face_locations = []
         camera.capture(rgb_frame, format="rgb")
-
-        face_locations = face_recognition.face_locations(rgb_frame)
-
-        # If no faces are found, skip to the next frame
-        if len(face_locations) == 0:
-            rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
-            cv2.imshow("Face recognition", rgb_image)
-            cv2.waitKey(1)
-            continue
-
-        print("Face detected")
-        # Find a reasonably big face closest to the center of the image
-        center_x = rgb_frame.shape[1] // 2
-        closest_face_location = None
-        min_size = 0
-        for location in face_locations:
-            top, right, bottom, left = location
-            x = (left + right) // 2
-            distance = abs(x - center_x)
-            size = right - left
-            print("Size = ", size, ", center dist = ", distance)
-            if size > min_size and size > 70 and distance < (size * 2.0):
-                closest_face_location = location
-
-        # If no faces are found, skip to the next frame
-        if not closest_face_location:
-            print('No qualifying face')
-            rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
-            cv2.imshow("Face recognition", rgb_image)
-            cv2.waitKey(1)
-            continue
-        
-        # Draw bounding box around the face
-        top, right, bottom, left = closest_face_location
-        cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
-
-        # Perform face recognition on the closest face
-        face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
-        if len(face_encodings) == 0:
-            print("Face recognition failed")
-            rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
-            cv2.imshow("Face recognition", rgb_image)
-            cv2.waitKey(1)
-            continue
-        face_encoding = face_encodings[0]
-
-        # Compare face encoding with known faces
-        distances = face_recognition.face_distance(known_faces, face_encoding)
-        min_distance_index = np.argmin(distances)
-        if distances[min_distance_index] <= 0.6:
-            name = face_data[min_distance_index]['name']
-            gender = face_data[min_distance_index]['gender']
-        else:
-            name = 'Unknown'
-            gender = 'Unknown'
-
-        # Draw text label for the detected name and gender
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+        dict = detect_face(rgb_frame)
         rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
         cv2.imshow("Face recognition", rgb_image)
         cv2.waitKey(1)
