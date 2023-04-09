@@ -64,8 +64,8 @@ for line in lines:
 print("Embeddings loaded")
 
 camera = picamera.PiCamera()
-camera.resolution = (1280, 720)
-rgb_frame = np.empty((720, 1280, 3), dtype=np.uint8)
+camera.resolution = (640, 480)
+rgb_frame = np.empty((480, 640, 3), dtype=np.uint8)
 
 print("Waiting for camera to warm up")
 
@@ -89,6 +89,8 @@ try:
 
         # If no faces are found, skip to the next frame
         if len(face_locations) == 0:
+            cv2.imshow("Face recognition", rgb_frame)
+            cv2.waitKey(1)
             continue
 
         print("Face detected")
@@ -100,12 +102,14 @@ try:
             top, right, bottom, left = location
             x = (left + right) // 2
             distance = abs(x - center_x)
-            if distance < min_distance and (right - left) > 20:
+            if distance < min_distance and (right - left) > 10:
                 min_distance = distance
                 closest_face_location = location
 
         # If no faces are found, skip to the next frame
-        if closest_face_location:
+        if not closest_face_location:
+            cv2.imshow("Face recognition", rgb_frame)
+            cv2.waitKey(1)
             continue
         
         # Draw bounding box around the face
@@ -116,6 +120,8 @@ try:
         face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
         if len(face_encodings) == 0:
             print("Face recognition failed")
+            cv2.imshow("Face recognition", rgb_frame)
+            cv2.waitKey(1)
             continue
         face_encoding = face_encodings[0]
 
