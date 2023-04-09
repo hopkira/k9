@@ -62,13 +62,18 @@ for line in lines:
     known_faces.append(embeddings)
 print("Embeddings loaded")
 
-# Open the video stream from the Pi Camera
+res = (1280, 720)
 camera = cv2.VideoCapture(0)
+camera.set(cv2.CAP_PROP_FRAME_WIDTH, res[0])
+camera.set(cv2.CAP_PROP_FRAME_HEIGHT, res[1])
 if not camera.isOpened():
     print("Could not open video stream")
 print("Waiting for camera to warm up")
 
 time.sleep(2.0)
+
+# Create a window to display the video
+cv2.namedWindow("Raspberry Pi HQ Camera")
 
 try:
     while True:
