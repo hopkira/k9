@@ -74,35 +74,18 @@ time.sleep(2.0)
 # Create a window to display the video
 cv2.namedWindow("Face recognition")
 
+i = 0
+
 try:
     while True:
-
+        face_locations = 0
         camera.capture(rgb_frame, format="rgb")
 
         # Find all the faces and their locations in the current frame
-        face_locations = face_recognition.face_locations(rgb_frame)
-
-        # If no faces are found, skip to the next frame
-        if len(face_locations) == 0:
-            continue
-
-        print("Face detected")
-        # Find the face closest to the center of the image
-        max_size = 0
-        center_x = rgb_frame.shape[1] // 2
-        min_distance = math.inf
-        closest_face_location = None
-        for location in face_locations:
-            top, right, bottom, left = location
-            x = (left + right) // 2
-            distance = abs(x - center_x)
-            size = (bottom - top) * (right - left)
-            if size > max_size and distance <= (rgb_frame.shape[1] * 0.25):
-                max_size = size
-                closest_face_location = location
-
-        # Find all the faces and their locations in the current frame
-        face_locations = face_recognition.face_locations(rgb_frame)
+        if i % 25 == 0:
+            face_locations = face_recognition.face_locations(rgb_frame)
+            i = 0
+        i += 1
 
         # If no faces are found, skip to the next frame
         if len(face_locations) == 0:
@@ -120,33 +103,35 @@ try:
             if distance < min_distance and (right - left) > 20:
                 min_distance = distance
                 closest_face_location = location
+
+        # If no faces are found, skip to the next frame
+        if closest_face_location:
+            continue
         
         # Draw bounding box around the face
-        if closest_face_location:
-            top, right, bottom, left = closest_face_location
-            cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
+        top, right, bottom, left = closest_face_location
+        cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
-            # Perform face recognition on the closest face
-            face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
-            if len(face_encodings) == 0:
-                print("Face recognition failed")
-                continue
-            face_encoding = face_encodings[0]
+        # Perform face recognition on the closest face
+        face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
+        if len(face_encodings) == 0:
+            print("Face recognition failed")
+            continue
+        face_encoding = face_encodings[0]
 
-            # Compare face encoding with known faces
-            distances = face_recognition.face_distance(known_faces, face_encoding)
-            min_distance_index = np.argmin(distances)
-            if distances[min_distance_index] <= 0.6:
-                name = face_data[min_distance_index]['name']
-                gender = face_data[min_distance_index]['gender']
-            else:
-                name = 'Unknown'
-                gender = 'Unknown'
+        # Compare face encoding with known faces
+        distances = face_recognition.face_distance(known_faces, face_encoding)
+        min_distance_index = np.argmin(distances)
+        if distances[min_distance_index] <= 0.6:
+            name = face_data[min_distance_index]['name']
+            gender = face_data[min_distance_index]['gender']
+        else:
+            name = 'Unknown'
+            gender = 'Unknown'
 
-            # Draw text label for the detected name and gender
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
-
+        # Draw text label for the detected name and gender
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
         cv2.imshow("Face recognition", rgb_frame)
         cv2.waitKey(1)
 
