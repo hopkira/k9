@@ -73,7 +73,7 @@ print("Waiting for camera to warm up")
 time.sleep(2.0)
 
 # Create a window to display the video
-cv2.namedWindow("Raspberry Pi HQ Camera")
+cv2.namedWindow("Face recognition")
 
 try:
     while True:
@@ -155,7 +155,7 @@ try:
             font = cv2.FONT_HERSHEY_SIMPLEX
             cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
 
-        cv2.imshow("Frame", rgb_frame)
+        cv2.imshow("Face recognition", rgb_frame)
         cv2.waitKey(1)
 
         '''
