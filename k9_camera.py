@@ -100,8 +100,7 @@ try:
             top, right, bottom, left = location
             x = (left + right) // 2
             distance = abs(x - center_x)
-            if distance < min_distance and (right - left) > 30:
-                min_distance = distance
+            if (right - left) > 50 and distance < 25:
                 closest_face_location = location
 
         # If no faces are found, skip to the next frame
