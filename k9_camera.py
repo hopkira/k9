@@ -78,7 +78,7 @@ i = 0
 
 try:
     while True:
-        face_locations = 0
+        face_locations = []
         camera.capture(rgb_frame, format="rgb")
 
         # Find all the faces and their locations in the current frame
