@@ -36,6 +36,7 @@
 
 import cv2
 import numpy as np
+import picamera
 import face_recognition
 import math
 from memory import Memory
@@ -62,12 +63,10 @@ for line in lines:
     known_faces.append(embeddings)
 print("Embeddings loaded")
 
-res = (1280, 720)
-camera = cv2.VideoCapture(0)
-camera.set(cv2.CAP_PROP_FRAME_WIDTH, res[0])
-camera.set(cv2.CAP_PROP_FRAME_HEIGHT, res[1])
-if not camera.isOpened():
-    print("Could not open video stream")
+camera = picamera.PiCamera()
+camera.resolution = (320, 240)
+rgb_frame = np.empty((240, 320, 3), dtype=np.uint8)
+
 print("Waiting for camera to warm up")
 
 time.sleep(2.0)
@@ -77,14 +76,8 @@ cv2.namedWindow("Face recognition")
 
 try:
     while True:
-        # Grab a single frame of video
-        ret, frame = camera.read()
-        if not ret:
-            print("Error reading frame from video stream")
-            break
 
-        # Convert the frame to RGB color
-        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        camera.capture(rgb_frame, format="rgb")
 
         # Find all the faces and their locations in the current frame
         face_locations = face_recognition.face_locations(rgb_frame)
@@ -96,7 +89,7 @@ try:
         print("Face detected")
         # Find the face closest to the center of the image
         max_size = 0
-        center_x = frame.shape[1] // 2
+        center_x = rgb_frame.shape[1] // 2
         min_distance = math.inf
         closest_face_location = None
         for location in face_locations:
@@ -104,7 +97,7 @@ try:
             x = (left + right) // 2
             distance = abs(x - center_x)
             size = (bottom - top) * (right - left)
-            if size > max_size and distance <= (frame.shape[1] * 0.25):
+            if size > max_size and distance <= (rgb_frame.shape[1] * 0.25):
                 max_size = size
                 closest_face_location = location
 
@@ -117,7 +110,7 @@ try:
 
         print("Face detected")
         # Find a reasonably big face closest to the center of the image
-        center_x = frame.shape[1] // 2
+        center_x = rgb_frame.shape[1] // 2
         min_distance = math.inf
         closest_face_location = None
         for location in face_locations:
@@ -135,7 +128,7 @@ try:
 
             # Perform face recognition on the closest face
             face_image = rgb_frame[top:bottom, left:right]
-            face_encodings = face_recognition.face_encodings(face_image)[0]
+            face_encodings = face_recognition.face_encodings(face_image)
             if len(face_encodings) == 0:
                 print("Face recognition failed")
                 continue
