@@ -101,11 +101,12 @@ try:
             x = (left + right) // 2
             distance = abs(x - center_x)
             print("Size = ", right - left, ", center dist = ", distance)
-            if (right - left) > 50 and distance < 25:
+            if (right - left) > 70 and distance < 35:
                 closest_face_location = location
 
         # If no faces are found, skip to the next frame
         if not closest_face_location:
+            print('No qualifying face')
             cv2.imshow("Face recognition", rgb_frame)
             cv2.waitKey(1)
             continue
