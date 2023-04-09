@@ -100,6 +100,7 @@ try:
             top, right, bottom, left = location
             x = (left + right) // 2
             distance = abs(x - center_x)
+            print("Size = ", right - left, ", center dist = ", distance)
             if (right - left) > 50 and distance < 25:
                 closest_face_location = location
 
