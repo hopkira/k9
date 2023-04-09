@@ -127,8 +127,7 @@ try:
             cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
             # Perform face recognition on the closest face
-            face_image = rgb_frame[top:bottom, left:right]
-            face_encodings = face_recognition.face_encodings(face_image)
+            face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
             if len(face_encodings) == 0:
                 print("Face recognition failed")
                 continue
