@@ -78,9 +78,12 @@ i = 0
 
 try:
     while True:
+
         time.sleep(0.2)
         face_locations = []
         camera.capture(rgb_frame, format="rgb")
+
+        face_locations = face_recognition.face_locations(rgb_frame)
 
         # If no faces are found, skip to the next frame
         if len(face_locations) == 0:
