@@ -89,7 +89,8 @@ try:
 
         # If no faces are found, skip to the next frame
         if len(face_locations) == 0:
-            cv2.imshow("Face recognition", rgb_frame)
+            rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
+            cv2.imshow("Face recognition", rgb_image)
             cv2.waitKey(1)
             continue
 
@@ -110,7 +111,8 @@ try:
         # If no faces are found, skip to the next frame
         if not closest_face_location:
             print('No qualifying face')
-            cv2.imshow("Face recognition", rgb_frame)
+            rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
+            cv2.imshow("Face recognition", rgb_image)
             cv2.waitKey(1)
             continue
         
@@ -122,7 +124,8 @@ try:
         face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
         if len(face_encodings) == 0:
             print("Face recognition failed")
-            cv2.imshow("Face recognition", rgb_frame)
+            rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
+            cv2.imshow("Face recognition", rgb_image)
             cv2.waitKey(1)
             continue
         face_encoding = face_encodings[0]
@@ -140,7 +143,8 @@ try:
         # Draw text label for the detected name and gender
         font = cv2.FONT_HERSHEY_SIMPLEX
         cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
-        cv2.imshow("Face recognition", rgb_frame)
+        rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
+        cv2.imshow("Face recognition", rgb_image)
         cv2.waitKey(1)
 
         '''
