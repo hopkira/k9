@@ -64,8 +64,8 @@ for line in lines:
 print("Embeddings loaded")
 
 camera = picamera.PiCamera()
-camera.resolution = (320, 240)
-rgb_frame = np.empty((240, 320, 3), dtype=np.uint8)
+camera.resolution = (1280, 720)
+rgb_frame = np.empty((720, 1280, 3), dtype=np.uint8)
 
 print("Waiting for camera to warm up")
 
@@ -194,5 +194,5 @@ try:
         '''
 except KeyboardInterrupt:
     # Release the video stream and close the window
-    camera.release()
+    camera.close()
     cv2.destroyAllWindows()
