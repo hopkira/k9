@@ -20,7 +20,9 @@ cam_h_fov = 63.0
 mem = Memory()
 
 data = AgeAndGender()
+data.load_shape_predictor('../models/shape_predictor_5_face_landmarks.dat')
 data.load_dnn_gender_classifier('../models/dnn_gender_classifier_v1.dat')
+data.load_dnn_age_predictor('../models/dnn_age_predictor_v1.dat')
 
 def detect_face(rgb_frame) -> dict:
         face_locations = []
