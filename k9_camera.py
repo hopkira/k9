@@ -1,52 +1,26 @@
 
 #!/usr/bin/env python
 # coding: utf-8
-# Author: Richard Hopkins and Chat-GPT
-# Date: 3 April 2023
+# Author: Richard Hopkins
+# Date: 10 April 2023
 #
-# Written in part by Chat-GPT using the following prompt:
-#
-# Write a Python program that will:
-#   1. Run on the Raspberry Pi and use the Pi Camera to perform the detection
-#      of a face closest to the centre of the camera image. 
-#   2. Perform face recognition of the detected face against a list of known faces.
-#      Each known face has an assigned name and gender.
-#   3. If the face is not recognized from the list call it "Unknown" and use a 
-#      specialist model to determine the likely gender of the face.
-#   4. Record the name, gender and horizontal bearing of the face (in degrees) in Redis
-#
-# Gender recognition code written by Chat-GPT but clearly from the following:
-# @article{Rothe-IJCV-2018,
-#  author = {Rasmus Rothe and Radu Timofte and Luc Van Gool},
-#  title = {Deep expectation of real and apparent age from a single image without facial landmarks},
-#  journal = {International Journal of Computer Vision},
-#  volume={126},
-#  number={2-4},
-#  pages={144--157},
-#  year={2018},
-#  publisher={Springer}
-# }
-# gender models can be downloaded from:
-# model structure: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.prototxt
-# pre-trained weights: https://data.vision.ee.ethz.ch/cvl/rrothe/imdb-wiki/static/gender.caffemodel
-
-# Load the gender detection model
-#gender_model = cv2.dnn.readNetFromCaffe("gender.prototxt", "gender_net.caffemodel")
-#print("Gender model loaded")
 
 import cv2
 import numpy as np
 import picamera
 import face_recognition
-import math
 from memory import Memory
+from age_and_gender import AgeAndGender
+from PIL import Image
 import time
-import sys
 
 # 6mm 3MP Pi HQ Camera
 cam_h_fov = 63.0
 
 mem = Memory()
+
+data = AgeAndGender()
+data.load_dnn_gender_classifier('../models/dnn_gender_classifier_v1.dat')
 
 def detect_face(rgb_frame) -> dict:
         face_locations = []
@@ -94,6 +68,9 @@ def detect_face(rgb_frame) -> dict:
         else:
             name = 'Unknown'
             gender = 'Unknown'
+            subset_cv2_image = rgb_frame[top:bottom, left:right, :]
+            subset_pil_image = Image.fromarray(subset_cv2_image)
+            gender = data.predict(subset_pil_image)[0]['gender']['value']
 
         # Draw text label for the detected name and gender
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -138,47 +115,6 @@ try:
         cv2.imshow("Face recognition", rgb_image)
         cv2.waitKey(1)
 
-        '''
-
-        unknown_face_encoding = face_recognition.face_encodings(rgb_frame, face_locations)
-
-        if len(unknown_face_encoding) > 0:
-            print("Face encoded")
-            unknown_face_encoding = unknown_face_encoding[0]
-            matches = face_recognition.compare_faces(known_faces, unknown_face_encoding)
-            # Find the name and gender of the closest match, or use "Unknown" and the predicted gender
-            name = "Unknown"
-            if True in matches:
-                print("Face recognized")
-                index = matches.index(True)
-                name = face_data[index]['name']
-                gender = face_data[index]['gender']
-                if gender == "male": 
-                    gender_prediction = 0.0
-                else:
-                    gender_prediction = 1.0
-            else:
-                print("Face not recognized, assuming male")
-                gender_prediction = 0.0
-                # Resize the face image to match the input size of the gender detection model
-                #resized_face_image = cv2.resize(face_image, (227, 227))
-                # Convert the face image to the input format of the gender detection model
-                #blob = cv2.dnn.blobFromImage(resized_face_image, scalefactor=1.0, size=(227, 227),
-                #                            mean=(78.4263377603, 87.7689143744, 114.895847746), swapRB=False, crop=False)
-                # Pass the face image through the gender detection model to predict the gender
-                #gender_model.setInput(blob)
-                #gender_predictions = gender_model.forward()
-                # Male if < 0.5 otherwise female
-                #gender_prediction = round(gender_predictions[0])
-
-            # Calculate the bearing to the face
-            face_center_x = (right + left) // 2
-            bearing = -(face_center_x - center_x) / center_x
-            angle = float(bearing * math.radians(cam_h_fov))
-            gender="male" if gender_prediction==1.0 else "female"
-            mem.storePerson(str(name), str(gender), float(bearing))
-            print(name,gender,bearing)
-        '''
 except KeyboardInterrupt:
     # Release the video stream and close the window
     camera.close()
