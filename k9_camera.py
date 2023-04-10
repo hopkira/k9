@@ -73,6 +73,7 @@ def detect_face(rgb_frame) -> dict:
             subset_cv2_image = rgb_frame[top:bottom, left:right, :]
             subset_pil_image = Image.fromarray(subset_cv2_image)
             info = data.predict(subset_pil_image)
+            print(info)
             if len(info) == 0:
                 return None
             else:
