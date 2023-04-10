@@ -31,7 +31,8 @@ def detect_face(rgb_frame) -> dict:
 
         print("Face detected")
         # Find a reasonably big face closest to the center of the image
-        center_x = rgb_frame.shape[1] // 2
+        img_width = rgb_frame.shape[1]
+        center_x = img_width // 2
         closest_face_location = None
         min_size = 0
         for location in face_locations:
@@ -48,6 +49,7 @@ def detect_face(rgb_frame) -> dict:
             print('No qualifying face')
             return None
 
+        bearing = round(float(cam_h_fov * (x - center_x) / img_width), 3)
         # Draw bounding box around the face
         top, right, bottom, left = closest_face_location
         cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
@@ -70,12 +72,14 @@ def detect_face(rgb_frame) -> dict:
             gender = 'Unknown'
             subset_cv2_image = rgb_frame[top:bottom, left:right, :]
             subset_pil_image = Image.fromarray(subset_cv2_image)
-            gender = data.predict(subset_pil_image)[0]['gender']['value']
+            info = data.predict(subset_pil_image)
+            print(info)
+            gender = info[0]['gender']['value']
 
         # Draw text label for the detected name and gender
         font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(rgb_frame, f'{name}, {gender}', (left, top-10), font, 0.8, (0, 255, 0), 2)
-        dict = {"name": name, "gender":gender}
+        cv2.putText(rgb_frame, f'{name}, {gender}, {bearing}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+        dict = {"name": name, "gender":gender, "bearing": bearing}
         return dict
 
 # Load the known faces and their names
@@ -111,6 +115,7 @@ try:
         time.sleep(0.2)
         camera.capture(rgb_frame, format="rgb")
         dict = detect_face(rgb_frame)
+        mem.storePerson(str(dict['name']), str(dict['gender']), float(dict['bearing']))
         rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
         cv2.imshow("Face recognition", rgb_image)
         cv2.waitKey(1)
