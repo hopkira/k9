@@ -68,13 +68,14 @@ def detect_face(rgb_frame) -> dict:
             name = face_data[min_distance_index]['name']
             gender = face_data[min_distance_index]['gender']
         else:
-            name = 'Unknown'
-            gender = 'Unknown'
             subset_cv2_image = rgb_frame[top:bottom, left:right, :]
             subset_pil_image = Image.fromarray(subset_cv2_image)
             info = data.predict(subset_pil_image)
-            print(info)
-            gender = info[0]['gender']['value']
+            if len(info) == 0:
+                return None
+            else:
+                name = 'Unknown'
+                gender = info[0]['gender']['value']
 
         # Draw text label for the detected name and gender
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -112,7 +113,7 @@ cv2.namedWindow("Face recognition")
 
 try:
     while True:
-        time.sleep(0.2)
+        #time.sleep(0.2)
         camera.capture(rgb_frame, format="rgb")
         dict = detect_face(rgb_frame)
         if dict:
