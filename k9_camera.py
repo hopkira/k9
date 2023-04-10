@@ -42,24 +42,24 @@ def detect_face(rgb_frame) -> dict:
             x = (left + right) // 2
             distance = abs(x - center_x)
             size = right - left
-            print("Size = ", size, ", center dist = ", distance)
+            #print("Size = ", size, ", center dist = ", distance)
             if size > min_size and size > 70 and distance < (size * 2.0):
                 closest_face_location = location
 
         # If no faces are found, skip to the next frame
         if not closest_face_location:
-            print('No qualifying face')
+            #print('No qualifying face')
             return None
 
         bearing = round(float(cam_h_fov * (x - center_x) / img_width), 3)
         # Draw bounding box around the face
         top, right, bottom, left = closest_face_location
-        cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
+        #cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
 
         # Perform face recognition on the closest face
         face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
         if len(face_encodings) == 0:
-            print("Face recognition failed")
+            #print("Face recognition failed")
             return None
         face_encoding = face_encodings[0]
 
@@ -73,7 +73,7 @@ def detect_face(rgb_frame) -> dict:
             subset_cv2_image = rgb_frame[top:bottom, left:right, :]
             subset_pil_image = Image.fromarray(subset_cv2_image)
             info = data.predict(subset_pil_image)
-            print(info)
+            # print(info)
             if len(info) == 0:
                 return None
             else:
@@ -81,8 +81,8 @@ def detect_face(rgb_frame) -> dict:
                 gender = info[0]['gender']['value']
 
         # Draw text label for the detected name and gender
-        font = cv2.FONT_HERSHEY_SIMPLEX
-        cv2.putText(rgb_frame, f'{name}, {gender}, {bearing}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+        #font = cv2.FONT_HERSHEY_SIMPLEX
+        #cv2.putText(rgb_frame, f'{name}, {gender}, {bearing}', (left, top-10), font, 0.8, (0, 255, 0), 2)
         dict = {"name": name, "gender":gender, "bearing": bearing}
         return dict
 
@@ -112,20 +112,24 @@ print("Waiting for camera to warm up")
 time.sleep(2.0)
 
 # Create a window to display the video
-cv2.namedWindow("Face recognition")
+#cv2.namedWindow("Face recognition")
 
 try:
     while True:
-        #time.sleep(0.2)
+        time.sleep(0.5)
         camera.capture(rgb_frame, format="rgb")
         dict = detect_face(rgb_frame)
         if dict:
-            mem.storePerson(str(dict['name']), str(dict['gender']), float(dict['bearing']))
-        rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
-        cv2.imshow("Face recognition", rgb_image)
-        cv2.waitKey(1)
+            name = str(dict['name'])
+            gender = str(dict['gender'])
+            bearing = float(dict['bearing'])
+            mem.storePerson(name, gender, bearing)
+            print("Name:", name, "Gender:", gender, "Bearing:", bearing)
+        #rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
+        #cv2.imshow("Face recognition", rgb_image)
+        #cv2.waitKey(1)
 
 except KeyboardInterrupt:
     # Release the video stream and close the window
     camera.close()
-    cv2.destroyAllWindows()
+    #cv2.destroyAllWindows()
