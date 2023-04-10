@@ -1,9 +1,17 @@
-
 #!/usr/bin/env python
 # coding: utf-8
 # Author: Richard Hopkins
 # Date: 10 April 2023
 #
+# This program detects faces that are close
+# to K9's eye panel HQ Pi camera and will attempt to
+# recognise them against a DB of candidates.
+
+# If it is not possible to
+# recognise a face, the robot will attempt to
+# deterrmine gender visually.  This information
+# is stored in the robot's short term memory
+# to improve and enhance verbal communications.
 
 import cv2
 import numpy as np
@@ -30,7 +38,6 @@ def detect_face(rgb_frame) -> dict:
         # If no faces are found, skip to the next frame
         if len(face_locations) == 0:
             return None
-        #print("Face detected")
         # Find a reasonably big face closest to the center of the image
         img_width = rgb_frame.shape[1]
         center_x = img_width // 2
@@ -41,28 +48,23 @@ def detect_face(rgb_frame) -> dict:
             x = (left + right) // 2
             distance = abs(x - center_x)
             size = right - left
-            #print("Size = ", size, ", center dist = ", distance)
             if size > min_size and size > 70 and distance < (size * 2.0):
                 closest_face_location = location
-
-        # If no faces are found, skip to the next frame
+        # If no suitable faces are found, skip to the next frame
         if not closest_face_location:
-            #print('No qualifying face')
             return None
-
+        # Calculate bearing to face
         bearing = round(float(cam_h_fov * (x - center_x) / img_width), 3)
-        # Draw bounding box around the face
         top, right, bottom, left = closest_face_location
-        #cv2.rectangle(rgb_frame, (left, top), (right, bottom), (0, 255, 0), 2)
-
         # Perform face recognition on the closest face
         face_encodings = face_recognition.face_encodings(rgb_frame, [closest_face_location])
+        # If no face was found then move on...
         if len(face_encodings) == 0:
-            #print("Face recognition failed")
             return None
+        # Select the primary face in the smaller frame (should be one)
         face_encoding = face_encodings[0]
-
-        # Compare face encoding with known faces
+        # Compare face encoding with known faces if not recognised
+        # then perform gender recognition
         distances = face_recognition.face_distance(known_faces, face_encoding)
         min_distance_index = np.argmin(distances)
         if distances[min_distance_index] <= 0.6:
@@ -78,17 +80,13 @@ def detect_face(rgb_frame) -> dict:
             else:
                 name = 'Unknown'
                 gender = info[0]['gender']['value']
-
-        # Draw text label for the detected name and gender
-        #font = cv2.FONT_HERSHEY_SIMPLEX
-        #cv2.putText(rgb_frame, f'{name}, {gender}, {bearing}', (left, top-10), font, 0.8, (0, 255, 0), 2)
+        # Return the best face metadata as a dict
         dict = {"name": name, "gender":gender, "bearing": bearing}
         return dict
 
 # Load the known faces and their names
 with open('../face_db/face_encodings.txt', 'r') as file:
     lines = file.readlines()
-
 face_data = []
 known_faces=[]
 for line in lines:
@@ -100,19 +98,16 @@ for line in lines:
     known_faces.append(embeddings)
 print("Embeddings loaded")
 
+# Start the camera
 camera = picamera.PiCamera()
 camera.resolution = (640, 480)
 rgb_frame = np.empty((480, 640, 3), dtype=np.uint8)
 min_head_size = camera.resolution[0] // 8
 print("Min head size is ", min_head_size, " pixels")
-
 print("Waiting for camera to warm up")
-
 time.sleep(2.0)
 
-# Create a window to display the video
-#cv2.namedWindow("Face recognition")
-
+# Main loop
 print("Entering main loop...")
 try:
     while True:
@@ -125,12 +120,8 @@ try:
             bearing = float(dict['bearing'])
             mem.storePerson(name, gender, bearing)
             print("I saw", name, "who is", gender, "at a bearing of",bearing,"degrees.")
-        #rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
-        #cv2.imshow("Face recognition", rgb_image)
-        #cv2.waitKey(1)
 
 except KeyboardInterrupt:
-    # Release the video stream and close the window
+    # Release the video stream
     camera.close()
-    #cv2.destroyAllWindows()
     print("k9_camera exited cleanly...")
