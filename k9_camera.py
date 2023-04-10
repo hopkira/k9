@@ -115,7 +115,8 @@ try:
         time.sleep(0.2)
         camera.capture(rgb_frame, format="rgb")
         dict = detect_face(rgb_frame)
-        mem.storePerson(str(dict['name']), str(dict['gender']), float(dict['bearing']))
+        if dict:
+            mem.storePerson(str(dict['name']), str(dict['gender']), float(dict['bearing']))
         rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
         cv2.imshow("Face recognition", rgb_image)
         cv2.waitKey(1)
