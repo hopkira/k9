@@ -30,8 +30,7 @@ def detect_face(rgb_frame) -> dict:
         # If no faces are found, skip to the next frame
         if len(face_locations) == 0:
             return None
-
-        print("Face detected")
+        #print("Face detected")
         # Find a reasonably big face closest to the center of the image
         img_width = rgb_frame.shape[1]
         center_x = img_width // 2
@@ -114,6 +113,7 @@ time.sleep(2.0)
 # Create a window to display the video
 #cv2.namedWindow("Face recognition")
 
+print("Entering main loop...")
 try:
     while True:
         time.sleep(0.5)
@@ -124,7 +124,7 @@ try:
             gender = str(dict['gender'])
             bearing = float(dict['bearing'])
             mem.storePerson(name, gender, bearing)
-            print("Name:", name, "Gender:", gender, "Bearing:", bearing)
+            print("I saw", name, "who is", gender, "at a bearing of",bearing,"degrees.")
         #rgb_image = cv2.cvtColor(rgb_frame, cv2.COLOR_BGR2RGB)
         #cv2.imshow("Face recognition", rgb_image)
         #cv2.waitKey(1)
@@ -133,3 +133,4 @@ except KeyboardInterrupt:
     # Release the video stream and close the window
     camera.close()
     #cv2.destroyAllWindows()
+    print("k9_camera exited cleanly...")
