@@ -2,6 +2,10 @@ import os
 #from tkinter import N
 import openai
 from typing import Tuple
+from dotenv import load_dotenv
+
+
+load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
