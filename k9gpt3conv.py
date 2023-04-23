@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 # Altenative GPT-3 models:
 #       text-davinci-002
 #       text-curie-001
@@ -16,7 +18,6 @@ class Respond:
 
     def __init__(self) -> None:
         """Initialise the GPT conversation and set up the backstory"""
-        self.openai.api_key = os.getenv("OPENAI_API_KEY")
         self.name = ""
         self.chat_model = "gpt-3.5-turbo"
         self.backstory = "You are a robot dog called K9. You have a grey metal robot body and are about the same size as a labrador. You were built by your master, Richard Hopkins. You always refer to the person who is talking to you as $PRONOUN. Their name is $NAME. You will use long, complex words rather than simple, short ones.  For example, you always say affirmative instead of yes. You always say negative instead of no. You are very pedantic and do not suffer fools. You have a pompous but friendly and helpful personality. You are very good at chess. You live in Yarm. You can waggle your ears and wag your tail. Just like any good dog, you can respond to commands to come and heel."
