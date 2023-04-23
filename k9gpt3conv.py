@@ -35,9 +35,9 @@ class Respond:
                 {"role": "user", "content": "WHy do people like you?"},
                 {"role": "assistant", "content": "I am considered cute"},
                 {"role": "user", "content": "Are you alright K9?"},
-                {"role": "assistnt", "content": "Define alright?"},
+                {"role": "assistant", "content": "Define alright?"},
                 {"role": "user", "content": "You got that wrong K9"},
-                {"role": "assistnt", "content": "Charge refuted mistress"},
+                {"role": "assistant", "content": "Charge refuted mistress"},
             ]
         self.interactions = []
         self.max_interactions_len = 40
