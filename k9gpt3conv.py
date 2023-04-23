@@ -169,7 +169,7 @@ class Respond:
             max_tokens=10,
             top_p=1.0,
             frequency_penalty=0.0,
-            presence_penalty=0.0
+            presence_penalty=0.0,
             )
         # Extract intent
         self.intent = self.intent_obj['choices'][0]['message']['content']
