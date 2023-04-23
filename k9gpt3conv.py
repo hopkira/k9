@@ -152,7 +152,7 @@ class Respond:
             {'role': 'assistant', 'content': 'PlayChess'}]
 
 
-    def robot_chat(self, command:str, name:str, gender:float) -> Tuple[str,str]:
+    def robot_chat(self, command:str, name:str, gender:str) -> Tuple[str,str]:
         '''Generate an intent/response using the latest Chat GPT turbo'''
         # Create intent context
         self.messages = []
