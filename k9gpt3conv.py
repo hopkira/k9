@@ -161,6 +161,7 @@ class Respond:
         messages.extend(self.intents)
         messages.append(prompt)
         # Execute Chat GPT Turbo 3.5
+        print("Intent key:",openai.api_key)
         intent_obj = openai.ChatCompletion.create(
             model = self.chat_model,
             messages = messages,
@@ -208,7 +209,7 @@ class Respond:
         messages.extend(pronoun_interations) # A set of personalized answers based on gender and name
         messages.extend(self.interactions) # The interactions with this person to date
         messages.append(prompt) # The instruction that was given
-        print(messages)
+        print("Response key:",openai.api_key)
         response_obj = openai.ChatCompletion.create(
             model = self.chat_model,
             messages = messages,
