@@ -76,7 +76,7 @@ class Memory():
         '''
 
         try:
-            state_value = float(self.r.get(str(key) + ":now"))
+            state_value = self.r.get(str(key) + ":now")
         except TypeError:
             return None
         return state_value
