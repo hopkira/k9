@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+openai.organization = os.getenv("OPENAI_ORG")
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Altenative GPT-3 models:
@@ -161,7 +162,7 @@ class Respond:
         self.messages.extend(self.intents)
         self.messages.append(self.prompt)
         # Execute Chat GPT Turbo 3.5
-        print("Intent key:",openai.api_key)
+        print("Intent key:",openai.api_key, openai.organization)
         self.intent_obj = openai.ChatCompletion.create(
             model = self.chat_model,
             messages = self.messages,
@@ -209,7 +210,7 @@ class Respond:
         self.messages.extend(self.pronoun_interations) # A set of personalized answers based on gender and name
         self.messages.extend(self.interactions) # The interactions with this person to date
         self.messages.append(self.prompt) # The instruction that was given
-        print("Response key:",openai.api_key)
+        print("Response key:",openai.api_key, openai.organization)
         self.response_obj = openai.ChatCompletion.create(
             model = self.chat_model,
             messages = self.messages,
