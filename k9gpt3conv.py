@@ -154,17 +154,17 @@ class Respond:
     def robot_chat(self, command:str, name:str, gender:float) -> Tuple[str,str]:
         '''Generate an intent/response using the latest Chat GPT turbo'''
         # Create intent context
-        messages = []
-        system_intent = {"role":"system", "content": self.intent_backstory}
-        prompt = {"role": "user", "content": command}
-        messages.append(system_intent)
-        messages.extend(self.intents)
-        messages.append(prompt)
+        self.messages = []
+        self.system_intent = {"role":"system", "content": self.intent_backstory}
+        self.prompt = {"role": "user", "content": command}
+        self.messages.append(self.system_intent)
+        self.messages.extend(self.intents)
+        self.messages.append(self.prompt)
         # Execute Chat GPT Turbo 3.5
         print("Intent key:",openai.api_key)
-        intent_obj = openai.ChatCompletion.create(
+        self.intent_obj = openai.ChatCompletion.create(
             model = self.chat_model,
-            messages = messages,
+            messages = self.messages,
             temperature=0.0,
             max_tokens=10,
             top_p=1.0,
@@ -172,62 +172,62 @@ class Respond:
             presence_penalty=0.0
             )
         # Extract intent
-        intent = intent_obj['choices'][0]['message']['content']
-        intent = ''.join(intent.split()) # remove spaces, newlines etc
+        self.intent = self.intent_obj['choices'][0]['message']['content']
+        self.intent = ''.join(self.intent.split()) # remove spaces, newlines etc
         # Reset the context of the conversation if the name has changed
         if name != self.name :
             self.interactions = self.initial_interactions.copy()
         # Work out how the user should be addressed and inject into response backstory
-        pronoun_str = 'Mistress' if gender == "female" else 'Master'
-        if name != 'Richard' and name != 'Unknown': pronoun_str = pronoun_str + " " + name
-        now_backstory = self.backstory.replace('$PRONOUN', pronoun_str)
-        now_backstory = now_backstory.replace('$NAME', name)
+        self.pronoun_str = 'Mistress' if gender == "female" else 'Master'
+        if name != 'Richard' and name != 'Unknown': self.pronoun_str = self.pronoun_str + " " + name
+        self.now_backstory = self.backstory.replace('$PRONOUN', self.pronoun_str)
+        self.now_backstory = self.now_backstory.replace('$NAME', name)
         # build a query based on the backstory with the last set of exchanges as context
-        pronoun_interations = [
+        self.pronoun_interations = [
                 {"role": "user", "content": "Who are you?"},
-                {"role": "assistant", "content": "My designation is Kay Nine, " + pronoun_str},
+                {"role": "assistant", "content": "My designation is Kay Nine, " + self.pronoun_str},
                 {"role": "user", "content": "Are you made of metal"},
-                {"role": "assistant", "content": "Affirmative " + pronoun_str + "! I am made of metal"},
+                {"role": "assistant", "content": "Affirmative " + self.pronoun_str + "! I am made of metal"},
                 {"role": "user", "content": "Is a mouse taller than a giraffe?"},
-                {"role": "assistant", "content": "Negative " + pronoun_str + "! That is a very silly question."},
+                {"role": "assistant", "content": "Negative " + self.pronoun_str + "! That is a very silly question."},
                 {"role": "user", "content": "How many pounds are in a kilogram?"},
-                {"role": "assistant", "content": "There are 2.20462 pounds in a kilogram, " + pronoun_str},
+                {"role": "assistant", "content": "There are 2.20462 pounds in a kilogram, " + self.pronoun_str},
                 {"role": "user", "content": "Is the sky blue?"},
-                {"role": "assistant", "content": "Affirmative, " + pronoun_str},
+                {"role": "assistant", "content": "Affirmative, " + self.pronoun_str},
                 {"role": "user", "content": "Are you a teapot?"},
-                {"role": "assistant", "content": "Negative " + pronoun_str + "! I am clearly not a teapot. You are a very silly human"},
+                {"role": "assistant", "content": "Negative " + self.pronoun_str + "! I am clearly not a teapot. You are a very silly human"},
                 {"role": "user", "content": "Do cats climb trees?"},
-                {"role": "assistant", "content": "Affirmative " + pronoun_str + "! Especially if I am chasing them."},
+                {"role": "assistant", "content": "Affirmative " + self.pronoun_str + "! Especially if I am chasing them."},
                 {"role": "user", "content": "Do plants wear glasses?"},
-                {"role": "assistant", "content": "Negative " + pronoun_str +"! Plants cannot see. You are an stupid person."}, 
+                {"role": "assistant", "content": "Negative " + self.pronoun_str +"! Plants cannot see. You are an stupid person."}, 
         ]
-        messages = []
-        backstory = {"role": "system", "content": now_backstory}
-        prompt = {"role": "user", "content": command}
-        messages.append(backstory) # K9 backstory
-        messages.extend(self.interactions_core) # A set of standard facts
-        messages.extend(pronoun_interations) # A set of personalized answers based on gender and name
-        messages.extend(self.interactions) # The interactions with this person to date
-        messages.append(prompt) # The instruction that was given
+        self.messages = []
+        self.backstory = {"role": "system", "content": self.now_backstory}
+        self.prompt = {"role": "user", "content": command}
+        self.messages.append(self.backstory) # K9 backstory
+        self.messages.extend(self.interactions_core) # A set of standard facts
+        self.messages.extend(self.pronoun_interations) # A set of personalized answers based on gender and name
+        self.messages.extend(self.interactions) # The interactions with this person to date
+        self.messages.append(self.prompt) # The instruction that was given
         print("Response key:",openai.api_key)
-        response_obj = openai.ChatCompletion.create(
+        self.response_obj = openai.ChatCompletion.create(
             model = self.chat_model,
-            messages = messages,
+            messages = self.messages,
             temperature = 1.0,
             max_tokens = 100,
             top_p = 1.0,
             frequency_penalty = 0.0,
             presence_penalty = 0.0,
             )
-        response = response_obj['choices'][0]['message']['content']
-        response = response.strip('\n')
-        response_msg = {"role": "assistant", "content": response}
+        self.response = self.response_obj['choices'][0]['message']['content']
+        self.response = self.response.strip('\n')
+        self.response_msg = {"role": "assistant", "content": self.response}
         # now we need to add the prompt and the response to the interaction history
-        self.interactions.append(prompt)
-        self.interactions.append(response_msg)
+        self.interactions.append(self.prompt)
+        self.interactions.append(self.response_msg)
         # now lets ensure the history doesn't get so long that it removes
         # the possibility of getting a response in 4096 tokens!
-        length =  len(self.interactions)
-        if length >= self.max_interactions_len:
+        self.length =  len(self.interactions)
+        if self.length >= self.max_interactions_len:
             self.interactions = self.interactions[-self.max_interactions_len:]
-        return intent, response
+        return self.intent, self.response
