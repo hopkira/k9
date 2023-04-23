@@ -252,9 +252,14 @@ class Memory():
     def retrievePerson(self) -> dict:
         '''Retrieves the details of the last person talking to the robot
         '''
-        name = float(self.retrieveState("name"))
-        gender = float(self.retrieveState("gender"))
-        bearing = float(self.retrieveState("bearing"))
+        name = str(self.retrieveState("name"))
+        if name :
+            gender = str(self.retrieveState("gender"))
+            bearing = float(self.retrieveState("bearing"))
+        else :
+            name = "richard"
+            gender = "male"
+            bearing = 0.0
         dict = {"name": name,
                 "gender": gender,
                 "bearing": bearing}
