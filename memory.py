@@ -260,6 +260,7 @@ class Memory():
             name = "richard"
             gender = "male"
             bearing = 0.0
+            self.storePerson(name, gender, bearing)
         dict = {"name": name,
                 "gender": gender,
                 "bearing": bearing}
