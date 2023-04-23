@@ -176,6 +176,7 @@ class Responding(State):
             person_dict = mem.retrievePerson()
             self.name = person_dict['name']
             self.gender = person_dict['gender']
+            self.bearing = float(person_dict['bearing'])
         except KeyError:
             self.name = 'Unknown'
             self.gender = 'Unknown'
@@ -332,6 +333,8 @@ mem = Memory()
 k9voice =  Voice()
 k9stt = Listen()
 k9history = Backhistory()
+
+mem.storePerson("richard", "male", 0.0)
 
 try:
     k9 = K9AudioSM()
