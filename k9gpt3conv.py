@@ -9,6 +9,8 @@ load_dotenv()
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+print("Key being used is:",openai.api_key)
+
 # Altenative GPT-3 models:
 #       text-davinci-002
 #       text-curie-001
