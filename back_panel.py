@@ -45,7 +45,7 @@ import serial
 class BackLights():
     def __init__(self) -> None:
         self.ser = serial.Serial(
-            port='/dev/tty.ACM0', # replace with your device name
+            port='/dev/backpanel', # replace with your device name
             baudrate = 9600,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
