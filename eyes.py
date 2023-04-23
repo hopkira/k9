@@ -18,7 +18,7 @@ class Eyes():
         '''
         Sets brightness to a percentage value (0.0 to 1.0)
         '''
-        self.mem.storeState("eyes", level)
+        self.mem.storeState("eyes", str(level))
         value = int(level * 65535)
         pca.channels[0].duty_cycle = value
     
@@ -38,4 +38,4 @@ class Eyes():
         '''
         Returns current level of eye panel illumination as a percentage
         '''
-        return self.mem.retrieveState("eyes")
+        return float(self.mem.retrieveState("eyes"))

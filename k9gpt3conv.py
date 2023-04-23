@@ -14,7 +14,7 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 #       gpt-3.5-turbo
 
 class Respond:
-    """A class to provide conversational access to GPT3"""
+    """A class to provide conversational access to GPT3.5 turbo"""
 
     def __init__(self) -> None:
         """Initialise the GPT conversation and set up the backstory"""
