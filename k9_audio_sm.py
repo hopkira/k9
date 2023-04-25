@@ -172,6 +172,7 @@ class Responding(State):
         # recognition to infer the intent and will respond with one of
         # a stock set of phrases.
         #
+        '''
         try:
             person_dict = mem.retrievePerson()
             self.name = person_dict['name']
@@ -180,6 +181,7 @@ class Responding(State):
         except KeyError:
             self.name = 'Unknown'
             self.gender = 'Unknown'
+        '''
         if connected():
             print("Calling respond using:", self.command)
             intent, answer = k9qa.robot_response(self.command)
