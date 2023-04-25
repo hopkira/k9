@@ -1,9 +1,7 @@
-import os
-#from tkinter import N
 import openai
 from typing import Tuple
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key_path = ".env"
 
 print("Key:",openai.api_key)
 
