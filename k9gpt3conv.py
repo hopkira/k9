@@ -5,6 +5,8 @@ from typing import Tuple
 
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
+print("Key:",openai.api_key)
+
 # Altenative GPT-3 models:
 #       text-davinci-002
 #       text-curie-001
