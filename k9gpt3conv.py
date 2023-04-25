@@ -1,7 +1,7 @@
 import openai
 from typing import Tuple
 
-openai.api_key_path = ".env"
+openai.api_key_path = "./.env"
 
 print("Key:",openai.api_key)
 
