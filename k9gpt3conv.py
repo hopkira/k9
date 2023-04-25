@@ -2,12 +2,14 @@ import os
 #from tkinter import N
 import openai
 from typing import Tuple
-from dotenv import load_dotenv
+import dotenv
 
-load_dotenv()
+config = dotenv.dotenv_values(".env")
+openai.api_key = config['OPENAI_API_KEY']
+openai.organization = config["OPENAI_ORG"]
 
-openai.organization = os.getenv("OPENAI_ORG")
-openai.api_key = os.getenv("OPENAI_API_KEY")
+print(openai.api_key)
+print(openai.organization)
 
 # Altenative GPT-3 models:
 #       text-davinci-002
