@@ -187,9 +187,7 @@ class Responding(State):
             intent, answer = k9qa.robot_response(self.command)
             # intent, answer = k9qa.robot_response(self.command)
             if intent == 'QuestionMe':
-                history_answer = k9history.get_answer(self.command)
-                if "Insufficient data" in history_answer:
-                    answer = history_answer
+                answer = k9history.get_answer(self.command)
         else:
             if 'listen' in self.command:
                 intent = 'StopListening'
