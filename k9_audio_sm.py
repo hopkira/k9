@@ -335,7 +335,7 @@ k9voice =  Voice()
 k9stt = Listen()
 k9history = Backhistory()
 
-mem.storePerson("richard", "male", 0.0)
+# mem.storePerson("richard", "male", 0.0)
 
 try:
     k9 = K9AudioSM()
