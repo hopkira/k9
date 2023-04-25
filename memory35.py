@@ -21,8 +21,10 @@ print("Short term memory loaded...")
 class Memory():
     '''
     K9 short term memory
+
     Arg:
         record (bool): When true, all messages will be recorded and not forgotten after 10 seconds
+
     Described in full in this post
     https://k9-build.blogspot.com/2018/02/using-redis-to-create-robot-short-term.html?q=redis
     '''
@@ -35,10 +37,10 @@ class Memory():
             print("Recording data permanently") # let the user know they are in sim mode
         self.storeState("left:speed",0.0)
         self.storeState("right:speed",0.0)
-
-            
-    def storeState(self, key:str, value:float) -> None:
+      
+    def storeState(self, key:str, value) -> None:
         '''Stores the value of a received key and the time it was stored as well as preserving the previous value
+
         Args:
             key (str): Name of the key
             value (float): New value for the key 
@@ -66,14 +68,15 @@ class Memory():
         self.r.set(str(key) + ":now",str(value))
         self.r.set(str(key) + ":time:now",str(time.time()))
 
-    def retrieveState(self, key:str) -> float:
+    def retrieveState(self, key:str):
         '''Retrieves the last version of a desired key
+
         Args:
             key (str): Name of the key
         '''
 
         try:
-            state_value = float(self.r.get(str(key) + ":now"))
+            state_value = self.r.get(str(key) + ":now")
         except TypeError:
             return None
         return state_value
@@ -83,6 +86,7 @@ class Memory():
         Returns a dictionary for a state that includes
         its current value, rate of change and age, will
         return None if state is not known
+
         Args:
             key (str): Name of state
         '''
@@ -116,6 +120,7 @@ class Memory():
 
     def storeSensorReading(self, name:str, reading:float, angle:float) -> None:
         '''Stores a sensor reading as a JSON string, compatible with other sensor readings
+
         Args:
             name (str): Name of the sensor
             reading (float): Distance measured by sensor
@@ -134,6 +139,7 @@ class Memory():
 
     def storeSensorMessage(self, json_data:str):
         '''Stores a JSON string formatted sensor reading message
+
         Arg:
             json_data (json): store a string that is in JSON format
         '''
@@ -164,6 +170,7 @@ class Memory():
 
     def getSensorKey(self,sensor:str) -> str:
         '''Returns name of sensor key
+
         Args:
             sensor (str): Name of the sensor
         '''
@@ -172,6 +179,7 @@ class Memory():
 
     def floatDict(self, dict:dict, list:list=['distance','angle','time']) -> dict:
         '''Returns a dictionary with floats rather than strings
+
         Args:
             dict (dict): Dictionary to modify
             list (list): List of dictionary indices to modify 
@@ -188,6 +196,7 @@ class Memory():
     def retrieveSensorReading(self, sensor:str) -> dict:
         '''Retrieves the last message stored for a sensor
            as a dictionary, will return None if none found
+
         Arg:
             sensor (str): Name of the sensor
         ''' 
@@ -220,8 +229,39 @@ class Memory():
         '''Retrieves the last value stored for a sensor
            as a dictionary, will return None if none
            recorded
+
         Arg:
             sensor (str): Name of the sensor
         '''
         
         return self.retrieveSensorReading(sensor)
+    
+    def storePerson(self, name:str, gender:str, bearing:float) -> None:
+        '''Saves the details of the person talking to the robot
+
+        Args:
+            name: first name of the person
+            gender: 'male' or 'female' as string
+            bearing: direction to person in degrees; zero is directly
+            forward whilst left is negative, right is positive
+        '''
+        self.storeState("name", name)
+        self.storeState("gender", gender)
+        self.storeState("bearing", str(bearing))
+
+    def retrievePerson(self) -> dict:
+        '''Retrieves the details of the last person talking to the robot
+        '''
+        name = str(self.retrieveState("name"))
+        if name :
+            gender = str(self.retrieveState("gender"))
+            bearing = float(self.retrieveState("bearing"))
+        else :
+            name = "richard"
+            gender = "male"
+            bearing = 0.0
+            self.storePerson(name, gender, bearing)
+        dict = {"name": name,
+                "gender": gender,
+                "bearing": bearing}
+        return dict
