@@ -181,8 +181,8 @@ class Responding(State):
             self.name = 'Unknown'
             self.gender = 'Unknown'
         if connected():
-            print("Calling respond using:", self.command, self.name, self.gender)
-            intent, answer = k9qa.robot_chat(self.command, self.name, self.gender)
+            print("Calling respond using:", self.command)
+            intent, answer = k9qa.robot_response(self.command)
             # intent, answer = k9qa.robot_response(self.command)
             if intent == 'QuestionMe':
                 history_answer = k9history.get_answer(self.command)
