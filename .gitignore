@@ -8,6 +8,8 @@ __pycache__/
 images/
 speech/
 
+secrets.py
+
 # Temp/backup files
 *.bkp
 *.dtmp

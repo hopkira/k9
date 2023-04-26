@@ -16,6 +16,8 @@ from urllib.request import urlretrieve
 from memory import Memory
 from eyes import Eyes
 
+from secrets import COQUI_IP
+
 mem = Memory()
 eyes = Eyes()
 
@@ -48,7 +50,7 @@ def speak_coqui(speech:str) -> None:
     eyes.on()
     print('Speech server:', speech)
     speak_proc = None
-    coqui_tts = "http://ros2.local:5002/api/tts"
+    coqui_tts = COQUI_IP
     params = {"text":speech}
     query = urlencode(params)
     coqui_tts = coqui_tts + "?" + query
