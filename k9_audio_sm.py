@@ -25,7 +25,7 @@ from secrets import ACCESS_KEY # API key
 print("Access key found....")
 from eyes import Eyes # k9 led eyes
 print("Eyes open...")
-from back_lights import BackLights # k9 back lights
+from back_panel import BackLights # k9 back lights
 print("Backlights on...")
 from ears import Ears # k9 radar ears
 print("Ears wiggling...")
@@ -80,7 +80,7 @@ class Waitforhotword(State):
         super(Waitforhotword, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
-        k9lights.off()
+        k9lights.cmd("red")
         k9tail.center()
         k9eyes.set_level(0.001)
         print("Eyes set in hotword state")
@@ -116,6 +116,7 @@ class Listening(State):
         super(Listening, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
+        k9.lights("green")
         self.command = None
         k9eyes.set_level(0.01)
         print("Eyes set in Listening state")
@@ -156,10 +157,10 @@ class Responding(State):
         self.command = command
         # print("Responding.init() - started")
         # print(self.command)
+        k9lights.on()
         k9eyes.set_level(0.5)
         print("Eyes set in Responding state")
         k9ears.think()
-        k9lights.on()
         #
         # If K9 is connected to the internet, then OpenAI GPT-3 is used to
         # determine both the best answer and intent of the vocal command.
@@ -258,7 +259,7 @@ class K9AudioSM(object):
 
     def __init__(self):
         ''' Initialise K9 in his waiting state. '''
-        k9lights.on()
+        k9lights.cmd("on")
         k9eyes.set_level(1)
         k9ears.scan()
         k9tail.center()
