@@ -116,7 +116,7 @@ class Listening(State):
         super(Listening, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
-        k9.lights("green")
+        k9lights.cmd("green")
         self.command = None
         k9eyes.set_level(0.01)
         print("Eyes set in Listening state")
