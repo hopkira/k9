@@ -137,10 +137,6 @@ class Waitforhotword(State):
 
     def on_event(self, event):
         if event == 'hotword_detected':
-            if self.porcupine is not None:
-                self.porcupine.delete()
-            if self.recorder is not None:
-                self.recorder.delete()
             return Listening()
         if event == 'button_press_no_listen':
             return NotListening()
