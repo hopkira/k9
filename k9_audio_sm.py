@@ -81,20 +81,25 @@ class NotListening(State):
         super(NotListening, self).__init__()
         k9eyes.set_level(0.0)
         k9lights.off()
-        turn_on_lights = [1,3,7,10]
-        switch = 2
+        turn_on_lights = [1,3,7,10,12]
+        hot_switch = 2
+        listen_switch = 11
         k9lights.cmd('computer')
         k9lights.turn_on(turn_on_lights)
         start_state = k9lights.get_switch_state()
         while True:
             time.sleep(0.2)
             current_state = k9lights.get_switch_state()
-            if (start_state[switch] ^ current_state[switch]):
-                self.on_event('button_press_hotword')   
+            if (start_state[hot_switch] ^ current_state[hot_switch]):
+                self.on_event('button_press_hotword')  
+            if (start_state[listen_switch] ^ current_state[listen_switch]):
+                self.on_event('button_press_listen')  
 
     def on_event(self, event):
         if event == "button_press_hotword":
             return Waitforhotword()
+        if event == "button_press_listen":
+            return Listening()
         return self
 
 class Waitforhotword(State):
