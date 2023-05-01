@@ -11,32 +11,45 @@ import numpy as np
 
 class Listen():
 
-    def __init__(self):
+    def __init__(self, lights):
         # load deepspeech models for STT
         self.model = deepspeech.Model("/home/pi/k9/deepspeech-0.9.3-models.tflite")
         self.model.enableExternalScorer("/home/pi/k9/deepspeech-0.9.3-models.scorer")
+        self.back_panel = lights
 
     def listen_for_command(self) -> str:
+        # put back panel lights into override mode
+        turn_on_lights = [2,5,9,12]
+        switch = 26
+        self.back_panel.cmd("computer")
+        self.back_panel.turn_on(turn_on_lights)
+        self.start_state = self.back_panel.debounced_switches()
         # load voice activiity detection capability
         self.vad_audio = VADAudio(aggressiveness=1,
             device=None,
             input_rate=16000,
             file=None)
-        stream_context = self.model.createStream()
+        self.stream_context = self.model.createStream()
         try:
             while True:
+                self.current_state = self.back_panel.debounced_switches()
+                if self.start_state[switch] ^ self.current_state[switch]:
+                    self.stream_context.finishStream()
+                    del self.stream_context
+                    self.vad_audio.destroy()
+                    return "button_stop_listening"
                 frames = self.vad_audio.vad_collector()
                 for frame in frames:
                     if frame is not None:
-                        stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
+                        self.stream_context.feedAudioContent(np.frombuffer(frame, np.int16))
                     else:
-                        command = stream_context.finishStream()
-                        del stream_context
+                        command = self.stream_context.finishStream()
+                        del self.stream_context
                         if command != "":
                             self.vad_audio.destroy()
                             return command
                         else:
-                            stream_context = self.model.createStream()
+                            self.stream_context = self.model.createStream()
         except KeyboardInterrupt:
-            stream_context.finishStream()
+            self.stream_context.finishStream()
             self.vad_audio.destroy()

@@ -123,11 +123,12 @@ class Listening(State):
         self.command = k9stt.listen_for_command()
         print("Listening state heard:",self.command)
         k9eyes.set_level(0.0)
-        self.on_event('command_received')
+        self.on_event(self.command)
 
     def on_event(self, event):
-        if event == 'command_received':
-            return Responding(self.command)
+        if event == "button_stop_listening":
+            return Waitforhotword()
+        else
         return self
 
 
@@ -333,7 +334,7 @@ k9qa = Respond()
 k9tail = Tail()
 mem = Memory()
 k9voice =  Voice()
-k9stt = Listen()
+k9stt = Listen(k9lights)
 k9history = Backhistory()
 
 # mem.storePerson("richard", "male", 0.0)

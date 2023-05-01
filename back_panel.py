@@ -57,6 +57,11 @@ class BackLights():
         print("Back panel:",text)
         self.ser.write(str.encode(text+"\n"))
 
+    def __sw_light(self, cmd:str, lights:list) -> None:
+        for light in lights:
+            text = "light " + str(light) + " " + cmd
+            self.__write(text)
+
     def cmd(self,text:str) -> None:
         self.__write(text)
 
@@ -66,17 +71,14 @@ class BackLights():
     def off(self):
         self.__write("off")
 
-    def turn_on(self, num:int):
-        text = "light " + str(num) + " on"
-        self.__write(text)
+    def turn_on(self, lights:list):
+        self.__sw_light("on",lights)
     
-    def turn_off(self, num:int):
-        text = "light " + str(num) + " off"
-        self.__write(text)
+    def turn_off(self, lights:list):
+        self.__sw_light("off",lights)
 
-    def toggle(self, num:int):
-        text = "light " + str(num) + " toggle"
-        self.__write(text)
+    def toggle(self, lights:list):
+        self.__sw_light("toggle",lights)
 
     def tv_on(self):
         self.__write("tvon")
