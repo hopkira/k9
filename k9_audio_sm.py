@@ -128,8 +128,8 @@ class Listening(State):
     def on_event(self, event):
         if event == "button_stop_listening":
             return Waitforhotword()
-        else
-        return self
+        else:
+            return Responding(event)
 
 
 class PlayChess(State):
