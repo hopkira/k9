@@ -43,8 +43,14 @@ class ManualControl(State):
             return Scanning()
         if event == 'FollowMe':
             return Following()
-        if event == 'TurnAbout':
-            return Turn_Around()
+        if event == 'TurnAbout' or event == 'Turn90Right':
+            return Turn_Around(math.pi)
+        if event == 'Turn90Left':
+            return Turn_Around(-math.pi)
+        if event == 'Turn180Left':
+            return Turn_Around(-2*math.pi)
+        if event == 'Turn180Right':
+            return Turn_Around(2*math.pi)
         return self
 
 
@@ -110,11 +116,11 @@ class Turning(State):
 
 class Turn_Around(State):
     '''
-    The child state where K9 rotates by 180 degrees
+    The child state where K9 rotates by 90 or 180 degrees
     '''
-    def __init__(self):
+    def __init__(self, angle):
         super(Turn_Around, self).__init__()
-        logo.right(math.pi)
+        logo.right(angle)
         while True:
             message = check_queue()
             if message != "no_message":

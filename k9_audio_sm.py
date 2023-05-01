@@ -102,6 +102,7 @@ class NotListening(State):
             return Listening()
         return self
 
+
 class Waitforhotword(State):
     '''
     The child state where the k9 is waiting for the hotword
@@ -170,6 +171,49 @@ class Listening(State):
             return Waitforhotword()
         else:
             return Responding(event)
+
+
+class Demonstration(State):
+    '''
+    The child state where K9 is basically showing off
+    '''
+    def __init__(self):
+        super(Demonstration, self).__init__()
+        k9lights.cmd("original")
+        self.block_speech("Good morning School. I am K9. I am a robot dog. I am built from inexpensive computer components and my software is published on the Internet.")
+        k9lights.cmd("two")
+        self.block_speech("I can move around and even spin!")
+        self.notify_motors("Turn90Right")
+        self.block_speech("My side-screen is a touch screen.  I have two cameras, the one in my head is for recognizing people, the other one is a 3D camera so I can go for walks.")
+        k9lights.cmd("three")
+        self.notify_motors("Turn90Right")
+        self.block_speech("I can even wag my tail to show that I am happy to be here.")
+        k9lights.cmd("four")
+        k9tail.wag_h()
+        k9tail.wag_v()
+        self.notify_motors("Turn180Right")
+        k9ears.think()
+        self.block_speech("My ears and back include light detection and ranging sensors known as LIDAR. They allow me to detect obstacles.")
+        k9ears.stop()
+        k9lights.cmd("six")
+        self.block_speech("You are the nearest obstacle!")
+        k9lights.cmd("original")
+        self.on_event('demo_complete')
+
+    def block_speech(self, speech:str):
+        k9voice.speak(speech)
+        mem.storeState("speaking",1.0)
+        while (mem.retrieveState("speaking") == 1.0):
+            time.sleep(0.2)
+        return
+
+    def notify_motors(self, event:str):
+        client.publish(topic="k9/events/motor", payload = event, qos = 2, retain = False)
+
+    def on_event(self, event):
+        if event == "demo_complete":
+            return Waitforhotword()
+        return self
 
 
 class PlayChess(State):
@@ -246,6 +290,8 @@ class Responding(State):
                 answer = random_phrase(intent)
             elif 'play chess' in self.command:
                 intent = 'PlayChess'
+            elif 'demo' in self.command:
+                intent = 'ShowOff'
             else:
                 intent = 'QuestionMe'
                 answer = k9history.get_answer(self.command)
@@ -286,6 +332,8 @@ class Responding(State):
             return Listening()
         elif event == 'PlayChess':
             return PlayChess()
+        elif event == 'ShowOff':
+            return Demonstration()
         else:
             return Listening()
 
