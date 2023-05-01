@@ -47,7 +47,7 @@ class BackLights():
     def __init__(self) -> None:
         self.ser = serial.Serial(
             port='/dev/backpanel', # replace with your device name
-            baudrate = 9600,
+            baudrate = 115200,
             parity=serial.PARITY_NONE,
             stopbits=serial.STOPBITS_ONE,
             bytesize=serial.EIGHTBITS,
