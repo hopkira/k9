@@ -122,12 +122,12 @@ class Waitforhotword(State):
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
-            current_state = k9lights.get_switch_state()
-            if (start_state[switch] ^ current_state[switch]):
-                self.on_event('button_press_no_listen') 
             if result >= 0:
-                print('AudioSM: Detected hotword')
-                self.on_event('hotword_detected')
+                current_state = k9lights.get_switch_state()
+                if (start_state[switch] ^ current_state[switch]):
+                    self.on_event('button_press_no_listen')
+                else:
+                    self.on_event('hotword_detected')
 
     def on_event(self, event):
         if event == 'hotword_detected':
