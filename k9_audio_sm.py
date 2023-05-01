@@ -128,7 +128,7 @@ class Waitforhotword(State):
                 if self.porcupine is not None:
                     self.porcupine.delete()
                 if self.recorder is not None:
-                    self.recorder.delete()`
+                    self.recorder.delete()
                 current_state = k9lights.get_switch_state()
                 if (start_state[switch] ^ current_state[switch]):
                     self.on_event('button_press_no_listen')
