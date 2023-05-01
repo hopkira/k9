@@ -62,7 +62,7 @@ for pin in light_pin_labels:
     light_pins.append(Pin(pin, Pin.OUT))
 
 # Switch debounce time
-debounce_time = 10
+debounce_time = 5
 
 # Empty list of switchh states
 switch_states = []
