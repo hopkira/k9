@@ -24,7 +24,7 @@ class Listen():
         self.back_panel.cmd("computer")
         self.back_panel.turn_on(turn_on_lights)
         self.start_state = self.back_panel.get_switch_state()
-        print(self.start_state)
+        print("Self start:",str(self.start_state))
         # load voice activiity detection capability
         self.vad_audio = VADAudio(aggressiveness=1,
             device=None,
