@@ -55,7 +55,7 @@ class BackLights():
             )
 
     def __write(self,text:str) -> None:
-        #print("Back panel:",text)
+        print("Back panel:",text)
         self.ser.write(str.encode(text+"\n"))
 
     def __sw_light(self, cmd:str, lights:list) -> None:
@@ -91,7 +91,7 @@ class BackLights():
         self.switch_state = []
         self.__write("switchstate")
         my_input = self.ser.readlines()
-        #print("I heard:" + str(my_input))
+        print("I heard:" + str(my_input))
         input_str = my_input[0].decode().strip()
         input_str = input_str[len('switchstate:'):]
         switchstate_list = ast.literal_eval(input_str)
