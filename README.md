@@ -56,6 +56,7 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 |listen.py|Enables offline speech to text recognition via Mozilla Deepspeech. Uses the audio_tools.py file to capture voice.|
 |memory.py|Provides a high level interface to Redis to act as K9's short term memory, primarily used to share state and information between modules|
 |k9gpt3conv.py|Interface to OpenAI's GPT3 to determine K9's audio responses and the intent of user commands|
+|k9gpt3-5conv.py|Interface to OpenAI's GPT3.5 turbo or GPT4 to determine K9's audio responses and the intent of user commands|
 |voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
 |k9_lichess_bot.py|Chess module that enables him to create Lichess.com games and play chess|
 |qanda.py|History module that provides K9 with a backstory.  The backstory itself is recorded in k9_story_vectors_500.csv. Both files are currently in the who_uni repository, but will be replicated here after testing.
