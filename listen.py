@@ -20,7 +20,7 @@ class Listen():
     def listen_for_command(self) -> str:
         # put back panel lights into override mode
         turn_on_lights = [2,5,9,12]
-        switch = 26
+        switch = 11
         self.back_panel.cmd("computer")
         self.back_panel.turn_on(turn_on_lights)
         self.start_state = self.back_panel.get_switch_state()
