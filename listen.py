@@ -34,7 +34,8 @@ class Listen():
         try:
             while True:
                 self.current_state = self.back_panel.get_switch_state()
-                if self.start_state[switch] ^ self.current_state[switch]:
+                print("old:",str(self.start_state[switch]),"new:",str(self.current_state[switch]))
+                if (self.start_state[switch] ^ self.current_state[switch]):
                     self.stream_context.finishStream()
                     del self.stream_context
                     self.vad_audio.destroy()
