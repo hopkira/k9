@@ -23,7 +23,7 @@ class Listen():
         switch = 26
         self.back_panel.cmd("computer")
         self.back_panel.turn_on(turn_on_lights)
-        self.start_state = self.back_panel.debounced_switches()
+        self.start_state = self.back_panel.get_switch_states()
         # load voice activiity detection capability
         self.vad_audio = VADAudio(aggressiveness=1,
             device=None,
@@ -32,7 +32,7 @@ class Listen():
         self.stream_context = self.model.createStream()
         try:
             while True:
-                self.current_state = self.back_panel.debounced_switches()
+                self.current_state = self.back_panel.get_switch_state()
                 if self.start_state[switch] ^ self.current_state[switch]:
                     self.stream_context.finishStream()
                     del self.stream_context
