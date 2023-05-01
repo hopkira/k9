@@ -70,7 +70,31 @@ phrases = { "PraiseMe" : PraiseMe,
             "TurnAbout" : TurnAbout,
             "Blocked" : Blocked}
 
-# Define K9 Audio States   
+# Define K9 Audio States 
+
+
+class NotListening(State):
+    '''
+    The child state where K9 is doing absolutely nothing
+    '''
+    def __init__(self):
+        super(NotListening, self).__init__()
+        k9eyes.set_level(0.0)
+        turn_on_lights = [1,3,7,10]
+        switch = 2
+        k9lights.cmd('computer')
+        k9lights.turn_on(turn_on_lights)
+        start_state = k9lights.get_switch_state()
+        while True:
+            time.sleep(0.2)
+            current_state = k9lights.get_switch_state()
+            if (start_state[switch] ^ current_state[switch]):
+                self.on_event('button_press_hotword')   
+
+    def on_event(self, event):
+        if event == "button_press_hotword":
+            return Waitforhotword()
+        return self
 
 class Waitforhotword(State):
     '''
@@ -80,7 +104,11 @@ class Waitforhotword(State):
         super(Waitforhotword, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
-        k9lights.cmd("red")
+        turn_on_lights = [1,3,6,8,9]
+        switch = 0
+        k9lights.cmd('computer')
+        k9lights.turn_on(turn_on_lights)
+        start_state = k9lights.get_switch_state()
         k9tail.center()
         k9eyes.set_level(0.001)
         print("Eyes set in hotword state")
@@ -94,6 +122,9 @@ class Waitforhotword(State):
         while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
+            current_state = k9lights.get_switch_state()
+            if (start_state[switch] ^ current_state[switch]):
+                self.on_event('button_press_no_listen') 
             if result >= 0:
                 print('AudioSM: Detected hotword')
                 self.on_event('hotword_detected')
@@ -105,6 +136,8 @@ class Waitforhotword(State):
             if self.recorder is not None:
                 self.recorder.delete()
             return Listening()
+        if event == 'button_press_no_listen':
+            return NotListening()
         return self
 
 
@@ -261,8 +294,10 @@ class K9AudioSM(object):
     def __init__(self):
         ''' Initialise K9 in his waiting state. '''
         k9lights.cmd("on")
-        k9eyes.set_level(1)
+        k9eyes.set_level(1.0)
         k9ears.scan()
+        k9tail.wag_h
+        k9tail.wag_v
         k9tail.center()
         k9voice.speak("Waiting for command")
         mem.storeState("speaking",1.0)
