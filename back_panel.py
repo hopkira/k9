@@ -90,10 +90,12 @@ class BackLights():
         self.switch_state = []
         self.__write("switchstate")
         input = self.ser.readlines()
+        print("I heard:" + str(input))
         for line in input:
             if "switchstate:" in line:
                 line = line.strip("\nswitchae: ")
                 for value in line:
                     self.switch_state.append(bool(value))
+        print(str(self.switch_state))
         return self.switch_state
             

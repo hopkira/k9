@@ -146,6 +146,9 @@ def main():
             # wait time
             elif command in speeds:
                 wait = int(speeds[command])
+            elif command == "switchstate":
+                debounced = debounced_switches()
+                print("switchstate:"+ str(debounced))
             elif "light" in command:
                 pattern = "computer"
                 #  expects command in the forma
