@@ -1,6 +1,7 @@
 import time
 from back_panel import BackLights
 bp = BackLights()
+bp.cmd("computer")
 original = bp.get_switch_state()
 print("original:",str(original))
 while True:
