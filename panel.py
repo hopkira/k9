@@ -104,13 +104,13 @@ def main():
     phase = 0
     wait = 150
     while True:
+        debounced = debounced_switches()
         # monitor for pressing a switch
         # set the lights in accordance
         # with the pattern
         if pattern == "computer":
             pass
         elif pattern == "manual":
-            debounced = debounced_switches()
             for num, switch in enumerate(debounced):
                 light_pins[num].value(int(switch))
         else:
@@ -147,7 +147,6 @@ def main():
             elif command in speeds:
                 wait = int(speeds[command])
             elif command == "switchstate":
-                debounced = debounced_switches()
                 print("switchstate:"+ str(debounced))
             elif "light" in command:
                 pattern = "computer"
