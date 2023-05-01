@@ -89,6 +89,8 @@ A simple sensor pipeline that translates raw information from the back panel 360
 ## k9_motor_sm.py
 Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward. Uses logo.py to precisely control motors and movement.
 
+## k9_camera.py
+Identifies faces and their genders as seen by the Pi high quality camera. The program identifies the faces in the video stream, identifies the face that is close to the camera and towards the middle of the image, then determines if the face is in a database of existing faces.  If the face is not recognized then the program will try and recognize the likely gender of the face.  This information is then used to infuence how K9 speaks to the person in front of it (e.g. by using Master and Mistress or using names of known people).
 
 ## Create and activate a virtualenv
 Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment called ```depthAI``` following the OAK-D instructions and then use ``pip3 install -r requirements`` to install the required Python packages.
