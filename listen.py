@@ -40,11 +40,11 @@ class Listen():
                     else:
                         command = self.stream_context.finishStream()
                         del self.stream_context
+                        self.current_state = self.back_panel.get_switch_state()
                         if (self.start_state[switch] ^ self.current_state[switch]):
                             command = "button_stop_listening"
                         if command != "":
                             self.vad_audio.destroy()
-                            self.current_state = self.back_panel.get_switch_state()
                             return command
                         else:
                             self.stream_context = self.model.createStream()
