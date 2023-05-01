@@ -80,6 +80,7 @@ class NotListening(State):
     def __init__(self):
         super(NotListening, self).__init__()
         k9eyes.set_level(0.0)
+        k9lights.off()
         turn_on_lights = [1,3,7,10]
         switch = 2
         k9lights.cmd('computer')
@@ -107,6 +108,7 @@ class Waitforhotword(State):
         turn_on_lights = [1,3,6,8,9]
         switch = 0
         k9lights.cmd('computer')
+        k9lights.off()
         k9lights.turn_on(turn_on_lights)
         start_state = k9lights.get_switch_state()
         k9tail.center()
@@ -125,8 +127,16 @@ class Waitforhotword(State):
             if result >= 0:
                 current_state = k9lights.get_switch_state()
                 if (start_state[switch] ^ current_state[switch]):
+                    if self.porcupine is not None:
+                        self.porcupine.delete()
+                    if self.recorder is not None:
+                        self.recorder.delete()
                     self.on_event('button_press_no_listen')
                 else:
+                    if self.porcupine is not None:
+                        self.porcupine.delete()
+                    if self.recorder is not None:
+                        self.recorder.delete()
                     self.on_event('hotword_detected')
 
     def on_event(self, event):
