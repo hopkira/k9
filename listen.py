@@ -33,13 +33,6 @@ class Listen():
         self.stream_context = self.model.createStream()
         try:
             while True:
-                self.current_state = self.back_panel.get_switch_state()
-                print("old:",str(self.start_state[switch]),"new:",str(self.current_state[switch]))
-                if (self.start_state[switch] ^ self.current_state[switch]):
-                    self.stream_context.finishStream()
-                    del self.stream_context
-                    self.vad_audio.destroy()
-                    return "button_stop_listening"
                 frames = self.vad_audio.vad_collector()
                 for frame in frames:
                     if frame is not None:
@@ -47,8 +40,11 @@ class Listen():
                     else:
                         command = self.stream_context.finishStream()
                         del self.stream_context
+                        if (self.start_state[switch] ^ self.current_state[switch]):
+                            command = "button_stop_listening"
                         if command != "":
                             self.vad_audio.destroy()
+                            self.current_state = self.back_panel.get_switch_state()
                             return command
                         else:
                             self.stream_context = self.model.createStream()
