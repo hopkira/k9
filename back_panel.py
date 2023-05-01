@@ -41,6 +41,7 @@
 #    slowest: 800
 #
 import serial
+import ast
 
 class BackLights():
     def __init__(self) -> None:
@@ -91,11 +92,8 @@ class BackLights():
         self.__write("switchstate")
         input = self.ser.readlines()
         print("I heard:" + str(input))
-        for line in input:
-            if "switchstate:" in line:
-                line = line.strip("\nswitchae: ")
-                for value in line:
-                    self.switch_state.append(bool(value))
+        lst = ast.literal_eval(input.decode('unicode_escape').strip()[1:])
+        self.switch_state = [bool(x) for x in lst]
         print(str(self.switch_state))
         return self.switch_state
             
