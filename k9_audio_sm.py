@@ -196,6 +196,12 @@ class Demonstration(State):
         self.block_speech("My ears and back include light detection and ranging sensors known as LIDAR. They allow me to detect obstacles.")
         k9ears.stop()
         k9lights.cmd("six")
+        try:
+            angle = float(mem.retrieveState("rotate_angle"))
+        except KeyError or ValueError:
+            print("Error: no target found for demo, so staying put.")
+            angle = 0.0
+        self.notify_motors("TurnAngle" + str(angle))
         self.block_speech("You are the nearest obstacle!")
         k9lights.cmd("original")
         self.on_event('demo_complete')

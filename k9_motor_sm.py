@@ -51,6 +51,9 @@ class ManualControl(State):
             return Turn_Around(-2*math.pi)
         if event == 'Turn180Right':
             return Turn_Around(2*math.pi)
+        if event.startswith("TurnAngle"):
+            angle_rad = float(event[len("TurnAngle"):])
+            return Turn_Around(angle_rad)
         return self
 
 
