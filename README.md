@@ -49,13 +49,14 @@ Audio controller with voice recognition, finite state machine and offline wakewo
 
 | Python module | Description |
 |---|---|
-|back_panel.py|Controls back panel flashing lights; used to indicate when K9 is thinking. The program talks to the panel.py MicroPython program that runs on a Pyboard Lite|
+|back_panel.py|Controls the lights on the back panel and registers the state of the buttons; used to indicate when K9 is thinking and the state of the robot dog. The program talks to the panel.py MicroPython program that runs on a Pyboard Lite|
 |eyes.py|Controls K9's eye lights to indicate listening activity (off = not listening; low level = listening for hotword; mid level = listening for audio command; high level = speaking, unable to listen)|
 |ears.py|Controls the LIDAR ears - supports various speeds and LIDAR modes to help avoid collisions. Talks to the ears.js program running on an Espruino|
 |state.py|Simple finite state machine class to simplify the core program|
 |listen.py|Enables offline speech to text recognition via Mozilla Deepspeech. Uses the audio_tools.py file to capture voice.|
 |memory.py|Provides a high level interface to Redis to act as K9's short term memory, primarily used to share state and information between modules|
 |k9gpt3conv.py|Interface to OpenAI's GPT3 to determine K9's audio responses and the intent of user commands|
+|k9gpt3-5conv.py|Interface to OpenAI's GPT3.5 turbo or GPT4 to determine K9's audio responses and the intent of user commands|
 |voice.py|The speech client that sends MQTT messagess to the speechserver so they can be vocalised|
 |k9_lichess_bot.py|Chess module that enables him to create Lichess.com games and play chess|
 |qanda.py|History module that provides K9 with a backstory.  The backstory itself is recorded in k9_story_vectors_500.csv. Both files are currently in the who_uni repository, but will be replicated here after testing.
@@ -88,6 +89,8 @@ A simple sensor pipeline that translates raw information from the back panel 360
 ## k9_motor_sm.py
 Python Motor Controller with a finite state machine that listens for state change events from MQTT and retrieves information about the environment from Redis.  Supported states include the motors being under manual control, following someone, scanning for someone, turning and moving forward. Uses logo.py to precisely control motors and movement.
 
+## k9_camera.py
+Identifies faces and their genders as seen by the Pi high quality camera. The program identifies the faces in the video stream, identifies the face that is close to the camera and towards the middle of the image, then determines if the face is in a database of existing faces.  If the face is not recognized then the program will try and recognize the likely gender of the face.  This information is then used to infuence how K9 speaks to the person in front of it (e.g. by using Master and Mistress or using names of known people).
 
 ## Create and activate a virtualenv
 Due to the large number of dependencies for these modules it is recommended that you create a Python 3 virtual environment called ```depthAI``` following the OAK-D instructions and then use ``pip3 install -r requirements`` to install the required Python packages.
