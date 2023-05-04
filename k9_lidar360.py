@@ -1,4 +1,3 @@
-from operator import indexOf
 import serial
 from CalcLidarData import CalcLidarData
 import math
@@ -66,6 +65,15 @@ try:
             min_dists = min_dists.values.reshape(segments)
             # narrow the min distances to the angles that can be seen
             min_dists = min_dists[lidar_start:lidar_end]
+            # Given a narrowed range of minimum distances
+            # find the index of the smallest minimum distance
+            # then translate that index back into degrees.
+            # The mimimum angle is 60 degrees and the maximum
+            # is 300.
+            min_bin_index = min_dists.idxmin()
+            angle_deg = (min_bin_index + 15) * 4
+            angle_rad = math.radians(angle_deg)
+            mem.storeState("rotate_angle", angle_rad)
             # Check if it is safe to turn
             # A negative figure means it isn't; a positive one means it is
             # the scale of the value gives an indication of how safe it is 
