@@ -180,11 +180,11 @@ class Demonstration(State):
     def __init__(self):
         super(Demonstration, self).__init__()
         k9lights.cmd("original")
-        self.block_speech("Good morning School. I am K9. I am a robot dog. I am built from inexpensive computer components and my software is published on the Internet.")
+        self.block_speech("Good morning School. I am K9. I am a robot dog. I am built from inexpensive computer components such as a Raspberry Pi and my software is published for free on the Internet.")
         k9lights.cmd("two")
-        self.block_speech("I can move around and even spin!")
+        self.block_speech("I can go for walks and even spin!")
         self.notify_motors("Turn90Right")
-        self.block_speech("My side-screen is a touch screen.  I have two cameras, the one in my head is for recognizing people, the other one is a 3D camera so I can go for walks.")
+        self.block_speech("My side screen is a touch sensitive.  I have two cameras. The one in my head is for recognizing people, the other one is a 3D camera so I can see obstacles.")
         k9lights.cmd("three")
         self.notify_motors("Turn90Right")
         self.block_speech("I can even wag my tail to show that I am happy to be here.")
@@ -193,16 +193,15 @@ class Demonstration(State):
         k9tail.wag_v()
         self.notify_motors("Turn180Right")
         k9ears.think()
-        self.block_speech("My ears and back include light detection and ranging sensors known as LIDAR. They allow me to detect obstacles.")
+        self.block_speech("My ears and back include light detection and ranging sensors known as LIDAR. They enable me to look all around me.")
         k9ears.stop()
         k9lights.cmd("six")
         try:
             angle = float(mem.retrieveState("rotate_angle"))
+            self.notify_motors("TurnAngle" + str(angle))
+            self.block_speech("You are the nearest obstacle!")
         except KeyError or ValueError:
             print("Error: no target found for demo, so staying put.")
-            angle = 0.0
-        self.notify_motors("TurnAngle" + str(angle))
-        self.block_speech("You are the nearest obstacle!")
         k9lights.cmd("original")
         self.on_event('demo_complete')
 
