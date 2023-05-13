@@ -89,12 +89,14 @@ class NotListening(State):
         start_state = k9lights.get_switch_state()
         while True:
             time.sleep(0.2)
-            current_state = k9lights.get_switch_state()
-            if (start_state[hot_switch] ^ current_state[hot_switch]):
-                self.on_event('button_press_hotword')  
-            if (start_state[listen_switch] ^ current_state[listen_switch]):
-                self.on_event('button_press_listen')  
-
+            try:
+                current_state = k9lights.get_switch_state()
+                if (start_state[hot_switch] ^ current_state[hot_switch]):
+                    self.on_event('button_press_hotword')  
+                if (start_state[listen_switch] ^ current_state[listen_switch]):
+                    self.on_event('button_press_listen')  
+            except IndexError:
+                pass
     def on_event(self, event):
         if event == "button_press_hotword":
             return Waitforhotword()
@@ -135,9 +137,12 @@ class Waitforhotword(State):
                     self.porcupine.delete()
                 if self.recorder is not None:
                     self.recorder.delete()
-                current_state = k9lights.get_switch_state()
-                if (start_state[switch] ^ current_state[switch]):
-                    self.on_event('button_press_no_listen')
+                try:
+                    current_state = k9lights.get_switch_state()
+                    if (start_state[switch] ^ current_state[switch]):
+                        self.on_event('button_press_no_listen')
+                except IndexError:
+                    pass
                 else:
                     self.on_event('hotword_detected')
 
