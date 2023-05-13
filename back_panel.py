@@ -95,7 +95,7 @@ class BackLights():
         try:
             input_str = my_input[0].decode().strip()
         except IndexError:
-            pass
+            return self.switch_state
         input_str = input_str[len('switchstate:'):]
         switchstate_list = ast.literal_eval(input_str)
         self.switch_state = [bool(x) for x in switchstate_list]
