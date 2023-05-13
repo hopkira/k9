@@ -92,7 +92,10 @@ class BackLights():
         self.__write("switchstate")
         my_input = self.ser.readlines()
         #print("I heard:" + str(my_input))
-        input_str = my_input[0].decode().strip()
+        try:
+            input_str = my_input[0].decode().strip()
+        except IndexError:
+            pass
         input_str = input_str[len('switchstate:'):]
         switchstate_list = ast.literal_eval(input_str)
         self.switch_state = [bool(x) for x in switchstate_list]
