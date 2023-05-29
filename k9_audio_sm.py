@@ -162,17 +162,31 @@ class Listening(State):
         super(Listening, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
-        k9lights.cmd("green")
+        turn_on_lights = [1,2,3,5,12]
+        no_listen_switch = 0
+        hotword_switch = 2
+        k9lights.cmd('computer')
+        k9lights.off()
+        k9lights.turn_on(turn_on_lights)
+        start_state = k9lights.get_switch_state()
         self.command = None
         k9eyes.set_level(0.01)
         print("Eyes set in Listening state")
         self.command = k9stt.listen_for_command()
         print("Listening state heard:",self.command)
         k9eyes.set_level(0.0)
-        self.on_event(self.command)
+        current_state = k9lights.get_switch_state()
+        if (start_state[no_listen_switch] ^ current_state[no_listen_switch]):
+                    self.on_event('button_press_no_listen')
+        elif (start_state[hotword_switch] ^ current_state[hotword_switch]):
+            self.on_event('button_press_hotword')
+        else:
+            self.on_event(self.command)
 
     def on_event(self, event):
-        if event == "button_stop_listening":
+        if event == "button_press_no_listen":
+            return NotListening()
+        if event == "button_press_hotword":
             return Waitforhotword()
         else:
             return Responding(event)
