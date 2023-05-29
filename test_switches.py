@@ -1,7 +1,7 @@
 from back_panel import BackLights
 import time
 k9lights = BackLights()
-k9lights.turn_on([0,2,4,8,10])
+turn_on_lights = [1,2,3,5,12]
 while True:
     state = k9lights.get_switch_state()
     print(state)
