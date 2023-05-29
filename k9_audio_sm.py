@@ -378,8 +378,8 @@ class K9AudioSM(object):
         k9lights.cmd("on")
         k9eyes.set_level(1.0)
         k9ears.scan()
-        k9tail.wag_h
-        k9tail.wag_v
+        k9tail.wag_h()
+        k9tail.wag_v()
         k9tail.center()
         k9voice.speak("Waiting for command")
         mem.storeState("speaking",1.0)
