@@ -128,9 +128,11 @@ try:
             if elapsed > 10:
                 last_reading = now_time
                 reverse = mem.retrieveStateMetadata("reverse")
-                print(reverse)
+                # print(reverse)
                 print("Can't move more than","{:.1f}".format(abs(reverse['value'])),"m backward.")
                 # rotate = mem.retrieveState("rotate")
+                rotate_angle = mem.retrieveStateMetadata("rotate_angle")
+                print("Angle to obstacle is ",rotate_angle['value']," degees.")
                 rotate = (mem.retrieveStateMetadata("rotate"))
                 if rotate['value'] < 0 and abs(rotate['delta_v']) < 10:
                     print("Unsafe to rotate")
