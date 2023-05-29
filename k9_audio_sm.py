@@ -441,7 +441,7 @@ def mqtt_callback(client, userdata, message):
     except NameError:
         pass
     else:
-        k9.state.on_event(payload)
+        k9.state.on_event(str(payload))
 
 def random_phrase(phrase:str) -> str:
     phrase_dict = phrases[phrase]
