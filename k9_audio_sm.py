@@ -195,7 +195,7 @@ class Demonstration(State):
         self.block_speech("I can go for walks and even spin around!")
         self.notify_motors("Turn90Right")
         self.block_speech("My side screen responds to touch.  I have two cameras.")
-        self.block_speech("The one in my head is for recognizing people"
+        self.block_speech("The one in my head is for recognizing people")
         self.block_speech("The one on my front sees in three dimensions so I can avoid obstacles.")
         k9lights.cmd("three")
         k9lights.cmd("normal")
