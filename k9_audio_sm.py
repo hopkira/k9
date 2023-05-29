@@ -113,7 +113,7 @@ class Waitforhotword(State):
         super(Waitforhotword, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
-        turn_on_lights = [1,3,6,8,9,11]
+        turn_on_lights = [1,3,6,8,9,12]
         no_listen_switch = 0
         listen_switch = 11
         k9lights.cmd('computer')
