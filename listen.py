@@ -19,8 +19,11 @@ class Listen():
 
     def listen_for_command(self) -> str:
         # put back panel lights into override mode
-        turn_on_lights = [2,5,9,12]
-        switch = 8
+        turn_on_lights = [1,2,5,9,12]
+
+        no_listen_switch = 0
+        hotword_switch = 8
+
         self.back_panel.cmd("computer")
         self.back_panel.turn_on(turn_on_lights)
         self.start_state = self.back_panel.get_switch_state()
@@ -41,8 +44,10 @@ class Listen():
                         command = self.stream_context.finishStream()
                         del self.stream_context
                         self.current_state = self.back_panel.get_switch_state()
-                        if (self.start_state[switch] ^ self.current_state[switch]):
-                            command = "button_stop_listening"
+                        if (self.start_state[no_listen_switch] ^ self.current_state[no_listen_switch]):
+                            command = "button_press_no_listen"
+                        elif (self.start_state[hotword_switch] ^ self.current_state[hotword_switch]):
+                            command = "button_press_hotword"
                         if command != "":
                             self.vad_audio.destroy()
                             return command
