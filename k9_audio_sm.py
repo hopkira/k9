@@ -99,7 +99,7 @@ class NotListening(State):
                 pass
 
     def on_event(self, event):
-        if event == "do_demo":
+        if "do_demo" in event:
             return Demonstration()
         if event == "button_press_hotword":
             return Waitforhotword()
