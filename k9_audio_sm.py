@@ -135,13 +135,11 @@ class Waitforhotword(State):
             if result >= 0:
                 self.porcupine.delete()
                 self.recorder.delete()
-                self.on_event('hotword_detected')
-            else:
                 current_state = k9lights.get_switch_state()
                 if (start_state[switch] ^ current_state[switch]):
-                    self.porcupine.delete()
-                    self.recorder.delete()
-                    self.on_event('button_press_no_listen')
+                    self.on_event('button_press_no_listen') 
+                else:
+                    self.on_event('hotword_detected')
 
     def on_event(self, event):
         if event == 'hotword_detected':
