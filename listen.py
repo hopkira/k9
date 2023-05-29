@@ -11,23 +11,12 @@ import numpy as np
 
 class Listen():
 
-    def __init__(self, lights):
+    def __init__(self):
         # load deepspeech models for STT
         self.model = deepspeech.Model("/home/pi/k9/deepspeech-0.9.3-models.tflite")
         self.model.enableExternalScorer("/home/pi/k9/deepspeech-0.9.3-models.scorer")
-        self.back_panel = lights
 
     def listen_for_command(self) -> str:
-        # put back panel lights into override mode
-        turn_on_lights = [1,2,5,9,12]
-
-        no_listen_switch = 0
-        hotword_switch = 8
-
-        self.back_panel.cmd("computer")
-        self.back_panel.turn_on(turn_on_lights)
-        self.start_state = self.back_panel.get_switch_state()
-        print("Self start:",str(self.start_state))
         # load voice activiity detection capability
         self.vad_audio = VADAudio(aggressiveness=1,
             device=None,
@@ -43,11 +32,6 @@ class Listen():
                     else:
                         command = self.stream_context.finishStream()
                         del self.stream_context
-                        self.current_state = self.back_panel.get_switch_state()
-                        if (self.start_state[no_listen_switch] ^ self.current_state[no_listen_switch]):
-                            command = "button_press_no_listen"
-                        elif (self.start_state[hotword_switch] ^ self.current_state[hotword_switch]):
-                            command = "button_press_hotword"
                         if command != "":
                             self.vad_audio.destroy()
                             return command
