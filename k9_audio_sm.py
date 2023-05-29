@@ -113,8 +113,9 @@ class Waitforhotword(State):
         super(Waitforhotword, self).__init__()
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
-        turn_on_lights = [1,3,6,8,9]
-        switch = 0
+        turn_on_lights = [1,3,6,8,9,11]
+        no_listen_switch = 0
+        listen_switch = 11
         k9lights.cmd('computer')
         k9lights.off()
         k9lights.turn_on(turn_on_lights)
@@ -136,8 +137,10 @@ class Waitforhotword(State):
                 self.porcupine.delete()
                 self.recorder.delete()
                 current_state = k9lights.get_switch_state()
-                if (start_state[switch] ^ current_state[switch]):
-                    self.on_event('button_press_no_listen') 
+                if (start_state[no_listen_switch] ^ current_state[no_listen_switch]):
+                    self.on_event('button_press_no_listen')
+                elif (start_state[listen_switch] ^ current_state[listen_switch]):
+                    self.on_event('button_press_listen')
                 else:
                     self.on_event('hotword_detected')
 
@@ -146,6 +149,8 @@ class Waitforhotword(State):
             return Listening()
         if event == 'button_press_no_listen':
             return NotListening()
+        if event == 'button_press_listen':
+            return Listening()
         return self
 
 
