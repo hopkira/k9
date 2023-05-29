@@ -97,7 +97,10 @@ class NotListening(State):
                     self.on_event('button_press_listen')  
             except IndexError:
                 pass
+
     def on_event(self, event):
+        if event == "do_demo":
+            return Demonstration()
         if event == "button_press_hotword":
             return Waitforhotword()
         if event == "button_press_listen":
