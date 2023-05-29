@@ -128,17 +128,18 @@ class Waitforhotword(State):
         )   
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
-        current_state = k9lights.get_switch_state()
         # print(f'Using device: {self.recorder.selected_device}')
-        while not(start_state[switch] ^ current_state[switch]):
+        while True:
             pcm = self.recorder.read()
             result = self.porcupine.process(pcm)
             if result >= 0:
                 self.porcupine.delete()
                 self.recorder.delete()
                 self.on_event('hotword_detected')
-            current_state = k9lights.get_switch_state()
-        self.on_event('button_press_no_listen')
+            else:
+                current_state = k9lights.get_switch_state()
+                if (start_state[switch] ^ current_state[switch]):
+                    self.on_event('button_press_no_listen')
 
     def on_event(self, event):
         if event == 'hotword_detected':
