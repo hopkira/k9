@@ -70,7 +70,7 @@ try:
             # then translate that index back into degrees.
             # The mimimum angle is 60 degrees and the maximum
             # is 300.
-            min_bin_index = min_dists.idxmin()
+            min_bin_index = np.argmin(min_dists)
             angle_deg = (min_bin_index + 15) * 4
             angle_rad = math.radians(angle_deg)
             mem.storeState("rotate_angle", angle_rad)
