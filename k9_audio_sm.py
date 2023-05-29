@@ -99,7 +99,7 @@ class NotListening(State):
                 pass
 
     def on_event(self, event):
-        if "do_demo" in event:
+        if event == "do_demo":
             return Demonstration()
         if event == "button_press_hotword":
             return Waitforhotword()
@@ -435,7 +435,7 @@ def mqtt_callback(client, userdata, message):
     #    self.last_message = payload
     #    event = payload[3:-1].lower()
     #    # print("Event: ",str(event))
-    print(str(payload)," received by audio state machine")
+    print(str(payload),"received by audio state machine")
     try:
         k9
     except NameError:
