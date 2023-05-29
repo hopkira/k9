@@ -128,6 +128,7 @@ class Waitforhotword(State):
         )   
         self.recorder = PvRecorder(device_index=-1, frame_length=self.porcupine.frame_length)
         self.recorder.start()
+        current_state = k9lights.get_switch_state()
         # print(f'Using device: {self.recorder.selected_device}')
         while not(start_state[switch] ^ current_state[switch]):
             pcm = self.recorder.read()
