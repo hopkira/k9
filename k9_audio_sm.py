@@ -230,6 +230,8 @@ class Demonstration(State):
         mem.storeState("speaking",1.0)
         while (mem.retrieveState("speaking") == 1.0):
             time.sleep(0.2)
+        k9eyes.set_level(0.2)
+        time.sleep(0.5)
         return
 
     def notify_motors(self, event:str):
