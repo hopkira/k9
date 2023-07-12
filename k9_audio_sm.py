@@ -236,10 +236,12 @@ class Demonstration(State):
         k9lights.cmd("six")
         try:
             angle = float(mem.retrieveState("rotate_angle"))
-            self.notify_motors("TurnAngle" + str(angle))
-            self.block_speech("You are the nearest obstacle!")
         except KeyError or ValueError:
             print("Error: no target found for demo, so staying put.")
+            angle = None
+        if angle:
+            self.notify_motors("TurnAngle" + str(angle))
+            self.block_speech("You are the nearest obstacle!")
         k9lights.cmd("original")
         k9lights.cmd("normal")
         self.on_event('demo_complete')
@@ -262,12 +264,12 @@ class Demonstration(State):
         return self
 
 
-class PlayChess(State):
+class PlayChessGame(State):
     '''
     The child state where K9 is now listening for an utterance
     '''
     def __init__(self):
-        super(PlayChess, self).__init__()
+        super(PlayChessGame, self).__init__()
         chess_game = ChessGame()
         self.on_event('game_over')
 
@@ -377,7 +379,7 @@ class Responding(State):
             k9tail.wag_h()
             return Listening()
         elif event == 'PlayChess':
-            return PlayChess()
+            return PlayChessGame()
         elif event == 'ShowOff':
             return Demonstration()
         else:
