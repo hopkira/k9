@@ -60,6 +60,7 @@ FollowMe = ["Following master", "Affirmative, following you!", "Heeling master!"
 StayThere = ["Entering stationary mode", "Staying put master", "I will remain here", "Stopping"]
 TurnAbout = ["Turning", "Turning around", "Turning about", "Reverse!"]
 Blocked = ["I cannot rotate!","Warning obstruction", "Blocked", "Movement blocked", "Obstacle detected"]
+ShowOff = ["Demonstration mode activated", "Entering demonstration mode", "Affirmative, showing off", "Happy to oblige!"]
 phrases = { "PraiseMe" : PraiseMe,
             "PlayChess" : PlayChess,
             "QuestionMe" : QuestionMe,
@@ -68,7 +69,9 @@ phrases = { "PraiseMe" : PraiseMe,
             "FollowMe" : FollowMe,
             "StayThere" : StayThere,
             "TurnAbout" : TurnAbout,
-            "Blocked" : Blocked}
+            "Blocked" : Blocked,
+            "ShowOff" : ShowOff
+            }
 
 # Define K9 Audio States 
 
@@ -339,7 +342,7 @@ class Responding(State):
                 intent = 'QuestionMe'
                 answer = k9history.get_answer(self.command)
         # Some phrases need a standard response
-        answer_list = ('StopListening', 'ComeHere', 'FollowMe','StayThere','TurnAbout','PlayChess')
+        answer_list = ('StopListening', 'ComeHere', 'FollowMe','StayThere','TurnAbout','PlayChess','ShowOff')
         if intent in answer_list:
             answer = random_phrase(intent)
         k9ears.stop()
