@@ -1,3 +1,4 @@
 {
-    "wcaForGP.enable": true
+    "wcaForGP.enable": true,
+    "python.pythonPath": "/home/pi/.virtualenvs/3dvision/bin/python"
 }
