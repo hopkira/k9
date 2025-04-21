@@ -116,6 +116,13 @@ class ChessGame():
                         if event["type"] == "gameStart":
                             self.game_id = event["game"]["id"]
                             print("Game ID: {}".format(self.game_id))
+                            # Ask what sise player wants to be
+                            bot_side = event["game"]["color"]
+                            if bot_side == "black":
+                                self.player = "white"
+                            else:
+                                self.player = "black"
+                            self.send_player_msg("Affirmative. I will play " + str(bot_side))
                             self.terminated = True
         # Play Lichess game
         print("Starting game...")
