@@ -69,6 +69,7 @@ def speak_local(speech:str) -> None:
     '''
     mem.storeState("speaking",1.0)
     store_eyes = eyes.get_level()
+    eyes.on()
     speak_proc = None
     pitch = 99
     speed = 150
