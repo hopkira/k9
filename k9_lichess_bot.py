@@ -4,14 +4,20 @@
 # Date: 30 August 2022
 #
 # This program provides Lichess.com chess playing
-# function for K9
+# function for K9, optionally with the Phantom
+# chess board (2025 revision)
 #
-import chess
-import chess.engine
+
 import random
 import os
 import json
+import signal
+import time
+
+import chess
+import chess.engine
 import requests
+
 from lichess import LichessAPI
 from listen import Listen
 from eyes import Eyes
@@ -22,6 +28,15 @@ from memory import Memory
 from tail import Tail
 
 INFO_SCORE = 2
+
+terminated = False
+
+def signal_handler(signal, frame):
+    global terminated
+    print("Recieved SIGINT. Terminating client.")
+    terminated = True
+
+signal.signal(signal.SIGINT, signal_handler)
 
 class ChessGame():
     '''Provides Lichess.com chess playing function'''
@@ -74,6 +89,8 @@ class ChessGame():
         self.back.off()
         self.ears.stop()
         print("Lights turned off...")
+
+        '''
         # Ask what sise player wants to be
         self.player = self.ask_color()
         if self.player == chess.WHITE:
@@ -81,8 +98,45 @@ class ChessGame():
         else:
             bot_side = "white"
         self.send_player_msg("Affirmative. I will play " + str(bot_side))
+
         # Create Lichess game
         self.game_id = self.create_game(username=self.username, token=player_token, color=bot_side)
+
+        gameStart Start of a game
+        gameFinish Completion of a game
+        challenge A player sends you a challenge or you challenge someone
+        challengeCanceled A player cancels their challenge to you
+        challengeDeclined The opponent declines your challenge
+        '''
+        while not terminated:
+            control_queue = []
+            response = LichessAPI.get_event_stream()
+            lines = response.iter_lines()
+            for line in lines:
+                if line:
+                        event = json.loads(line.decode("utf-8"))
+                        control_queue.append(event)
+                else:
+                    control_queue.append({"type": "ping"})
+            for event in control_queue:
+                event_type = event.get("type")
+                if event_type != "ping":
+                    print(event)
+                if event_type is None:
+                    print("Unable to handle response from lichess.org")
+                    print(event)
+                    if event.get("error") == "Missing scope":
+                        print('Please check that the API access token for your bot has the scope "Play games '
+                                        'with the bot API".')
+                if event_type == "challenge":
+                    # do some checks on who is challenging
+                    chlng_id = event["challenge"]["id"]
+                    LichessAPI.accept_challenge(chlng_id)
+                if event["type"] == "gameStart":
+                    self.game_id = event["game"]["id"]
+                    print("Game ID: {}".format(self.game_id))
+                    break
+            time.sleep(3.0)
         # Play Lichess game
         self.play_game(game_id=self.game_id)
         # Game finished

@@ -1,10 +1,19 @@
+#
+# Forked from lichess-bot-devs/lichess bot
+# Modified in 2025 to enable bot to monitor
+# event stream and accept or decline challenge
+#
 import requests
+from urllib.parse import urljoin
 
 ENDPOINTS = {
     "stream": "bot/game/stream/{}",
+    "stream_event": "stream/event",
     "move": "bot/game/{}/move/{}",
     "chat": "bot/game/{}/chat",
-    "challenge": "challenge/{}"
+    "challenge": "challenge/{}",
+    "accept": "challenge/{}/accept",
+    "decline": "challenge/{}/decline"
 }
 
 # docs: https://lichess.org/api
@@ -30,6 +39,10 @@ class LichessAPI():
             print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
             return None
         return r.json()
+    
+    def get_event_stream(self):
+        url = urljoin(self.baseUrl, ENDPOINTS["stream_event"])
+        return requests.get(url, headers=self.header, stream=True)
 
     def get_stream(self, game_id):
         url = self.baseUrl + ENDPOINTS["stream"].format(game_id)
@@ -44,6 +57,16 @@ class LichessAPI():
             print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
             return None
         return r.json()
+    
+    def accept_challenge(self, challenge_id):
+        return self.api_post(ENDPOINTS["accept"].format(challenge_id))
+    
+    def decline_challenge(self, challenge_id, reason="generic"):
+        return self.api_post(ENDPOINTS["decline"].format(challenge_id),
+                             data=f"reason={reason}",
+                             headers={"Content-Type":
+                                      "application/x-www-form-urlencoded"},
+                             raise_for_status=False)
 
     def _get_header(self, token):
         header = {
