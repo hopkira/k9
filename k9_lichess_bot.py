@@ -11,7 +11,6 @@
 import random
 import os
 import json
-import signal
 import time
 
 import chess
@@ -28,15 +27,6 @@ from memory import Memory
 from tail import Tail
 
 INFO_SCORE = 2
-
-terminated = False
-
-def signal_handler(signal, frame):
-    global terminated
-    print("Recieved SIGINT. Terminating client.")
-    terminated = True
-
-signal.signal(signal.SIGINT, signal_handler)
 
 class ChessGame():
     '''Provides Lichess.com chess playing function'''
@@ -108,7 +98,8 @@ class ChessGame():
         challengeCanceled A player cancels their challenge to you
         challengeDeclined The opponent declines your challenge
         '''
-        while not terminated:
+        self.terminated = False
+        while not self.terminated:
             time.sleep(3.0)
             response = self.li.get_event_stream()
             lines = response.iter_lines()
@@ -125,7 +116,7 @@ class ChessGame():
                         if event["type"] == "gameStart":
                             self.game_id = event["game"]["id"]
                             print("Game ID: {}".format(self.game_id))
-                            terminated = True
+                            self.terminated = True
         # Play Lichess game
         print("Starting game...")
         self.play_game(game_id=self.game_id)
