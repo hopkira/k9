@@ -109,16 +109,26 @@ class ChessGame():
         challengeDeclined The opponent declines your challenge
         '''
         while not terminated:
-            control_queue = []
-            event_queue = []
             response = self.li.get_event_stream()
             lines = response.iter_lines()
             for line in lines:
                 if line:
                         event = json.loads(line.decode("utf-8"))
-                        event_queue.append(event)
-                        print("Event:", str(event))
-            for event in event_queue:
+                        print("Event: {}".format(event))
+                        if event["type"] == "challenge":
+                            print("Challenge detected...")
+                            self.chlng_id = event["challenge"]["id"]
+                            print("Challenge ID: {}".format(self.chlng_id))
+                            self.li.accept_challenge(self.chlng_id)
+                            print("Challenge accepted.")
+                        if event["type"] == "gameStart":
+                            self.game_id = event["game"]["id"]
+                            print("Game ID: {}".format(self.game_id))
+                            break
+            # end of while loop
+            time.sleep(3.0) # don't spam the server..
+            print("Slept, trying again...")
+            '''for event in event_queue:
                 event_type = event.get("type")
                 if event_type != "ping":
                     print(event)
@@ -135,12 +145,7 @@ class ChessGame():
                     print("Challenge ID: {}".format(self.chlng_id))
                     self.li.accept_challenge(self.chlng_id)
                     print("Challenge accepted.")
-                if event["type"] == "gameStart":
-                    self.game_id = event["game"]["id"]
-                    print("Game ID: {}".format(self.game_id))
-                    break
-            time.sleep(3.0)
-            print("Slept, trying again...")
+            '''
         # Play Lichess game
         print("Starting game...")
         self.play_game(game_id=self.game_id)
