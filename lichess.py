@@ -59,9 +59,10 @@ class LichessAPI():
         return r.json()
     
     def accept_challenge(self, challenge_id):
+        # went to https://lichess.org/api/challenge/z26K17Ib/accept
         url = self.baseUrl + ENDPOINTS["accept"].format(challenge_id)
         print(url)
-        r = requests.get(url, headers=self.header, stream=True)
+        r = requests.post(url, headers=self.header)
         print(r.json)
         if r.status_code != 200:
             print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
