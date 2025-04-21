@@ -119,11 +119,12 @@ class ChessGame():
                             # Ask what sise player wants to be
                             bot_side = event["game"]["color"]
                             if bot_side == "black":
-                                self.player = "white"
+                                self.player = chess.WHITE
                             else:
-                                self.player = "black"
+                                self.player = chess.BLACK
                             self.send_player_msg("Affirmative. I will play " + str(bot_side))
                             self.terminated = True
+                            break
         # Play Lichess game
         print("Starting game...")
         self.play_game(game_id=self.game_id)
