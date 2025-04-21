@@ -109,6 +109,7 @@ class ChessGame():
         challengeDeclined The opponent declines your challenge
         '''
         while not terminated:
+            time.sleep(3.0)
             response = self.li.get_event_stream()
             lines = response.iter_lines()
             for line in lines:
@@ -124,28 +125,7 @@ class ChessGame():
                         if event["type"] == "gameStart":
                             self.game_id = event["game"]["id"]
                             print("Game ID: {}".format(self.game_id))
-                            break
-            # end of while loop
-            time.sleep(3.0) # don't spam the server..
-            print("Slept, trying again...")
-            '''for event in event_queue:
-                event_type = event.get("type")
-                if event_type != "ping":
-                    print(event)
-                if event_type is None:
-                    print("Unable to handle response from lichess.org")
-                    print(event)
-                    if event.get("error") == "Missing scope":
-                        print('Please check that the API access token for your bot has the scope "Play games '
-                                        'with the bot API".')
-                if event_type == "challenge":
-                    # do some checks on who is challenging
-                    print("Challenge detected...")
-                    self.chlng_id = event["challenge"]["id"]
-                    print("Challenge ID: {}".format(self.chlng_id))
-                    self.li.accept_challenge(self.chlng_id)
-                    print("Challenge accepted.")
-            '''
+                            terminated = True
         # Play Lichess game
         print("Starting game...")
         self.play_game(game_id=self.game_id)
