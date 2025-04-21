@@ -110,7 +110,7 @@ class ChessGame():
         '''
         while not terminated:
             control_queue = []
-            response = LichessAPI.get_event_stream()
+            response = self.li.get_event_stream()
             lines = response.iter_lines()
             for line in lines:
                 if line:
@@ -131,7 +131,7 @@ class ChessGame():
                 if event_type == "challenge":
                     # do some checks on who is challenging
                     chlng_id = event["challenge"]["id"]
-                    LichessAPI.accept_challenge(chlng_id)
+                    self.li.accept_challenge(chlng_id)
                 if event["type"] == "gameStart":
                     self.game_id = event["game"]["id"]
                     print("Game ID: {}".format(self.game_id))
