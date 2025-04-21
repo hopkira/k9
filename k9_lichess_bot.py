@@ -20,7 +20,7 @@ import requests
 from lichess import LichessAPI
 from listen import Listen
 from eyes import Eyes
-from back_lights import BackLights
+from back_panel import BackLights
 from ears import Ears
 from voice import Voice
 from memory import Memory
@@ -240,12 +240,15 @@ class ChessGame():
                             self.send_player_msg(self.random_msg("your_move"))
                         else:
                             self.back.on()
+                            self.eyes.on()
+                            self.ears.think()
                             result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
                             print(result)
                             move = result.move
                             score = result.info["score"].pov(chess.WHITE)
                             print("Play score:", score)
                             self.back.off()
+                            self.ears.stop()
                             self.li.make_move(game_id=game_id,move=move)
                             move_piece = self.pieces[self.board.piece_type_at(move.from_square)-1] 
                             move_color = self.board.turn
@@ -276,6 +279,7 @@ class ChessGame():
                                         piece = move_piece)
                             # number = 3 and random 0.8
                             if ((self.board.fullmove_number > 3) and (random.random()>0.7)): self.send_player_msg(self.get_phrase())
+                            self.eyes.set_level(0.1)
         except requests.exceptions.StreamConsumedError:
             print("Game aborted by player")
             return
