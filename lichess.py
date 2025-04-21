@@ -59,14 +59,18 @@ class LichessAPI():
         return r.json()
     
     def accept_challenge(self, challenge_id):
-        return self.api_post(ENDPOINTS["accept"].format(challenge_id))
+        url = self.baseUrl + ENDPOINTS["accept"].format(challenge_id)
+        return requests.get(url, headers=self.header, stream=True)
     
     def decline_challenge(self, challenge_id, reason="generic"):
-        return self.api_post(ENDPOINTS["decline"].format(challenge_id),
-                             data=f"reason={reason}",
-                             headers={"Content-Type":
-                                      "application/x-www-form-urlencoded"},
-                             raise_for_status=False)
+        url = self.baseUrl + ENDPOINTS["decline"].format(challenge_id)
+        print(url)
+        r = requests.post(url, headers = self.header, data = f"reason={reason}", raise_for_status = False)
+        print(r.json())
+        if r.status_code != 200:
+            print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
+            return None
+        return r.json()
 
     def _get_header(self, token):
         header = {
