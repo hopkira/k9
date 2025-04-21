@@ -110,18 +110,15 @@ class ChessGame():
         '''
         while not terminated:
             control_queue = []
+            event_queue = []
             response = self.li.get_event_stream()
             lines = response.iter_lines()
-            print("There are ",lines.len()," lines")
             for line in lines:
                 if line:
                         event = json.loads(line.decode("utf-8"))
-                        control_queue.append(event)
+                        event_queue.append(event)
                         print("Event:", str(event))
-                else:
-                    control_queue.append({"type": "ping"})
-                    print("Ping...")
-            for event in control_queue:
+            for event in event_queue:
                 event_type = event.get("type")
                 if event_type != "ping":
                     print(event)
@@ -133,8 +130,11 @@ class ChessGame():
                                         'with the bot API".')
                 if event_type == "challenge":
                     # do some checks on who is challenging
-                    chlng_id = event["challenge"]["id"]
-                    self.li.accept_challenge(chlng_id)
+                    print("Challenge detected...")
+                    self.chlng_id = event["challenge"]["id"]
+                    print("Challenge ID: {}".format(self.chlng_id))
+                    self.li.accept_challenge(self.chlng_id)
+                    print("Challenge accepted.")
                 if event["type"] == "gameStart":
                     self.game_id = event["game"]["id"]
                     print("Game ID: {}".format(self.game_id))
@@ -142,6 +142,7 @@ class ChessGame():
             time.sleep(3.0)
             print("Slept, trying again...")
         # Play Lichess game
+        print("Starting game...")
         self.play_game(game_id=self.game_id)
         # Game finished
         self.engine.quit()
