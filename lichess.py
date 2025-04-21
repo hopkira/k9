@@ -60,7 +60,13 @@ class LichessAPI():
     
     def accept_challenge(self, challenge_id):
         url = self.baseUrl + ENDPOINTS["accept"].format(challenge_id)
-        return requests.get(url, headers=self.header, stream=True)
+        print(url)
+        r = requests.get(url, headers=self.header, stream=True)
+        print(r.json)
+        if r.status_code != 200:
+            print("Something went wrong! status_code: {}, response: {}".format(r.status_code, r.text))
+            return None
+        return r
     
     def decline_challenge(self, challenge_id, reason="generic"):
         url = self.baseUrl + ENDPOINTS["decline"].format(challenge_id)
