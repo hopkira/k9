@@ -112,12 +112,15 @@ class ChessGame():
             control_queue = []
             response = self.li.get_event_stream()
             lines = response.iter_lines()
+            print("There are ",lines.len()," lines")
             for line in lines:
                 if line:
                         event = json.loads(line.decode("utf-8"))
                         control_queue.append(event)
+                        print("Event:", str(event))
                 else:
                     control_queue.append({"type": "ping"})
+                    print("Ping...")
             for event in control_queue:
                 event_type = event.get("type")
                 if event_type != "ping":
@@ -137,6 +140,7 @@ class ChessGame():
                     print("Game ID: {}".format(self.game_id))
                     break
             time.sleep(3.0)
+            print("Slept, trying again...")
         # Play Lichess game
         self.play_game(game_id=self.game_id)
         # Game finished
