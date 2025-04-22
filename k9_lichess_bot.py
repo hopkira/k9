@@ -15,6 +15,7 @@ import time
 
 import chess
 import chess.engine
+import chess.polyglot
 import requests
 
 from lichess import LichessAPI
@@ -199,92 +200,95 @@ class ChessGame():
             return None
 
     def play_game(self, game_id:str):
-        '''Play a created Lichess game'''
-        stream = self.li.get_stream(game_id)
-        lines = stream.iter_lines()
-        initial_state = json.loads(next(lines).decode('utf-8'))
-        self.game_state = initial_state.get("state")
-        print("Initial state:",str(self.game_state))
-        moves = self.game_state["moves"].split()
-        print("Moves:",moves)
-        print("Status:",self.game_state["status"])
-        try:
-            while self.game_state["status"] == "started":
-                try:
-                    binary_chunk = next(lines)
-                except StopIteration:
-                    print("Game finished")
-                    return
-                event_obj = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
-                print("Event:",str(event_obj))
-                if event_obj is not None:
-                    if event_obj["type"] == 'gameState':
-                        self.game_state = event_obj
-                        moves = self.game_state["moves"].split()
-                        print("Moves:",moves)
-                        self.board = chess.Board()
-                        for move in moves:
-                            self.board = self.update_board(self.board, move)
-                        print(self.board)
-                        if self.board.turn == self.player:
-                            # analyse the board
-                            if self.board.is_check(): 
-                                self.tail.up()
-                                self.send_player_msg(self.random_msg("check")) # announce check
-                            result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
-                            print(result)
-                            #score = result.score.pov(chess.WHITE)
-                            score = result['score'].pov(chess.WHITE)
-                            print("Analysis score:", score)
-                            # prompt player for their move
-                            self.send_player_msg(self.random_msg("your_move"))
-                        else:
-                            self.back.on()
-                            self.eyes.on()
-                            self.ears.think()
-                            result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=20.0),info=INFO_SCORE)
-                            print(result)
-                            move = result.move
-                            score = result.info["score"].pov(chess.WHITE)
-                            print("Play score:", score)
-                            self.back.off()
-                            self.ears.stop()
-                            self.li.make_move(game_id=game_id,move=move)
-                            move_piece = self.pieces[self.board.piece_type_at(move.from_square)-1] 
-                            move_color = self.board.turn
-                            move_from = chess.SQUARE_NAMES[move.from_square]
-                            move_to = chess.SQUARE_NAMES[move.to_square]  
-                            if 'score' in self.context:
-                                old_score = self.context["score"]
-                                self.context.update(old_score = old_score)
-                            # Announce if piece is taken
-                            taken = self.board.piece_type_at(move.to_square)
-                            if taken is not None:
-                                if (self.board.turn == self.player):
-                                    if (random.random() < (taken*0.2)):
-                                        self.send_player_msg("You have taken my " + self.pieces[taken-1])
-                                        self.tail.down()
-                                else:
-                                    self.send_player_msg("My " + move_piece + " " + self.random_msg("takes") + " your " + self.pieces[taken-1])
+        with chess.polyglot.open_reader("./Titans.bin") as reader:
+            '''Play a created Lichess game'''
+            stream = self.li.get_stream(game_id)
+            lines = stream.iter_lines()
+            initial_state = json.loads(next(lines).decode('utf-8'))
+            self.game_state = initial_state.get("state")
+            print("Initial state:",str(self.game_state))
+            moves = self.game_state["moves"].split()
+            print("Moves:",moves)
+            print("Status:",self.game_state["status"])
+            try:
+                while self.game_state["status"] == "started":
+                    try:
+                        binary_chunk = next(lines)
+                    except StopIteration:
+                        print("Game finished")
+                        return
+                    event_obj = json.loads(binary_chunk.decode("utf-8")) if binary_chunk else None
+                    print("Event:",str(event_obj))
+                    if event_obj is not None:
+                        if event_obj["type"] == 'gameState':
+                            self.game_state = event_obj
+                            moves = self.game_state["moves"].split()
+                            print("Moves:",moves)
+                            self.board = chess.Board()
+                            for move in moves:
+                                self.board = self.update_board(self.board, move)
+                            print(self.board)
+                            if self.board.turn == self.player:
+                                # analyse the board
+                                if self.board.is_check(): 
                                     self.tail.up()
-                            # if no piece is taken, announce K9's move
+                                    self.send_player_msg(self.random_msg("check")) # announce check
+                                result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
+                                print(result)
+                                #score = result.score.pov(chess.WHITE)
+                                score = result['score'].pov(chess.WHITE)
+                                print("Analysis score:", score)
+                                # prompt player for their move
+                                self.send_player_msg(self.random_msg("your_move"))
                             else:
-                                if (self.board.turn != self.player):
-                                    self.send_player_msg(self.random_msg("instruction") + " " + move_piece + " from " + move_from + " to " + move_to)
-                            self.context.update(player = self.player,
-                                        mv_color = move_color,
-                                        mv_from = move_from,
-                                        mv_to = move_to,
-                                        score = score,
-                                        piece = move_piece)
-                            # number = 3 and random 0.8
-                            if ((self.board.fullmove_number > 3) and (random.random()>0.7)): self.send_player_msg(self.get_phrase())
-                            self.eyes.set_level(0.1)
-        except requests.exceptions.StreamConsumedError:
-            print("Game aborted by player")
+                                self.back.on()
+                                self.eyes.on()
+                                self.ears.think()
+                                result = reader.find(board=self.board)
+                                if result is None:
+                                    result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=10.0),info=INFO_SCORE)
+                                print(result)
+                                move = result.move
+                                score = result.info["score"].pov(chess.WHITE)
+                                print("Play score:", score)
+                                self.back.off()
+                                self.ears.stop()
+                                self.li.make_move(game_id=game_id,move=move)
+                                move_piece = self.pieces[self.board.piece_type_at(move.from_square)-1] 
+                                move_color = self.board.turn
+                                move_from = chess.SQUARE_NAMES[move.from_square]
+                                move_to = chess.SQUARE_NAMES[move.to_square]  
+                                if 'score' in self.context:
+                                    old_score = self.context["score"]
+                                    self.context.update(old_score = old_score)
+                                # Announce if piece is taken
+                                taken = self.board.piece_type_at(move.to_square)
+                                if taken is not None:
+                                    if (self.board.turn == self.player):
+                                        if (random.random() < (taken*0.2)):
+                                            self.send_player_msg("You have taken my " + self.pieces[taken-1])
+                                            self.tail.down()
+                                    else:
+                                        self.send_player_msg("My " + move_piece + " " + self.random_msg("takes") + " your " + self.pieces[taken-1])
+                                        self.tail.up()
+                                # if no piece is taken, announce K9's move
+                                else:
+                                    if (self.board.turn != self.player):
+                                        self.send_player_msg(self.random_msg("instruction") + " " + move_piece + " from " + move_from + " to " + move_to)
+                                self.context.update(player = self.player,
+                                            mv_color = move_color,
+                                            mv_from = move_from,
+                                            mv_to = move_to,
+                                            score = score,
+                                            piece = move_piece)
+                                # number = 3 and random 0.8
+                                if ((self.board.fullmove_number > 3) and (random.random()>0.7)): self.send_player_msg(self.get_phrase())
+                                self.eyes.set_level(0.1)
+            except requests.exceptions.StreamConsumedError:
+                print("Game aborted by player")
+                return
+            print("Game finished")
             return
-        print("Game finished")
-        return
 
     def send_player_msg(self, command:str):
         '''Send a player a message via chat and verbally via the robot'''
