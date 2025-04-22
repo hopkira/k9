@@ -243,7 +243,7 @@ class ChessGame():
                             else:
                                 self.back.on()
                                 self.eyes.on()
-                                # self.ears.think()
+                                self.ears.think()
                                 # Try to find the best book move
                                 try:
                                     book_move = reader.find(board=self.board)
@@ -257,7 +257,7 @@ class ChessGame():
                                     print("Stockfish Move: {}".format(move))
                                     score = result.info['score'].pov(chess.WHITE)
                                 else:
-                                    result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
+                                    result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=2.0),info=INFO_SCORE)
                                     print("Result: {}".format(result))
                                     move = book_move.move
                                     print("Book Move: {}".format(move))
