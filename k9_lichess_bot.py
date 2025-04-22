@@ -235,8 +235,8 @@ class ChessGame():
                                     self.send_player_msg(self.random_msg("check")) # announce check
                                 result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                                 print(result)
-                                #score = result.score.pov(chess.WHITE)
-                                score = result['score'].pov(chess.WHITE)
+                                score = result.score.pov(chess.WHITE)
+                                #score = result['score'].pov(chess.WHITE)
                                 print("Analysis score:", score)
                                 # prompt player for their move
                                 self.send_player_msg(self.random_msg("your_move"))
@@ -254,7 +254,9 @@ class ChessGame():
                                     result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                                     move = book_move.move
                                 print("Final Move: {}".format(move))
-                                score = result.info["score"].pov(chess.WHITE)
+                                print("Result: {}".format(result))
+                                # score = result.info["score"].pov(chess.WHITE)
+                                score = result.score.pov(chess.WHITE)
                                 print("White's score: {}".format(score))
                                 self.back.off()
                                 self.ears.stop()
