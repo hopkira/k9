@@ -260,7 +260,7 @@ class ChessGame():
                                     print("Book Move: {}".format(move))
                                 print("Final Move: {}".format(move))
                                 print("Result: {}".format(result))
-                                score = result["score"].pov(chess.WHITE)
+                                score = result.info["score"].pov(chess.WHITE)
                                 # score = result.score.pov(chess.WHITE)
                                 print("White's score: {}".format(score))
                                 self.back.off()
