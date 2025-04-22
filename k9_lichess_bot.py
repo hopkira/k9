@@ -244,13 +244,16 @@ class ChessGame():
                                 self.back.on()
                                 self.eyes.on()
                                 self.ears.think()
-                                result = reader.find(board=self.board)
-                                if result is None:
+                                move = reader.find(board=self.board)
+                                print("Book Move: {}".format(move))
+                                if move is None:
                                     result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=10.0),info=INFO_SCORE)
-                                print(result)
-                                move = result.move
+                                    move = result.move
+                                else:
+                                    result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
+                                print("Final Move: {}".format(result))
                                 score = result.info["score"].pov(chess.WHITE)
-                                print("Play score:", score)
+                                print("White's score: {}".format(score))
                                 self.back.off()
                                 self.ears.stop()
                                 self.li.make_move(game_id=game_id,move=move)
