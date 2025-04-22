@@ -255,7 +255,7 @@ class ChessGame():
                                     move = book_move.move
                                 print("Final Move: {}".format(move))
                                 print("Result: {}".format(result))
-                                score = result.info["score"].pov(chess.WHITE)
+                                score = result["score"].pov(chess.WHITE)
                                 # score = result.score.pov(chess.WHITE)
                                 print("White's score: {}".format(score))
                                 self.back.off()
