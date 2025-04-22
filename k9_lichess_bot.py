@@ -254,14 +254,14 @@ class ChessGame():
                                     move = result.move
                                     print("Out of book moves!")
                                     print("Stockfish Move: {}".format(move))
+                                    score = result.info["score"].pov(chess.WHITE)
                                 else:
                                     result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                                     move = book_move.move
                                     print("Book Move: {}".format(move))
+                                    score = result.score.pov(chess.WHITE)
                                 print("Final Move: {}".format(move))
                                 print("Result: {}".format(result))
-                                score = result.info["score"].pov(chess.WHITE)
-                                # score = result.score.pov(chess.WHITE)
                                 print("White's score: {}".format(score))
                                 self.back.off()
                                 self.ears.stop()
