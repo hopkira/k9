@@ -246,14 +246,14 @@ class ChessGame():
                                 # self.ears.think()
                                 # Find the best book move
                                 book_move = reader.find(board=self.board)
-                                print("Book Move: {}".format(book_move['move']))
+                                print("Book Move: {}".format(book_move.move))
                                 if book_move is None:
                                     result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=10.0),info=INFO_SCORE)
                                     move = result.move
                                 else:
                                     result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
-                                    move = book_move['move']
-                                print("Final Move: {}".format(result))
+                                    move = book_move.move
+                                print("Final Move: {}".format(move))
                                 score = result.info["score"].pov(chess.WHITE)
                                 print("White's score: {}".format(score))
                                 self.back.off()
