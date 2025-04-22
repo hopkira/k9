@@ -244,15 +244,20 @@ class ChessGame():
                                 self.back.on()
                                 self.eyes.on()
                                 # self.ears.think()
-                                # Find the best book move
-                                book_move = reader.find(board=self.board)
-                                print("Book Move: {}".format(book_move.move))
+                                # Try to find the best book move
+                                try:
+                                    book_move = reader.find(board=self.board)
+                                except IndexError:
+                                    book_move = None
                                 if book_move is None:
                                     result = self.engine.play(board=self.board, limit=chess.engine.Limit(time=10.0),info=INFO_SCORE)
                                     move = result.move
+                                    print("Out of book moves!")
+                                    print("Stockfish Move: {}".format(move))
                                 else:
                                     result = self.engine.analyse(board=self.board, limit=chess.engine.Limit(time=1.0),info=INFO_SCORE)
                                     move = book_move.move
+                                    print("Book Move: {}".format(move))
                                 print("Final Move: {}".format(move))
                                 print("Result: {}".format(result))
                                 score = result["score"].pov(chess.WHITE)
